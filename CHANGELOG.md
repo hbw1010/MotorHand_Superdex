@@ -2,6 +2,11 @@
 
 All notable changes to this repository will be documented here.
 
+## 本地手套模型适配
+
+- 将 vE.3.3 左右手的闭环轴转换为每侧 56 个 SuperDex 球形闭环约束；生成器为 `assets/hand_motor_ve33/generate_closed_chain.py`。
+- 新增 `tools/ve33_closed_chain_view.py`，通过原闭链求解器提供 12 个电机角或指节角输入，并在 SuperDex Physics Debugger 中显示求解后的姿态；该窗口与 Studio 不联动，不代表动力学或实物控制验证。
+
 ## [1.0.1]
 
 This release expands Python support, improves simulation performance, and adds

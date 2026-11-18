@@ -1,0 +1,7 @@
+{
+  "name": "superdex-quest-view",
+  "private": true,
+  "scripts": {"build": "esbuild scene.js --bundle --minify --format=esm --outfile=build/scene.js"},
+  "dependencies": {"three": "0.180.0"},
+  "devDependencies": {"esbuild": "0.25.12"}
+}

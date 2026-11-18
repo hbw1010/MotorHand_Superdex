@@ -29,3 +29,8 @@ SuperDexStudio.ini
 audit_reports/
 default.profraw
 *.egg-info/
+
+# Python bytecode and local VE33 asset packages
+__pycache__/
+*.py[cod]
+/assets/hand_motor_ve33/**/*.zip

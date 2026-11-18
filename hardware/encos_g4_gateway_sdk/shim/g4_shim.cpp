@@ -1,0 +1,158 @@
+// 厂商SDK的C ABI包装（vendor/include/HandClientG4.hpp）；时间快照扩展见vendor/LOCAL_CHANGES.md。
+// for "驱动 2" (STM32G4 LQS-GW02 gateway).  Loaded from Python with ctypes.
+//
+// 在 SDK 之上保留指令期限 watchdog：控制器停止刷新指令时，先发送
+// 零增益 MIT 卸力帧，再 DisableJoint，避免 SDK 持续发送过期目标。
+// 位置与接收时间一起取自 SDK 的 GetTimedSnapshots，不依赖 watchdog 调度。
+#include "HandClientG4.hpp"
+
+#include <time.h>
+
+#include <atomic>
+#include <cstdint>
+#include <map>
+#include <mutex>
+#include <thread>
+
+namespace {
+int64_t MonotonicNs() {
+    timespec ts{};
+    clock_gettime(CLOCK_MONOTONIC, &ts);  // == Python time.monotonic_ns()
+    return int64_t(ts.tv_sec) * 1000000000LL + ts.tv_nsec;
+}
+
+struct Pending {
+    int64_t deadline_ns = 0;       // 0: no deadline
+    int64_t disable_at_ns = 0;     // >0: limp MIT sent, DisableJoint at this time
+};
+
+struct Shim {
+    lqs::HandClientG4 client;
+    std::mutex mutex;
+    std::map<lqs::JointKey, Pending> pending;
+    std::atomic<bool> running{false};
+    std::thread watchdog;
+    uint64_t releases = 0;
+
+    void Limp(const lqs::JointKey& k, Pending& p, int64_t now) {
+        client.SetMitCommand(k.bus, k.id, 0.f, 0.f, 0.f, 0.f, 0.f);
+        p.deadline_ns = 0;
+        p.disable_at_ns = now + 20000000;  // >= 3 SDK cycles of zero-gain MIT
+        ++releases;
+    }
+
+    void Loop() {
+        while (running) {
+            const int64_t now = MonotonicNs();
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                for (auto& [k, p] : pending) {
+                    if (p.deadline_ns && now >= p.deadline_ns) Limp(k, p, now);
+                    if (p.disable_at_ns && now >= p.disable_at_ns) {
+                        client.DisableJoint(k.bus, k.id);
+                        p.disable_at_ns = 0;
+                    }
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    }
+};
+}  // namespace
+
+extern "C" {
+
+struct G4Joint {
+    uint32_t bus, id, valid, error;
+    float angle_deg, current_a, temp_c, speed_rpm, hz;
+    uint64_t samples;
+    int64_t received_ns;
+    uint32_t board_timestamp_us, max_board_gap_us, max_host_gap_us, tx_failures;
+};
+
+uint32_t g4_joint_size() { return sizeof(G4Joint); }
+int64_t g4_now_ns() { return MonotonicNs(); }
+
+void* g4_open(const char* port, int baud, unsigned hz) {
+    auto* shim = new Shim();
+    if (!shim->client.Connect(port, baud, hz)) {
+        delete shim;
+        return nullptr;
+    }
+    shim->running = true;
+    shim->watchdog = std::thread(&Shim::Loop, shim);
+    return shim;
+}
+
+// 仅读取位置。采集期间和关闭时均不发送电机控制帧。
+void* g4_open_reader(const char* port) {
+    auto* shim = new Shim();
+    if (!shim->client.Connect(port, 921600, 200, true)) {
+        delete shim;
+        return nullptr;
+    }
+    return shim;
+}
+
+void g4_set_mit(void* h, uint32_t bus, uint32_t id, float deg, float kp, float kd, float vel,
+                float tor, int64_t deadline_ns) {
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    shim->client.SetMitCommand(uint8_t(bus), uint16_t(id), deg, kp, kd, vel, tor);
+    shim->pending[{uint8_t(bus), uint16_t(id)}] = Pending{deadline_ns, 0};
+}
+
+void g4_set_servo(void* h, uint32_t bus, uint32_t id, float deg, float spd, float cur,
+                  int64_t deadline_ns) {
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    shim->client.SetServoCommand(uint8_t(bus), uint16_t(id), deg, spd, cur);
+    shim->pending[{uint8_t(bus), uint16_t(id)}] = Pending{deadline_ns, 0};
+}
+
+// Zero-gain MIT for a few cycles, then back to read-only query.
+void g4_release(void* h, uint32_t bus, uint32_t id) {
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    lqs::JointKey key{uint8_t(bus), uint16_t(id)};
+    shim->Limp(key, shim->pending[key], MonotonicNs());
+}
+
+int g4_snapshots_with_current_time(void* h, G4Joint* out, int64_t* current_received_ns, int capacity) {
+    auto* shim = static_cast<Shim*>(h);
+    const auto snaps = shim->client.GetTimedSnapshots();
+    int n = 0;
+    for (const auto& [k, timed] : snaps) {
+        if (n >= capacity) break;
+        const auto& s = timed.state;
+        if (current_received_ns) current_received_ns[n] = int64_t(timed.current_received_us) * 1000;
+        G4Joint& j = out[n++];
+        j.bus = s.bus; j.id = s.id; j.valid = s.valid; j.error = s.error;
+        j.angle_deg = s.angle_deg; j.current_a = s.current_a; j.temp_c = s.temp_c;
+        j.speed_rpm = s.speed_rpm; j.hz = s.hz; j.samples = s.samples;
+        j.received_ns = int64_t(timed.position_received_us) * 1000;
+        j.board_timestamp_us = s.board_timestamp_us; j.max_board_gap_us = s.max_board_gap_us;
+        j.max_host_gap_us = s.max_host_gap_us; j.tx_failures = s.tx_failures;
+    }
+    return n;
+}
+
+int g4_snapshots(void* h, G4Joint* out, int capacity) {
+    return g4_snapshots_with_current_time(h, out, nullptr, capacity);
+}
+
+uint64_t g4_release_count(void* h) {
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    return shim->releases;
+}
+
+// SDK Disconnect(): stops the IO thread and sends the vendor 3x safe release.
+void g4_close(void* h) {
+    auto* shim = static_cast<Shim*>(h);
+    shim->running = false;
+    if (shim->watchdog.joinable()) shim->watchdog.join();
+    shim->client.Disconnect();
+    delete shim;
+}
+}
