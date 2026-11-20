@@ -38,6 +38,21 @@ PHYSICS_STEP_S = 1. / 240.
 SCENE_VIEW_PERIOD_S = 1. / 60.
 
 
+class GraspPresentationSchedule:
+    """本地抓握画面与诊断降频，物理反馈仍按控制节拍运行。"""
+
+    def __init__(self):
+        self.next_at = 0.
+        self.revision = None
+
+    def due(self, now_s, revision):
+        if revision == self.revision and now_s < self.next_at:
+            return False
+        self.revision = revision
+        self.next_at = now_s + 1. / 30.
+        return True
+
+
 class GatewayBusy(RuntimeError):
     pass
 
@@ -507,6 +522,8 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
         was_cube_free = False
         joint_count = len(tree_names)
         no_encoder_sample = [math.nan] * MOTOR_COUNT
+        presentation = GraspPresentationSchedule()
+        pairs, contact_forces = {}, {}
 
         def read_target():
             stamp, *values = pending[:]
@@ -679,7 +696,9 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 actor.set_articulated_pose_from_joints(pose)
                 actor.set_articulated_joint_velocities(velocities)
                 scene.step(1e-6)
-            if environment:
+            show_scene = (not local_grasp or presentation.due(
+                time.monotonic(), (scene_revision, grasp_settings["contact_revision"])))
+            if environment and show_scene:
                 measured = (grasp_physics.contacts([body for _, body in contacts.shells])
                             if grasp_physics is not None else None)
                 pairs, contact_forces = contacts.read(measured)
@@ -699,7 +718,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                                           bool(stamp and (native_grasp or fingers.valid)), palm_contact, wrist_stamp)
             actor.get_articulated_pose(pose)
             displayed[:] = [stamp, *(pose[offsets[name]] for name in motor_names)]
-            if view:
+            if view and show_scene:
                 actor.get_articulated_link_transforms(transforms)
                 if environment:
                     if collection == "puzzle_cube":
@@ -757,7 +776,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                     if not official_puzzle or now - last_view >= .045:
                         view.update(transforms)
                         last_view = now
-            period = SCENE_VIEW_PERIOD_S if environment else .015
+            period = 1. / CONFIG["control_hz"] if local_grasp else SCENE_VIEW_PERIOD_S if environment else .015
             stop.wait(max(0., period - (time.monotonic() - frame_start)))
     finally:
         services.close()
@@ -873,6 +892,7 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
               "zero_error": None, "can_align": control.align is not None, "fixed_wrist": fixed_wrist,
               "demo": demo, "can_zero": not demo,
               "can_feedback": feedback is not None and not demo,
+              "feedback_profile": feedback.profile if feedback is not None else None,
               "feedback_source": "joint_position_and_contact_force" if feedback else None}
     if control.grasp is not None:
         status["grasp_backend"] = "cpp" if use_cpp else "python"
@@ -1003,6 +1023,10 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
                 row["contact_encoder_rad"] = contact_encoder if math.isfinite(contact_encoder) else None
                 row["motor_rad_s"] = float(feedback.velocity.dq[i]) if stamp and nominal is not None else None
                 row["position_motor_nm"] = float(feedback.position_torque[i]) if fresh_contact and nominal is not None else None
+                # 映射接触项为滤波及回撤加权前的值，便于追踪建力过程。
+                row["mapped_contact_nm"] = float(feedback.mapped_contact[i]) if fresh_contact and nominal is not None else None
+                row["contact_gate"] = bool(feedback.contact_gate[i]) if fresh_contact and nominal is not None else None
+                row["retreat_weight"] = float(feedback.frame_weight[i]) if fresh_contact and nominal is not None else None
                 row["nominal_nm"] = float(nominal[i]) if nominal is not None and math.isfinite(nominal[i]) else None
                 row["sent_motor_nm"] = sent[i] if sent is not None else None
                 row["current_a"] = currents[i] if math.isfinite(currents[i]) else None
@@ -1022,6 +1046,8 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
                           wrist=wrist_state.value.decode() if wrist_state is not None else "本地调试",
                           wrist_ms=(now-wrist)/1e6 if wrist else None,
                           contact_ms=(now-contact_input)/1e6 if contact_input else None,
+                          contact_frame_ns=int(effort_frame[1]) if fresh_contact else None,
+                          command_deadline_ns=feedback.deadline if active else None,
                           motor_ms=(now-stamp)/1e6 if stamp else None,
                           applied_ms=(now-applied)/1e6 if applied else None,
                           max_angle_error_rad=float(np.max(np.abs(np.array(targets)-sim_positions)))
@@ -1059,6 +1085,8 @@ def main():
     parser.add_argument("--palm-test", action="store_true", help="本地固定腕部与 45 mm 掌心硬球测试")
     parser.add_argument("--local-grasp", action="store_true", help="本地固定腕部掌心与桌面抓握")
     parser.add_argument("--grasp-backend", choices=("cpp", "python"), help="本地抓握实时后端（默认 cpp）")
+    parser.add_argument("--feedback-profile", choices=("identity", *CONFIG.get("feedback_profiles", {})), default="identity",
+                        help="接触力矩映射配置（默认 identity）")
     parser.add_argument("--demo", action="store_true", help="本地抓握的无串口演示")
     parser.add_argument("--official-puzzle", action="store_true", help="用官方 grip_lift 测试固定腕部与掌心魔方")
     parser.add_argument("--inspect-physics", action="store_true", help="同时打开官方 Physics Debugger")
@@ -1151,7 +1179,7 @@ def main():
     else:
         connection = gateway(args.port, args.quest)
     with connection as read:
-        feedback = ContactForceFeedbackLoop(read, axes) if args.quest else None
+        feedback = ContactForceFeedbackLoop(read, axes, profile=args.feedback_profile) if args.quest else None
         renderer.start()
         inspector = None
         recorder = None

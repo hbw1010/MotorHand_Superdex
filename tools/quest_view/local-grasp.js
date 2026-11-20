@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {sizePreview} from './size-preview.mjs';
 
 export class LocalGraspView {
   constructor(world, camera, canvas, controls) {
@@ -16,6 +17,11 @@ export class LocalGraspView {
     this.material = new THREE.MeshStandardMaterial({roughness: .51});
     this.loader = new GLTFLoader();
     this.models = new Map();
+    this.sizeGroup = new THREE.Group();
+    this.sizeCenter = new THREE.Vector3();
+    this.sizeBounds = new THREE.Box3();
+    world.add(this.sizeGroup);
+    sizePreview.addEventListener('change', () => this.applySizePreview());
     canvas.addEventListener('pointerdown', event => this.begin(event), true);
     canvas.addEventListener('pointermove', event => this.move(event), true);
     for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
@@ -28,17 +34,16 @@ export class LocalGraspView {
     if (this.revision !== object.mesh_revision) {
       this.revision = object.mesh_revision;
       if (this.mesh) {
-        this.world.remove(this.mesh);
+        this.sizeGroup.remove(this.mesh);
         this.mesh.geometry?.dispose();
       }
       if (object.parts) {
         this.mesh = new THREE.Group();
         for (const part of object.parts) this.mesh.add(this.loadPart(part));
-        this.world.add(this.mesh);
       } else {
         this.mesh = this.createPrimitive(object);
-        this.world.add(this.mesh);
       }
+      this.sizeGroup.add(this.mesh);
     }
     if (object.parts) {
       for (const [index, part] of object.parts.entries()) {
@@ -57,6 +62,26 @@ export class LocalGraspView {
       this.mesh.position.fromArray(object.pose);
       this.mesh.quaternion.fromArray(object.pose, 3);
     }
+    sizePreview.sceneSnapshot(object);
+    this.applySizePreview();
+  }
+
+  applySizePreview() {
+    if (!this.object) return;
+    const ratio = sizePreview.ratio(this.object);
+    this.sizeGroup.scale.setScalar(1);
+    this.sizeGroup.position.set(0, 0, 0);
+    if (ratio === 1) return;
+    const center = this.sizeCenter.fromArray(this.object.pose);
+    if (this.object.vertices) center.copy(this.mesh.geometry.boundingSphere.center);
+    if (this.object.parts) {
+      // 未锁定的官方部件会移动，使用画面中当前模型的中心。
+      this.sizeGroup.updateWorldMatrix(true, false);
+      this.sizeBounds.setFromObject(this.mesh);
+      if (!this.sizeBounds.isEmpty()) this.world.worldToLocal(this.sizeBounds.getCenter(center));
+    }
+    this.sizeGroup.scale.setScalar(ratio);
+    this.sizeGroup.position.copy(center).multiplyScalar(1 - ratio);
   }
 
   createPrimitive(object) {
@@ -75,7 +100,7 @@ export class LocalGraspView {
     } else {
       geometry = new THREE.SphereGeometry(size / 2, 32, 24);
     }
-    this.material.color.set(object.kind.endsWith('_soft') ? '#38b8ca' : '#ef9d43');
+    this.material.color.set(object.hardness < 1 ? '#38b8ca' : '#ef9d43');
     return new THREE.Mesh(geometry, this.material);
   }
 

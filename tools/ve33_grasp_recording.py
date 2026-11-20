@@ -8,16 +8,15 @@ from queue import Full, Queue
 from tempfile import NamedTemporaryFile
 from threading import Thread
 
-from ve33_grasp_assets import GRASP_ASSETS
 
 
 AXIS_FIELDS = ("id", "joint", "raw_deg", "input_rad", "contact_input_rad", "sim_rad", "motor_rad_s", "contact_motor_nm",
                "position_motor_nm", "nominal_nm", "sent_motor_nm", "current_a", "age_ms", "state",
-               "encoder_rad", "contact_encoder_rad")
+               "encoder_rad", "contact_encoder_rad", "mapped_contact_nm", "contact_gate", "retreat_weight")
 HEADER = ("monotonic_ns", "mode", "kind", "layout", "size_mm", "hardness", "feedback_active", "feedback_gain",
           "contact_ms", "feedback_interruptions", "last_feedback_interruption",
           "feedback_handoffs", "last_feedback_handoff_ms",
-          *AXIS_FIELDS)
+          *AXIS_FIELDS, "feedback_profile", "contact_frame_ns", "command_deadline_ns")
 
 
 class GraspRecorder:
@@ -38,13 +37,14 @@ class GraspRecorder:
                 return
             self.active = requested
         if self.active:
-            asset = settings["kind"] in GRASP_ASSETS
             prefix = (stamp, "demo" if demo else "g4", settings["kind"], settings["layout"],
-                      None if asset else settings["size_mm"], None if asset else settings["hardness"],
+                      settings["size_mm"], settings["hardness"],
                       int(output_active), status["feedback_gain"],
                       status["contact_ms"], status["feedback_interruptions"], status["last_feedback_interruption"],
                       status["feedback_handoffs"], status["last_feedback_handoff_ms"])
-            data = [(*prefix, *(row.get(key) for key in AXIS_FIELDS)) for row in rows]
+            data = [(*prefix, *(row.get(key) for key in AXIS_FIELDS),
+                     status.get("feedback_profile"), status.get("contact_frame_ns"),
+                     status.get("command_deadline_ns")) for row in rows]
             try:
                 self.queue.put_nowait(("sample", data))
             except Full:

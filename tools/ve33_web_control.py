@@ -59,6 +59,8 @@ class WebControl:
             elif action == "configure_grasp" and self.grasp is not None:
                 from ve33_local_grasp import grasp_needs_rebuild, grasp_settings
                 current = self.grasp_request()
+                if "expected_kind" in message and message["expected_kind"] != current["kind"]:
+                    return
                 settings = grasp_settings(current, message.get("values"))
                 if grasp_needs_rebuild(current, settings):
                     settings["contact_revision"] += 1
@@ -70,7 +72,7 @@ class WebControl:
                 self.demo_grip.value = -1. if value is None else value
             elif action == "home_grasp" and self.grasp is not None:
                 settings = self.grasp_request()
-                settings.update(drag=None, angle_deg=0., home=settings.get("home", 0) + 1)
+                settings.update(layout="palm", drag=None, angle_deg=0., home=settings.get("home", 0) + 1)
                 settings["contact_revision"] += 1
                 self.grasp.value = json.dumps(settings).encode()
             elif action == "start_recording" and self.record_requested is not None:
@@ -94,7 +96,7 @@ class WebControl:
                     self.cube_fixed.set()
                 if self.grasp is not None:
                     settings = self.grasp_request()
-                    settings.update(drag=None, angle_deg=0.)
+                    settings.update(layout="palm", drag=None, angle_deg=0.)
                     settings["contact_revision"] += 1
                     self.grasp.value = json.dumps(settings).encode()
                 self.scene_revision.value += 1

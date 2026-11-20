@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {ForceReadout} from './force-readout.mjs';
 
 // 顺序与右手 joint_space.json 的独立关节和 G4 电机 ID 一致。
 const FINGER_AXES = [
@@ -48,7 +49,7 @@ function background({canvas, ctx}, title, subtitle) {
   text(ctx, subtitle, 28, 94, 24, '#9fbcd1');
 }
 
-function motorReadout(card, frame) {
+function motorReadout(card, frame, {axis, loaded, available}) {
   const fb = frame.motor_feedback;
   const tracking = frame.wrist_detail ?? '等待腕部定位';
   const timing = (frame.time_monotonic_s * 1e9 - frame.motor_received_ns) / 1e6;
@@ -67,23 +68,22 @@ function motorReadout(card, frame) {
   text(card.ctx, '手套输入', 29, 249, 26, '#95b5cc', '700');
   text(card.ctx, frame.motor_received_ns && Number.isFinite(timing) ? `${Math.max(0, timing).toFixed(0)} ms` : '—', 163, 249, 26);
   const nominal = fb?.nominal_nm ?? [];
-  const available = nominal.some(Number.isFinite);
   text(card.ctx, '受力轴', 29, 301, 26, '#95b5cc', '700');
-  const loaded = nominal.flatMap((n, i) => Number.isFinite(n) && Math.abs(n) >= .01 ? [i + 1] : []);
-  text(card.ctx, loaded.length ? loaded.join(' / ') : available ? '无' : '等待有效接触帧', 163, 301, 26);
-  const valid = nominal.map((v,i) => [v,i]).filter(([v]) => Number.isFinite(v) && v !== 0);
-  valid.sort(([a],[b]) => Math.abs(b)-Math.abs(a));
-  const [torque, axis] = valid[0] ?? [];
+  const loadLabel = loaded.length ? loaded.map(i => i+1).join(' / ')
+    : !available ? '等待有效接触帧' : axis === null ? '无' : '轻触';
+  text(card.ctx, loadLabel, 163, 301, 26);
+  const torque = nominal[axis];
   const current = fb?.current_a?.[axis];
   text(card.ctx, '名义力矩', 29, 353, 26, '#95b5cc', '700');
-  const peak = axis === undefined ? (available ? '0.00 N·m' : '—') : `轴 ${axis+1}  ·  ${torque.toFixed(2)} N·m`;
-  text(card.ctx, peak, 163, 353, 26);
+  const torqueText = axis === null ? (available ? '0.00 N·m' : '—')
+    : `J${axis+1}  ·  ${Math.abs(torque) < .005 ? torque.toPrecision(2) : torque.toFixed(2)} N·m`;
+  text(card.ctx, torqueText, 163, 353, 26);
   text(card.ctx, '同轴回报', 29, 405, 26, '#95b5cc', '700');
   text(card.ctx, Number.isFinite(current) ? `${current.toFixed(3)} A` : '—', 163, 405, 26);
   card.texture.needsUpdate = true;
 }
 
-function jointLoads(card, frame) {
+function jointLoads(card, frame, readout) {
   background(card, '接触载荷', 'J1–J12 · 模型名义力矩（N·m）');
   const {ctx} = card;
   const nominal = frame.motor_feedback?.nominal_nm ?? [];
@@ -98,7 +98,7 @@ function jointLoads(card, frame) {
     axes.forEach(([id, name], column) => {
       const x = 108 + column * width;
       const value = nominal[id - 1];
-      const loaded = Number.isFinite(value) && Math.abs(value) >= .01;
+      const loaded = readout.loaded.includes(id - 1);
       text(ctx, `J${id}`, x, y, 25, loaded ? '#ffc38d' : '#a7cbe0', '700');
       const barX = x + 50;
       const ratio = Number.isFinite(value) ? Math.min(Math.abs(value) / LOAD_BAR_MAX_NM, 1) : 0;
@@ -116,6 +116,7 @@ function jointLoads(card, frame) {
 
 export class ForceDiagnostics {
   constructor(scene, links, {localGrasp = false} = {}) {
+    this.readout = new ForceReadout();
     this.anchor = new THREE.Group();
     this.anchor.visible = false;
     scene.add(this.anchor);
@@ -180,8 +181,10 @@ export class ForceDiagnostics {
         arrow.setLength(.008 + .031 * Math.sqrt(intensity), .006, .004);
       }
     }
-    jointLoads(this.rightCard, frame);
-    motorReadout(this.leftCard, frame);
+    const readout = this.readout.update(frame.motor_feedback?.nominal_nm ?? [],
+      frame.scene_revision, frame.grasp_object?.contact_revision);
+    jointLoads(this.rightCard, frame, readout);
+    motorReadout(this.leftCard, frame, readout);
   }
 }
 

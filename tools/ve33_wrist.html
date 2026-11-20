@@ -52,9 +52,10 @@ th:nth-child(2),td:nth-child(2){text-align:left}tbody tr:hover{background:#1b304
 <section id="local-grasp" class="local-grasp" aria-label="本地抓握设置" hidden>
   <div class="controls">
     <label>场景 <select data-grasp="layout"><option value="palm">掌心</option><option value="desk">桌面</option></select></label>
-    <label>物体 <select data-grasp="kind"><option value="ball_soft">软球</option><option value="ball_hard">硬球</option><option value="box_soft">软方块</option><option value="box_hard">硬方块</option><option value="cylinder_soft">软圆柱</option><option value="cylinder_hard">硬圆柱</option></select></label>
-    <label>尺寸 <input data-grasp="size_mm" type="range" min="20" max="90" value="45"><output data-value="size_mm">45 mm</output></label>
-    <label>硬度 <input data-grasp="hardness" type="range" min="0" max="1" step="0.01" value="0.25"><output data-value="hardness">0.25</output></label>
+    <label>物体 <select data-grasp="kind"><option value="ball">球</option><option value="box">方块</option><option value="cylinder">圆柱</option></select></label>
+    <label>尺寸 <input data-grasp="size_mm" type="range" min="20" max="150" value="45" aria-describedby="grasp-size-hint"><output data-value="size_mm">45 mm</output></label>
+    <small id="grasp-size-hint">拖动预览尺寸，松手应用到仿真</small>
+    <label>硬度（1 为刚体） <input data-grasp="hardness" type="range" min="0" max="1" step="0.01" value="0.25"><output data-value="hardness">0.25</output></label>
     <label>旋转 <input data-grasp="angle_deg" type="range" min="-180" max="180" value="0"><output data-value="angle_deg">0°</output></label>
     <label><input data-grasp="locked" type="checkbox" checked>锁定物体</label>
     <button id="grasp-home">物体归位</button>

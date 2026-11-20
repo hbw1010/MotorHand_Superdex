@@ -125,11 +125,24 @@ private:
 class ContactFeedback {
 public:
     ContactFeedback(Axes limits, Axes stiffness, Axes position_limits, double deadband, double contact_min,
-                    double blend_end, double full_load, double motor_damping, double rebound_lookahead)
+                    double blend_end, double full_load, double motor_damping, double rebound_lookahead,
+                    std::vector<std::array<double, 2>> anchors = {})
         : limits_(limits), stiffness_(stiffness), position_limits_(position_limits),
           deadband_(deadband), contact_min_(contact_min),
           blend_end_(blend_end), full_load_(full_load), motor_damping_(motor_damping),
-          rebound_lookahead_(rebound_lookahead) {}
+          rebound_lookahead_(rebound_lookahead), anchors_(std::move(anchors)) {
+        if (!anchors_.empty()) {
+            if (anchors_.size() < 2 || anchors_[0][0] != 0. || anchors_[0][1] != 0.)
+                throw std::invalid_argument("Invalid feedback curve origin");
+            for (std::size_t i = 0; i < anchors_.size(); ++i) {
+                const auto [x, y] = anchors_[i];
+                if (!std::isfinite(x) || !std::isfinite(y) || x < 0. || y < 0. ||
+                    y > *std::min_element(limits_.begin(), limits_.end()) ||
+                    (i && (x <= anchors_[i-1][0] || y < anchors_[i-1][1])))
+                    throw std::invalid_argument("Invalid feedback curve anchor");
+            }
+        }
+    }
 
     std::tuple<Axes, Axes, int> plan(const Axes& q, const Axes& dq, const Axes& reaction,
                                     const Axes& sim_pos, const Axes& sampled_pos, const Axes& frame_weight,
@@ -147,7 +160,20 @@ public:
             const double load_torque = std::clamp(reaction[i], -limit, limit);
             const double onset = std::clamp((std::abs(load_torque) - contact_min_) / (blend_end_ - contact_min_), 0., 1.);
             const double blend = onset * onset * (3. - 2. * onset);
-            const double contact = load_torque * blend;
+            const double raw_contact = load_torque * blend;
+            double mapped = std::abs(raw_contact);
+            if (!anchors_.empty()) {
+                const auto upper = std::upper_bound(anchors_.begin(), anchors_.end(), mapped,
+                    [](double x, const auto& point) { return x < point[0]; });
+                if (upper == anchors_.end()) mapped = anchors_.back()[1];
+                else if (upper == anchors_.begin()) mapped = upper->at(1);
+                else {
+                    const auto& a = *(upper - 1);
+                    const auto& b = *upper;
+                    mapped = a[1] + (mapped - a[0]) * (b[1] - a[1]) / (b[0] - a[0]);
+                }
+            }
+            const double contact = std::copysign(mapped, raw_contact);
             const double sampled_error = sim_pos[i] - sampled_pos[i];
             const double direction = std::copysign(1., sampled_error);
             const double speed = std::clamp(dq[i], -2., 2.);
@@ -183,6 +209,7 @@ private:
     Axes limits_, stiffness_, position_limits_;
     double deadband_, contact_min_, blend_end_, full_load_, motor_damping_;
     double rebound_lookahead_;
+    std::vector<std::array<double, 2>> anchors_;
     Axes slew_{}, filtered_{};
 };
 } // namespace
@@ -197,5 +224,7 @@ NB_MODULE(_ve33_native, module) {
         .def("contacts", &GraspPhysics::contacts);
     nb::class_<ContactFeedback>(module, "ContactFeedback")
         .def(nb::init<Axes, Axes, Axes, double, double, double, double, double, double>())
+        .def(nb::init<Axes, Axes, Axes, double, double, double, double, double, double,
+                      std::vector<std::array<double, 2>>>())
         .def("plan", &ContactFeedback::plan);
 }

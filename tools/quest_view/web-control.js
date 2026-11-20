@@ -1,3 +1,6 @@
+import {RotationControl} from './rotation-control.mjs';
+import {sizePreview} from './size-preview.mjs';
+
 const panel = document.querySelector('#g4-control');
 const rows = document.querySelector('#axes-body');
 const feedbackStatus = document.querySelector('#feedback-state');
@@ -11,6 +14,9 @@ const resetScene = document.querySelector('#reset-scene');
 const sceneMessage = document.querySelector('#scene-message');
 const graspPanel = document.querySelector('#local-grasp');
 const graspInputs = [...graspPanel.querySelectorAll('[data-grasp]')];
+const graspKind = graspPanel.querySelector('[data-grasp="kind"]');
+const rotationInput = graspPanel.querySelector('[data-grasp="angle_deg"]');
+const sizeInput = graspPanel.querySelector('[data-grasp="size_mm"]');
 const graspHome = document.querySelector('#grasp-home');
 const graspMessage = document.querySelector('#grasp-message');
 const demoControls = document.querySelector('#demo-controls');
@@ -21,6 +27,12 @@ const csvLink = document.querySelector('#grasp-csv');
 const buttons = Array.from(panel.querySelectorAll('[data-control]'));
 let busy = false, timer = 0;
 let sceneRevision;
+let switchingObject = false;
+let sizeCancelled = false;
+let sizeCommit = Promise.resolve();
+
+const rotation = new RotationControl((kind, angle) => postCommand(
+  {action: 'configure_grasp', expected_kind: kind, values: {angle_deg: angle}}, graspMessage));
 
 const number = (value, digits) => Number.isFinite(value) ? value.toFixed(digits) : '—';
 
@@ -45,21 +57,23 @@ function graspValue(input) {
 function showGrasp(state) {
   const grasp = state.grasp;
   graspPanel.hidden = !grasp;
-  if (!grasp) return;
-  const kindSelect = graspPanel.querySelector('[data-grasp="kind"]');
-  if (state.grasp_assets?.length && !kindSelect.querySelector('optgroup')) {
+  if (!grasp) {
+    sizePreview.clear();
+    return;
+  }
+  sizePreview.controlSnapshot(grasp);
+  if (state.grasp_assets?.length && !graspKind.querySelector('optgroup')) {
     const group = document.createElement('optgroup');
     group.label = 'SuperDex 官方资产';
     for (const {kind, label} of state.grasp_assets) group.append(new Option(label, kind));
-    kindSelect.append(group);
+    graspKind.append(group);
   }
   for (const input of graspInputs) {
-    const key = input.dataset.grasp;
-    const authored = grasp.asset && (key === 'size_mm' || key === 'hardness');
-    input.closest('label').hidden = Boolean(authored);
-    input.disabled = busy || state.calibrating || authored || (key === 'layout' && grasp.desk_only);
-    if (busy || input.matches(':active')) continue;
+    input.disabled = busy || switchingObject || state.calibrating;
+    if (busy || switchingObject || input.matches(':active')) continue;
     const value = grasp[input.dataset.grasp];
+    if (input === rotationInput && rotation.waitingForEcho(grasp.kind, value)) continue;
+    if (input === sizeInput && sizePreview.target) continue;
     if (input.type === 'checkbox') input.checked = value;
     else input.value = value;
     graspValue(input);
@@ -141,10 +155,7 @@ async function poll() {
   }
 }
 
-async function submit(command, message) {
-  busy = true;
-  for (const button of buttons) button.disabled = true;
-  cubeMode.disabled = resetScene.disabled = true;
+async function postCommand(command, message) {
   message.textContent = '';
   try {
     const reply = await fetch('/api/v1/control', {
@@ -152,8 +163,19 @@ async function submit(command, message) {
       body: JSON.stringify(command), signal:AbortSignal.timeout(1200),
     });
     if (!reply.ok) throw Error(reply.status);
+    return true;
   } catch {
     message.textContent = '操作未提交，请检查连接后重试。';
+    return false;
+  }
+}
+
+async function submit(command, message) {
+  busy = true;
+  for (const button of buttons) button.disabled = true;
+  cubeMode.disabled = resetScene.disabled = true;
+  try {
+    return await postCommand(command, message);
   } finally {
     busy = false;
   }
@@ -169,12 +191,52 @@ for (const button of buttons) {
 cubeMode.addEventListener('change', () => submit({action:'cube_mode', mode:cubeMode.value}, sceneMessage));
 resetScene.addEventListener('click', () => submit({action:'reset_scene'}, sceneMessage));
 for (const input of graspInputs) {
-  input.addEventListener('input', () => graspValue(input));
-  input.addEventListener('change', () => {
+  input.addEventListener('input', () => {
+    graspValue(input);
+    if (input === rotationInput && !switchingObject) rotation.update(graspKind.value, Number(input.value));
+    if (input === sizeInput && !switchingObject && !sizeCancelled) sizePreview.update(graspKind.value, Number(input.value));
+  });
+  input.addEventListener('change', async () => {
     const value = input.type === 'checkbox' ? input.checked : input.type === 'range' ? Number(input.value) : input.value;
-    submit({action: 'configure_grasp', values: {[input.dataset.grasp]: value}}, graspMessage);
+    if (input === rotationInput) {
+      if (!switchingObject) rotation.update(graspKind.value, value, true);
+      return;
+    }
+    const command = {action: 'configure_grasp', values: {[input.dataset.grasp]: value}};
+    if (input === sizeInput) {
+      if (switchingObject || sizeCancelled) return;
+      const target = sizePreview.update(graspKind.value, value);
+      sizeCommit = sizeCommit.then(async () => {
+        if (sizePreview.target !== target) return;
+        const ok = await submit({...command, expected_kind: target.kind}, graspMessage);
+        sizePreview.submitted(target, ok);
+      });
+      return;
+    }
+    if (input !== graspKind) {
+      await submit(command, graspMessage);
+      return;
+    }
+    switchingObject = true;
+    sizePreview.clear();
+    rotationInput.disabled = graspKind.disabled = true;
+    try {
+      await Promise.all([rotation.cancel(), sizeCommit]);
+      await submit(command, graspMessage);
+    } finally {
+      switchingObject = false;
+    }
   });
 }
+sizeInput.addEventListener('pointerdown', () => { sizeCancelled = false; });
+sizeInput.addEventListener('pointercancel', () => {
+  sizeCancelled = true;
+  sizePreview.clear();
+});
+sizeInput.addEventListener('keydown', event => {
+  sizeCancelled = event.key === 'Escape';
+  if (sizeCancelled) sizePreview.clear();
+});
 graspHome.addEventListener('click', () => submit({action: 'home_grasp'}, graspMessage));
 demoGrip.addEventListener('change', () => submit({action: 'demo_grip', value: Number(demoGrip.value)}, graspMessage));
 demoAuto.addEventListener('click', () => submit({action: 'demo_grip', value: null}, graspMessage));
@@ -182,4 +244,8 @@ record.addEventListener('click', () => submit({action: record.dataset.recording 
   ? 'stop_recording' : 'start_recording'}, graspMessage));
 
 if (panel) poll();
-window.addEventListener('pagehide', () => clearTimeout(timer));
+window.addEventListener('pagehide', () => {
+  clearTimeout(timer);
+  rotation.cancel();
+  sizePreview.clear();
+});

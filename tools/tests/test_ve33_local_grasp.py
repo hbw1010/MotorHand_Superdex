@@ -66,7 +66,7 @@ class LocalGraspTest(unittest.TestCase):
         self.assertFalse(state["can_feedback"])
         self.assertTrue(state["fixed_wrist"])
         self.assertFalse(state["can_align"])
-        self.assertEqual(state["grasp"]["kind"], "ball_soft")
+        self.assertEqual(state["grasp"]["kind"], "ball")
         with self.assertRaises(HTTPError) as err:
             read("wrist", {"space": "xr", "seq": 1, "pose": [0, 0, 0, 0, 0, 0, 1]})
         self.assertEqual(err.exception.code, 404)
@@ -114,7 +114,7 @@ class LocalGraspTest(unittest.TestCase):
         self.assertFalse(frame["hand_cube_contacts"])
         self.assertGreater(recovered, .044)
         self.assertTrue(all(row["nominal_nm"] == 0 for row in state["rows"]))
-        read("control", {"action": "configure_grasp", "values": {"size_mm": 90, "hardness": 1}})
+        read("control", {"action": "configure_grasp", "values": {"size_mm": 90, "hardness": .99}})
         read("control", {"action": "reset_scene"})
         for _ in range(50):
             frame = read("scene")
@@ -134,10 +134,10 @@ class LocalGraspTest(unittest.TestCase):
             time.sleep(.055)
         self.assertGreaterEqual(loaded, 29, f"90 mm 软球持续抓握时仅 {loaded}/{samples} 次有反馈")
         read("control", {"action": "demo_grip", "value": 0})
-        read("control", {"action": "configure_grasp", "values": {"kind": "ball_hard", "size_mm": 55}})
+        read("control", {"action": "configure_grasp", "values": {"kind": "ball", "hardness": 1., "size_mm": 55}})
         for _ in range(35):
             frame = read("scene")
-            if frame["grasp_object"]["kind"] == "ball_hard":
+            if frame["grasp_object"]["kind"] == "ball" and frame["grasp_object"]["size_mm"] == 55:
                 break
             time.sleep(.05)
         self.assertEqual(frame["grasp_object"]["size_mm"], 55)
@@ -156,7 +156,7 @@ class LocalGraspTest(unittest.TestCase):
         self.assertIn("position_motor_nm", csv)
         self.assertIn("encoder_rad,contact_encoder_rad", csv.splitlines()[0])
         self.assertIn("feedback_handoffs,last_feedback_handoff_ms", csv.splitlines()[0])
-        self.assertIn("ball_hard", csv)
+        self.assertIn(",ball,", csv)
         self.assertGreater(len(csv.splitlines()), 13)
 
         read("control", {"action": "configure_grasp", "values": {
@@ -185,6 +185,7 @@ class LocalGraspTest(unittest.TestCase):
 
         control = WebControl(mp.get_context("spawn"), None, allow_reset=True, local_grasp=True)
         self.assertEqual(control.grasp_request()["contact_revision"], 0)
+        self.assertEqual(control.grasp_request()["layout"], "palm")
         control.command({"action": "configure_grasp", "values": {"layout": "desk", "size_mm": 65}})
         self.assertEqual(control.grasp_request()["contact_revision"], 1)
         control.command({"action": "configure_grasp", "values": {"drag": [.2, .01, -.04], "angle_deg": 35}})
@@ -197,20 +198,91 @@ class LocalGraspTest(unittest.TestCase):
         control.command({"action": "reset_scene"})
         self.assertIsNone(control.grasp_request()["drag"])
         self.assertEqual(control.grasp_request()["angle_deg"], 0.)
+        self.assertEqual(control.grasp_request()["layout"], "palm")
         self.assertEqual(control.grasp_request()["contact_revision"], 2)
         self.assertEqual(control.scene_request()[1], 1)
+
+    def test_switching_objects_and_returning_home_select_the_palm(self):
+        from ve33_grasp_assets import GRASP_ASSETS
+        from ve33_local_grasp import GRASP_KINDS
+        from ve33_web_control import WebControl
+
+        control = WebControl(mp.get_context("spawn"), None, local_grasp=True)
+        for kind in (*GRASP_ASSETS, *GRASP_KINDS):
+            with self.subTest(kind=kind):
+                control.command({"action": "configure_grasp", "values": {"layout": "desk"}})
+                control.command({"action": "configure_grasp", "values": {"kind": kind}})
+                self.assertEqual(control.grasp_request()["layout"], "palm")
+                control.command({"action": "configure_grasp", "values": {"layout": "desk"}})
+                self.assertEqual(control.grasp_request()["layout"], "desk")
+                control.command({"action": "home_grasp"})
+                self.assertEqual(control.grasp_request()["layout"], "palm")
 
     def test_settings_and_presets(self):
         from ve33_local_grasp import DEFAULT_GRASP, GRASP_KINDS, grasp_settings
 
-        self.assertEqual(len(GRASP_KINDS), 6)
-        self.assertEqual(DEFAULT_GRASP["kind"], "ball_soft")
+        self.assertEqual(set(GRASP_KINDS), {"ball", "box", "cylinder"})
+        self.assertEqual(DEFAULT_GRASP["kind"], "ball")
         self.assertEqual(DEFAULT_GRASP["size_mm"], 45)
-        self.assertEqual(grasp_settings(DEFAULT_GRASP, {"kind": "cylinder_hard"})["hardness"], .92)
-        for patch in ({"size_mm": 19}, {"hardness": float("nan")}, {"locked": 1},
+        self.assertEqual(grasp_settings(DEFAULT_GRASP, {"kind": "cylinder_hard"})["hardness"], 1.)
+        for patch in ({"size_mm": 19}, {"size_mm": 150.1}, {"hardness": float("nan")}, {"locked": 1},
                       {"kind": "other"}, {"drag": [0., 0., -100.]}):
             with self.assertRaises(ValueError):
                 grasp_settings(DEFAULT_GRASP, patch)
+
+    def test_resizing_every_object_invalidates_the_old_contact_frame(self):
+        from ve33_grasp_assets import GRASP_ASSETS
+        from ve33_local_grasp import GRASP_KINDS
+        from ve33_web_control import WebControl
+
+        control = WebControl(mp.get_context("spawn"), None, local_grasp=True)
+        for kind in (*GRASP_KINDS, *GRASP_ASSETS):
+            with self.subTest(kind=kind):
+                control.command({"action": "configure_grasp", "values": {"kind": kind, "size_mm": 20}})
+                revision = control.grasp_request()["contact_revision"]
+                control.command({"action": "configure_grasp", "values": {"size_mm": 150}})
+                self.assertEqual(control.grasp_request()["size_mm"], 150.)
+                self.assertEqual(control.grasp_request()["contact_revision"], revision + 1)
+                control.command({"action": "configure_grasp", "values": {"angle_deg": 42}})
+                self.assertEqual(control.grasp_request()["contact_revision"], revision + 1)
+                control.command({"action": "configure_grasp", "expected_kind": "previous_object",
+                                 "values": {"angle_deg": 12}})
+                self.assertEqual(control.grasp_request()["angle_deg"], 42.)
+
+    def test_object_selection_defaults_to_locked_and_honours_explicit_unlock(self):
+        from ve33_local_grasp import DEFAULT_GRASP, grasp_settings
+
+        self.assertTrue(DEFAULT_GRASP["locked"])
+        for kind in ("official_chain", "official_pegboard", "box_soft"):
+            selected = grasp_settings({**DEFAULT_GRASP, "locked": False}, {"kind": kind})
+            self.assertTrue(selected["locked"])
+            unlocked = grasp_settings(DEFAULT_GRASP, {"kind": kind, "locked": False})
+            self.assertFalse(grasp_settings(unlocked, {"size_mm": 80})["locked"])
+
+    def test_rotating_soft_ball_moves_surface_over_multiple_steps(self):
+        import superdex.physics as sdp
+        from ve33_local_grasp import DEFAULT_GRASP, LocalGrasp
+
+        sdp.initialize(num_worker_threads=0)
+        try:
+            scene = sdp.create_scene("软球连续旋转")
+            scene.set_gravity([0., 0., 0.])
+            env = LocalGrasp(sdp, scene, {**DEFAULT_GRASP, "layout": "desk"})
+            dt = 1 / 240
+            def advance(steps):
+                for _ in range(steps):
+                    env.step(dt)
+                    scene.step(dt)
+                return np.array(env.packet()["vertices"]).reshape(-1, 3)
+            start = advance(4)
+            self.assertFalse(env.configure({**env.settings, "angle_deg": 45.}))
+            first = advance(1)
+            end = advance(100)
+            self.assertLess(np.max(np.linalg.norm(first - start, axis=1)), .002)
+            self.assertGreater(np.max(np.linalg.norm(end - start, axis=1)), .008)
+            self.assertEqual(env.mesh_revision, 1)
+        finally:
+            sdp.shutdown()
 
     def test_official_prefabs_load_step_and_switch_in_one_scene(self):
         import superdex.physics as sdp
@@ -226,16 +298,19 @@ class LocalGraspTest(unittest.TestCase):
             open_surface = wrist.inv().apply([[.11, -.075, .045]])
             env = LocalGrasp(sdp, scene, DEFAULT_GRASP, open_surface=open_surface)
             settings = DEFAULT_GRASP
-            for kind, asset in GRASP_ASSETS.items():
+            for kind in GRASP_ASSETS:
                 with self.subTest(kind=kind):
                     settings = grasp_settings(settings, {"kind": kind, "layout": "palm"})
                     if kind in ("official_duck_lamp", "official_quest_cube"):
                         settings = grasp_settings(settings, {"locked": True})
-                    self.assertEqual(settings["layout"], "desk" if asset.desk_only else "palm")
+                    self.assertEqual(settings["layout"], "palm")
                     self.assertTrue(env.configure(settings))
-                    if kind == "official_shape_box":
-                        front = max(part.get_aabb_world().max[1] for _, part in env.contact_actors)
-                        self.assertLess(front, -.075)
+                    bounds = [part.get_aabb_world() for _, part in env.contact_actors]
+                    low = np.min([list(b.min) for b in bounds], axis=0)
+                    high = np.max([list(b.max) for b in bounds], axis=0)
+                    center = wrist.inv().apply((low + high) / 2.)
+                    np.testing.assert_allclose(center[:2], [.072, -.005], atol=.001)
+                    self.assertLessEqual(center[2], -.007)
                     env.step(1 / 240)
                     scene.step(1 / 240)
                     if settings["locked"]:
@@ -252,6 +327,9 @@ class LocalGraspTest(unittest.TestCase):
                         self.assertEqual(len(payload["parts"]), len(env.contact_actors))
                         self.assertTrue(all(render_model_path(part["model"]).is_file() for part in payload["parts"]))
                         self.assertTrue(all(np.isfinite(part["pose"]).all() for part in payload["parts"]))
+            env.configure(grasp_settings(settings, {"kind": "official_shape_box", "layout": "desk"}))
+            front = max(part.get_aabb_world().max[1] for _, part in env.contact_actors)
+            self.assertLess(front, -.075)
             env.configure(DEFAULT_GRASP)
             self.assertEqual(scene.get_num_actors(), 1)
             self.assertEqual(scene.get_num_constraints(), 0)
@@ -290,8 +368,15 @@ class LocalGraspTest(unittest.TestCase):
                 payload = env.packet()
                 self.assertEqual(payload["kind"], kind)
                 self.assertEqual(payload["size_mm"], 60)
-                self.assertEqual(bool(payload.get("vertices")), kind == "ball_soft")
+                self.assertEqual(env.actor.get_type(), sdp.ActorType.SOFT)
+                self.assertTrue(payload.get("vertices"))
+                env.configure(grasp_settings(settings, {"hardness": 1.}))
+                self.assertEqual(env.actor.get_type(), sdp.ActorType.RIGID)
+                self.assertNotIn("vertices", env.packet())
+                env.configure(settings)
                 self.assertEqual(scene.get_num_actors(), 1)
+            settings = grasp_settings(settings, {"hardness": 1.})
+            env.configure(settings)
             old = env.packet()
             np.testing.assert_allclose(Rotation.from_quat(old["pose"][3:]).apply([0, 0, 1]),
                                        [0, 1, 0], atol=1e-6)

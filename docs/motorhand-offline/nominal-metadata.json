@@ -1,0 +1,20 @@
+{
+  "profile": "nominal",
+  "command": [
+    ".venv/bin/python",
+    "tools/ve33_g4_view.py",
+    "--local-grasp",
+    "--demo",
+    "--quest-port",
+    "55155",
+    "--feedback-profile",
+    "nominal"
+  ],
+  "backend": "cpp",
+  "precision": "float32",
+  "size_mm": 89,
+  "locked": true,
+  "layout": "palm",
+  "timeline": "每 0.2 秒变更 grip 0.05，合拢到 0.8，保持 2 秒，再对称松开",
+  "timing": "实时调度，非固定仿真时间；时间戳为本机 monotonic_ns"
+}

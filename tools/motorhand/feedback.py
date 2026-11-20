@@ -337,8 +337,30 @@ class ContactForceFeedbackLoop(FeedbackLoop):
 
     refresh_on_contact = True
 
-    def __init__(self, gateway, axes, *, native=None):
+    def __init__(self, gateway, axes, *, native=None, profile="identity", profile_config=None):
         self.native = native
+        self.profile = profile
+        profiles = CONFIG.get("feedback_profiles", {})
+        if profile not in ("identity", "nominal") and profile not in profiles:
+            raise ValueError(f"未知反馈配置：{profile}")
+        self.feedback_anchors = []
+        if profile != "identity":
+            cfg = profile_config if profile_config is not None else profiles.get(profile)
+            try:
+                anchors = np.asarray(cfg["anchors_nm"], dtype=float)
+                max_output = min(CONFIG["torque_limit_nm"]) * CONFIG["driver_impedance"]["torque_margin"]
+                valid = (anchors.ndim == 2 and anchors.shape[1] == 2 and len(anchors) >= 2
+                         and np.isfinite(anchors).all() and np.array_equal(anchors[0], [0., 0.])
+                         and np.all(np.diff(anchors[:, 0]) > 0.)
+                         and np.all(np.diff(anchors[:, 1]) >= 0.)
+                         and np.all(anchors[:, 1] <= max_output)
+                         and anchors[-1, 0] >= CONTACT_BLEND_END_NM
+                         and np.allclose(np.interp([.01, .03], anchors[:, 0], anchors[:, 1]), [.01, .03]))
+            except (TypeError, KeyError, ValueError, IndexError):
+                valid = False
+            if not valid:
+                raise ValueError("名义反馈曲线无效：要求有限、单调、原点为零、轻触原尺度且不超过有效限幅")
+            self.feedback_anchors = anchors.tolist()
         self.grasp_revision = None
         super().__init__(gateway, axes)
 
@@ -358,6 +380,9 @@ class ContactForceFeedbackLoop(FeedbackLoop):
         self.slew_torque = np.zeros(MOTOR_COUNT)
         self.filtered_torque = np.zeros(MOTOR_COUNT)
         self.position_torque = np.zeros(MOTOR_COUNT)
+        self.mapped_contact = np.zeros(MOTOR_COUNT)
+        self.contact_gate = np.zeros(MOTOR_COUNT, dtype=bool)
+        self.frame_weight = np.ones(MOTOR_COUNT)
         cfg = CONFIG["driver_impedance"]
         self.position_stiffness = np.minimum(cfg["k_max_nm_per_rad"],
                                               surface_stiffness() * cfg["gain"] * np.asarray(cfg["joint_gain"]))
@@ -368,7 +393,7 @@ class ContactForceFeedbackLoop(FeedbackLoop):
         if self.native is not None:
             self.native_feedback = self.native.ContactFeedback(self.limit, self.position_stiffness, self.position_limit,
                 POSITION_DEADBAND_RAD, CONTACT_THRESHOLD_NM, CONTACT_BLEND_END_NM, POSITION_FULL_LOAD_NM,
-                MOTOR_DAMPING_NM_S_PER_RAD, self.rebound_lookahead)
+                MOTOR_DAMPING_NM_S_PER_RAD, self.rebound_lookahead, self.feedback_anchors)
 
     def plan(self, q, dq, force_frame, ramp, dt, now, *, encoder_position=None):
         reaction = np.asarray(force_frame[3:FORCE_TORQUE_END])
@@ -385,6 +410,15 @@ class ContactForceFeedbackLoop(FeedbackLoop):
         progress = np.clip((retreat - RETREAT_BLEND_START_RAD) /
                            (RETREAT_BLEND_END_RAD - RETREAT_BLEND_START_RAD), 0., 1.)
         frame_weight = 1. - progress**2 * (3. - 2. * progress)
+        self.frame_weight = frame_weight.copy()
+        self.contact_gate = np.abs(reaction) >= CONTACT_THRESHOLD_NM
+        clipped = np.clip(reaction, -self.limit, self.limit)
+        onset = np.clip((np.abs(clipped) - CONTACT_THRESHOLD_NM) / (CONTACT_BLEND_END_NM - CONTACT_THRESHOLD_NM), 0., 1.)
+        contact = clipped * onset**2 * (3. - 2. * onset)
+        if self.feedback_anchors:
+            anchors = np.asarray(self.feedback_anchors)
+            contact = np.sign(contact) * np.interp(np.abs(contact), anchors[:, 0], anchors[:, 1])
+        self.mapped_contact = contact
         dt = min(self.ttl / 1e9, dt if dt > 0. else 1. / CONFIG["control_hz"])
         if self.native is not None:
             torque, position, loaded = self.native_feedback.plan(q, dq, reaction, sim_position, sampled_position,
@@ -402,7 +436,7 @@ class ContactForceFeedbackLoop(FeedbackLoop):
         reaction = np.clip(reaction, -limit, limit)
         onset = np.clip((np.abs(reaction) - CONTACT_THRESHOLD_NM) / (CONTACT_BLEND_END_NM - CONTACT_THRESHOLD_NM), 0., 1.)
         blend = onset**2 * (3. - 2. * onset)
-        contact = reaction * blend
+        contact = self.mapped_contact
         sampled_error = sim_position - sampled_position
         direction = np.sign(sampled_error)
         speed = np.clip(dq, -2., 2.)
