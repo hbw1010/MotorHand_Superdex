@@ -9,6 +9,7 @@
 #include <time.h>
 
 #include <atomic>
+#include <cmath>
 #include <cstdint>
 #include <map>
 #include <mutex>
@@ -100,6 +101,34 @@ void g4_set_mit(void* h, uint32_t bus, uint32_t id, float deg, float kp, float k
     std::lock_guard<std::mutex> lock(shim->mutex);
     shim->client.SetMitCommand(uint8_t(bus), uint16_t(id), deg, kp, kd, vel, tor);
     shim->pending[{uint8_t(bus), uint16_t(id)}] = Pending{deadline_ns, 0};
+}
+
+// 先校验完整批次，再一次提交给 IO 线程。返回 0 表示过期，-1 表示参数无效。
+int g4_set_mit_batch(void* h, const float* commands, int count, int64_t deadline_ns) {
+    constexpr int axes = 12;
+    if (!h || !commands || count != axes) return -1;
+    std::array<std::pair<lqs::JointKey, MotorCommand>, axes> batch;
+    for (int axis = 0; axis < axes; ++axis) {
+        const float* fields = commands + axis * 5;
+        for (int field = 0; field < 5; ++field) {
+            if (!std::isfinite(fields[field])) return -1;
+        }
+        auto& [key, command] = batch[axis];
+        key = {uint8_t(3 - axis / 4), uint16_t(axis + 1)};
+        command.enabled = true;
+        command.is_mit_mode = true;
+        command.target_angle = fields[0];
+        command.mit_kp = fields[1];
+        command.mit_kd = fields[2];
+        command.mit_vel = fields[3];
+        command.mit_tor = fields[4];
+    }
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    if (MonotonicNs() >= deadline_ns) return 0;
+    shim->client.SetCommandBatch(batch);
+    for (const auto& entry : batch) shim->pending[entry.first] = Pending{deadline_ns, 0};
+    return 1;
 }
 
 void g4_set_servo(void* h, uint32_t bus, uint32_t id, float deg, float spd, float cur,

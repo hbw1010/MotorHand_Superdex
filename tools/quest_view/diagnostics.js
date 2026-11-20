@@ -56,21 +56,28 @@ function motorReadout(card, frame) {
   background(card, 'MotorHand', mode);
   text(card.ctx, '右腕', 29, 145, 26, '#95b5cc', '700');
   text(card.ctx, tracking, 163, 145, 26);
-  text(card.ctx, '左手', 29, 197, 26, '#95b5cc', '700');
-  const left = frame.left_hand_tracking?.kind;
-  text(card.ctx, left === 'hand' ? '光学追踪' : left === 'controller' ? '手柄支撑' : '等待追踪', 163, 197, 26);
+  if (frame.scene_kind === 'local_grasp') {
+    text(card.ctx, '接触', 29, 197, 26, '#95b5cc', '700');
+    text(card.ctx, frame.hand_cube_contacts?.grasp_object?.length ? '物体受力' : '自由空间', 163, 197, 26);
+  } else {
+    text(card.ctx, '左手', 29, 197, 26, '#95b5cc', '700');
+    const left = frame.left_hand_tracking?.kind;
+    text(card.ctx, left === 'hand' ? '光学追踪' : left === 'controller' ? '手柄支撑' : '等待追踪', 163, 197, 26);
+  }
   text(card.ctx, '手套输入', 29, 249, 26, '#95b5cc', '700');
   text(card.ctx, frame.motor_received_ns && Number.isFinite(timing) ? `${Math.max(0, timing).toFixed(0)} ms` : '—', 163, 249, 26);
   const nominal = fb?.nominal_nm ?? [];
+  const available = nominal.some(Number.isFinite);
   text(card.ctx, '受力轴', 29, 301, 26, '#95b5cc', '700');
   const loaded = nominal.flatMap((n, i) => Number.isFinite(n) && Math.abs(n) >= .01 ? [i + 1] : []);
-  text(card.ctx, loaded.length ? loaded.join(' / ') : '—', 163, 301, 26);
-  const valid = nominal.map((v,i) => [v,i]).filter(([v]) => Number.isFinite(v));
+  text(card.ctx, loaded.length ? loaded.join(' / ') : available ? '无' : '等待有效接触帧', 163, 301, 26);
+  const valid = nominal.map((v,i) => [v,i]).filter(([v]) => Number.isFinite(v) && v !== 0);
   valid.sort(([a],[b]) => Math.abs(b)-Math.abs(a));
   const [torque, axis] = valid[0] ?? [];
   const current = fb?.current_a?.[axis];
   text(card.ctx, '名义力矩', 29, 353, 26, '#95b5cc', '700');
-  text(card.ctx, axis === undefined ? '—' : `轴 ${axis+1}  ·  ${torque.toFixed(2)} N·m`, 163, 353, 26);
+  const peak = axis === undefined ? (available ? '0.00 N·m' : '—') : `轴 ${axis+1}  ·  ${torque.toFixed(2)} N·m`;
+  text(card.ctx, peak, 163, 353, 26);
   text(card.ctx, '同轴回报', 29, 405, 26, '#95b5cc', '700');
   text(card.ctx, Number.isFinite(current) ? `${current.toFixed(3)} A` : '—', 163, 405, 26);
   card.texture.needsUpdate = true;
@@ -108,7 +115,7 @@ function jointLoads(card, frame) {
 }
 
 export class ForceDiagnostics {
-  constructor(scene, links) {
+  constructor(scene, links, {localGrasp = false} = {}) {
     this.anchor = new THREE.Group();
     this.anchor.visible = false;
     scene.add(this.anchor);
@@ -117,8 +124,8 @@ export class ForceDiagnostics {
     this.anchor.add(this.leftCard.mesh, this.rightCard.mesh);
     this.ghost = new THREE.Group();
     this.ghost.quaternion.copy(GHOST_ORIENTATION);
-    this.ghost.position.y = -.067;
-    this.ghost.scale.setScalar(1.12);
+    this.ghost.position.y = localGrasp ? -.073 : -.067;
+    this.ghost.scale.setScalar(localGrasp ? .95 : 1.12);
     this.anchor.add(this.ghost);
     this.parts = new Map();
 

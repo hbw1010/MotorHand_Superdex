@@ -3,6 +3,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {ForceDiagnostics, LeftHandView} from './diagnostics.js';
+import {LocalGraspView} from './local-grasp.js';
 import './web-control.js';
 
 const button = document.querySelector('#start');
@@ -22,7 +23,7 @@ const xrBasis = new THREE.Matrix4().set(0,-1,0,0, 0,0,1,0, -1,0,0,0, 0,0,0,1);
 let renderer, session, space, latest, align = false, sending = false, seq = 0, lastSend = 0;
 let previewPlaced = false;
 let mode = 'controller';
-let diagnostics, leftView, controls, shown, lastPoll = 0, polling = false;
+let diagnostics, leftView, graspView, controls, shown, lastPoll = 0, polling = false;
 const wristJoint = 'wrist';
 const leftJointNames = [wristJoint, 'thumb-metacarpal', 'thumb-phalanx-distal', 'thumb-tip'];
 for (const finger of ['index', 'middle', 'ring', 'pinky']) {
@@ -122,8 +123,10 @@ function pollScene(t, interval) {
   polling = true;
   lastPoll = t;
   const sessionSent = session;
-  fetch('/api/v1/scene', {signal:AbortSignal.timeout(session ? 150 : 700)})
-    .then(response => response.ok ? response.json() : null)
+  const after = graspView && !session ? latest?.frame : undefined;
+  const path = after === undefined ? '/api/v1/scene' : `/api/v1/scene?after=${after}`;
+  fetch(path, {signal:AbortSignal.timeout(session ? 150 : 700)})
+    .then(response => response.status === 200 ? response.json() : null)
     .then(frame => {
       if (session === sessionSent && frame?.version === 1) latest = frame;
     })
@@ -139,7 +142,11 @@ function applyFrame() {
     }
   }
   diagnostics.update(latest, Number(forceScale.value));
-  leftView.update(latest.left_hand_tracking, latest.left_contact_probes);
+  leftView?.update(latest.left_hand_tracking, latest.left_contact_probes);
+  if (graspView && latest.grasp_object) {
+    graspView.update(latest.grasp_object);
+    groups.objects.get('table').visible = latest.grasp_object.layout === 'desk';
+  }
   shown = latest;
   world.visible = true;
 }
@@ -162,7 +169,7 @@ function draw(t, frame) {
 
 function drawDesktop(t) {
   if (session) return;
-  pollScene(t, 50);
+  pollScene(t, graspView ? 0 : 50);
   applyFrame();
   controls.update();
   diagnostics.anchor.visible = Boolean(latest && showDiagnostics.checked);
@@ -254,11 +261,24 @@ async function prepare() {
   });
   const tabletop = groups.objects.has('table') && groups.objects.has('test_box');
   const palmTest = groups.objects.has('palm_ball');
-  if (groups.right_hand.size !== 73 || (!tabletop && !palmTest && groups.puzzle_cube.size !== 16)) throw Error('模型链接不完整');
+  const localGrasp = groups.objects.has('table') && !tabletop && !groups.puzzle_cube.size;
+  if (groups.right_hand.size !== 73 || (!tabletop && !palmTest && !localGrasp && groups.puzzle_cube.size !== 16)) throw Error('模型链接不完整');
   document.querySelector('h1').textContent = palmTest ? 'MotorHand 掌心测试' : tabletop ? 'MotorHand 桌面测试' : '右手与二阶魔方';
-  diagnostics = new ForceDiagnostics(scene, groups.right_hand);
-  leftView = new LeftHandView(world);
+  diagnostics = new ForceDiagnostics(scene, groups.right_hand, {localGrasp});
+  if (!localGrasp) leftView = new LeftHandView(world);
+  if (localGrasp) {
+    button.hidden = sourceSelect.closest('label').hidden = document.querySelector('#xr-hint').hidden = true;
+    document.querySelector('h1').textContent = 'MotorHand 本地抓握';
+    camera.position.set(.43, .22, .24);
+    controls.target.set(.014, .098, .055);
+    controls.update();
+    graspView = new LocalGraspView(world, camera, renderer.domElement, controls);
+  }
   startDesktop();
+  if (localGrasp) {
+    status.textContent = '固定腕部已就绪。桌面模式可拖动抓握物体。';
+    return;
+  }
   if (!navigator.xr || !await navigator.xr.isSessionSupported('immersive-ar')) {
     status.textContent = '桌面预览已连接。头显交互需要支持沉浸 AR 的浏览器。';
     return;

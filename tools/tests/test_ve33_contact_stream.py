@@ -212,7 +212,7 @@ class ContactStreamTest(unittest.TestCase):
             feedback.follow_request(q, raw, stamp, force_frame[:], True)
             if feedback.active and feedback.nominal is not None:
                 peak = max(peak, max(map(abs, feedback.nominal)))
-            time.sleep(.025)
+            time.sleep(1. / CONFIG["control_hz"])
         self.assertEqual(frame()["wrist_received_ns"], 0)
         self.assertTrue(frame()["blocked_motor_ids"])
         self.assertGreater(peak, .01, feedback.message)

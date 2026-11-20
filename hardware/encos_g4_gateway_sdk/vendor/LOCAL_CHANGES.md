@@ -14,3 +14,5 @@
 离线回归：`sim/tests/test_g4_snapshot.py` 使用伪终端运行实际 SDK，在 watchdog 未启动的情况下验证首批反馈时间戳、时钟来源及断流过期行为。此修复保留指令期限 watchdog、软释放及电机控制报文。
 
 2026-11-17：为 SuperDex 只读跟随增加独立入口 `g4_open_reader`。SDK 的 query_only 会话在采集循环中固定生成位置查询，断开时跳过控制会话使用的三轮卸力帧。原有控制入口保留原行为。
+
+2026-11-19：`HandClientG4.hpp` 增加 `SetCommandBatch()`，在同一指令锁中更新 12 轴。SuperDex 的 `g4_set_mit_batch` 先校验各轴参数及共同的命令期限，再一次提交给 SDK IO 线程。伪终端验证了无效批次拒绝、逐轴路由、过期及卸力。

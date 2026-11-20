@@ -189,6 +189,7 @@ class VelocityEstimator:
     def __init__(self, cutoff_hz: float = 12.0) -> None:
         self.cutoff_hz = float(cutoff_hz)
         self._q: np.ndarray | None = None
+        self._sample_stamps: np.ndarray | None = None
         self.dq = np.zeros(12)
 
     def update(self, q: np.ndarray, dt_s: float) -> np.ndarray:
@@ -203,6 +204,27 @@ class VelocityEstimator:
         self._q = q.copy()
         return self.dq
 
+    def update_samples(self, q: np.ndarray, stamps_ns) -> np.ndarray:
+        """按各轴位置包的接收时间求速度，重复快照继续使用已有速度。"""
+        q = np.asarray(q, dtype=float)
+        stamps = np.asarray(stamps_ns, dtype=np.int64)
+        if self._sample_stamps is None:
+            self._q = q.copy()
+            self._sample_stamps = stamps.copy()
+            self.dq = np.zeros(12)
+            return self.dq
+        elapsed = (stamps - self._sample_stamps) / 1e9
+        changed = elapsed != 0.
+        valid = (elapsed > 0.) & (elapsed <= .2)
+        raw = (q[valid] - self._q[valid]) / elapsed[valid]
+        alpha = -np.expm1(-2. * math.pi * self.cutoff_hz * elapsed[valid])
+        self.dq[valid] += alpha * (raw - self.dq[valid])
+        self.dq[changed & ~valid] = 0.
+        self._q[changed] = q[changed]
+        self._sample_stamps[changed] = stamps[changed]
+        return self.dq
+
     def reset(self) -> None:
         self._q = None
+        self._sample_stamps = None
         self.dq = np.zeros(12)

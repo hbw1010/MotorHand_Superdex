@@ -5,6 +5,7 @@ import multiprocessing as mp
 from pathlib import Path
 import socket
 import sys
+from threading import Timer
 import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError
@@ -13,7 +14,7 @@ from urllib.request import Request, urlopen
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from motorhand.feedback import FeedbackLoop, MAPPING
+from motorhand.feedback import ContactForceFeedbackLoop, FeedbackLoop, MAPPING
 from motorhand.mapping import GloveMapping
 from ve33_quest import WristBridge, wrist_server
 from ve33_web_control import WebControl
@@ -32,6 +33,76 @@ class Gateway:
 
 
 class WristFeedbackTest(unittest.TestCase):
+    def test_fresh_frame_replaces_a_just_expired_batch_with_a_zero_start(self):
+        axes = {m.motor_id: (m.model_joint, m) for m in GloveMapping.load(MAPPING).motors}
+        gateway = Gateway()
+        feedback = ContactForceFeedbackLoop(gateway, axes)
+        q = np.zeros(12)
+        reaction = q.copy()
+        reaction[4] = -1.
+        raw = dict.fromkeys(axes, 0.)
+        with patch("motorhand.feedback.time.monotonic_ns", return_value=1_095_000_000):
+            feedback.start()
+            feedback.started -= 200_000_000
+            feedback.follow_request(q, raw, 1_094_000_000,
+                                    [1_000_000_000, 1_093_000_000, True, *reaction, *q, *q, *q], True)
+        self.assertEqual(gateway.commands[0][1], 1_100_000_000)
+        self.assertNotEqual(gateway.commands[0][0][4][4], 0.)
+        frame = [1_055_000_000, 1_104_000_000, True, *reaction, *q, *q, *q]
+        with patch("motorhand.feedback.time.monotonic_ns", return_value=1_105_000_000):
+            feedback.follow_request(q, raw, 1_104_000_000, frame, True)
+        self.assertTrue(feedback.active)
+        self.assertEqual(feedback.interruption_count, 0)
+        self.assertEqual(feedback.handoff_count, 1)
+        self.assertEqual(gateway.commands[-1][1], 1_155_000_000)
+        self.assertEqual(gateway.commands[-1][0], [(0., 0., 0., 0., 0.)] * 12)
+        with patch("motorhand.feedback.time.monotonic_ns", return_value=1_115_000_000):
+            feedback.follow_request(q, raw, 1_114_000_000, frame, True)
+        self.assertGreater(abs(gateway.commands[-1][0][4][4]), 0.)
+        self.assertLess(abs(gateway.commands[-1][0][4][4]), .15)
+        self.assertFalse(gateway.released)
+
+    def test_expired_batch_with_long_gap_or_short_new_lease_pauses(self):
+        axes = {m.motor_id: (m.model_joint, m) for m in GloveMapping.load(MAPPING).motors}
+        q = np.zeros(12)
+        raw = dict.fromkeys(axes, 0.)
+        for now, sample in ((1_130_000_000, 1_088_000_000), (1_105_000_000, 1_008_000_000)):
+            with self.subTest(now=now, sample=sample):
+                gateway = Gateway()
+                feedback = ContactForceFeedbackLoop(gateway, axes)
+                with patch("motorhand.feedback.time.monotonic_ns", return_value=1_095_000_000):
+                    feedback.start()
+                    feedback.follow_request(q, raw, 1_094_000_000,
+                                            [1_000_000_000, 1_093_000_000, True, *q, *q, *q, *q], True)
+                with patch("motorhand.feedback.time.monotonic_ns", return_value=now):
+                    feedback.follow_request(q, raw, now-1_000_000, [sample, now-2_000_000, True, *q, *q, *q, *q], True)
+                self.assertEqual(len(gateway.commands), 1)
+                self.assertFalse(feedback.active)
+                self.assertEqual(feedback.interruption_count, 1)
+
+    def test_new_contact_frame_uses_same_encoder_sample_without_extending_lease(self):
+        axes = {m.motor_id: (m.model_joint, m) for m in GloveMapping.load(MAPPING).motors}
+        gateway = Gateway()
+        feedback = ContactForceFeedbackLoop(gateway, axes)
+        q = np.zeros(12)
+        reaction = q.copy()
+        reaction[4] = -.3
+        raw = dict.fromkeys(axes, 0.)
+        stamp = 1_000_000_000
+        with patch("motorhand.feedback.time.monotonic_ns", return_value=stamp):
+            feedback.start()
+        feedback.started -= 200_000_000
+        for t in (stamp + 10_000_000, stamp + 20_000_000, stamp + 20_000_000):
+            with patch("motorhand.feedback.time.monotonic_ns", return_value=t):
+                feedback.tick(q, raw, stamp, [stamp, t, True, *reaction, *q, *q, *q])
+        self.assertEqual(len(gateway.commands), 2)
+        self.assertTrue(all(d == stamp + 100_000_000 for _, d in gateway.commands))
+        with patch("motorhand.feedback.time.monotonic_ns", return_value=stamp + 110_000_000):
+            feedback.follow_request(q, raw, stamp + 110_000_000, [stamp, stamp + 50_000_000, True, *reaction, *q, *q, *q], True)
+        self.assertFalse(feedback.active)
+        self.assertEqual(feedback.interruption_count, 1)
+        self.assertIn("仿真使用的编码器样本", feedback.last_interruption)
+
     def test_missing_pose_preserves_impedance_until_simulation_frame_expires(self):
         bridge = WristBridge()
         gateway = Gateway()
@@ -110,6 +181,27 @@ class WristFeedbackTest(unittest.TestCase):
             with urlopen(f"http://127.0.0.1:{port}/api/v1/scene", timeout=2) as response:
                 self.assertEqual(json.load(response), bridge.scene)
 
+    def test_scene_request_waits_for_a_new_frame(self):
+        bridge = WristBridge()
+        bridge.scene = {"version": 1, "frame": 42}
+        with socket.socket() as endpoint:
+            endpoint.bind(("127.0.0.1", 0))
+            port = endpoint.getsockname()[1]
+        url = f"http://127.0.0.1:{port}/api/v1/scene?after=42"
+        with wrist_server(bridge, port):
+            with urlopen(url, timeout=2) as response:
+                self.assertEqual(response.status, 204)
+                self.assertEqual(response.read(), b"")
+            updated = {"version": 1, "frame": 43}
+            timer = Timer(.025, bridge.publish_scene, args=(updated,))
+            timer.start()
+            try:
+                with urlopen(url, timeout=2) as response:
+                    self.assertEqual(json.load(response), updated)
+            finally:
+                timer.cancel()
+                timer.join()
+
     def test_web_controls_share_status_and_stop_for_calibration(self):
         ctx = mp.get_context("spawn")
         align = ctx.Event()
@@ -130,17 +222,14 @@ class WristFeedbackTest(unittest.TestCase):
 
         with wrist_server(WristBridge(), port, control=control):
             with urlopen(url, timeout=2) as response:
-                self.assertEqual(json.load(response)["online"], 12)
+                state = json.load(response)
+                self.assertEqual(state["online"], 12)
+                self.assertNotIn("feedback_gains", state)
             command("disable")
-            command("feedback_gain", value=2.5)
-            self.assertEqual(control.feedback_gain.value, 2.5)
             self.assertFalse(control.requested.is_set())
             with self.assertRaises(HTTPError) as error:
-                command("feedback_gain", value=9.)
+                command("feedback_gain", value=64.)
             self.assertEqual(error.exception.code, 400)
-            self.assertEqual(control.feedback_gain.value, 2.5)
-            command("feedback_gain", value=8.)
-            self.assertEqual(control.feedback_gain.value, 8.)
             with self.assertRaises(HTTPError) as error:
                 command("enable", origin="http://example.test")
             self.assertEqual(error.exception.code, 403)

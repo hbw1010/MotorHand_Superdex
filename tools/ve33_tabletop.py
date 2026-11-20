@@ -5,12 +5,15 @@ import vtk
 
 
 class Tabletop:
-    def __init__(self, sdp, scene, view, *, puzzle_shells=None):
+    def __init__(self, sdp, scene, view, *, puzzle_shells=None, grasp_table=False):
         self.groups = {}
         self.contact_actors = []
         self.transforms = []
         layer = "tabletop"
-        if puzzle_shells is None:
+        if grasp_table:
+            from ve33_local_grasp import DESK_CENTER, DESK_SIZE
+            objects = (("table", DESK_SIZE, DESK_CENTER, (.25, .32, .37)),)
+        elif puzzle_shells is None:
             # 桌面上表面 z=-80 mm，70 mm 方块就放在桌上。
             objects = (
                 ("table", (.58, .58, .03), (.47, 0., -.095), (.25, .32, .37)),

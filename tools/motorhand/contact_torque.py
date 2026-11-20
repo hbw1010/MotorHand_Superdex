@@ -29,8 +29,13 @@ class ContactTorqueProjector:
             loaded = True
         if not loaded:
             return np.zeros(12)
+        return self.project_tree(tree_torque, np.asarray(pose)[self.motor_indices])
+
+    def project_tree(self, tree_torque, motor_positions):
+        if not any(tree_torque):
+            return np.zeros(12)
         # 机械限位的数值余量不应把 CAD 闭链求解推到标定区间以外。
-        q = np.clip(np.asarray(pose)[self.motor_indices], self.low, self.high)
+        q = np.clip(motor_positions, self.low, self.high)
         # 约 0.06° 以内复用闭链导数，避免静止接触的小抖动反复求解闭链。
         if self.q is None or np.max(np.abs(q - self.q)) > .001:
             self.kin.full_pose(q, None, self.mapping)

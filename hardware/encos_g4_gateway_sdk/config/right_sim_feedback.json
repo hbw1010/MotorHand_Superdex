@@ -35,6 +35,7 @@
       80.0,
       80.0
     ],
+    "position_compensation_max_nm": 2.0,
     "release_lookahead_s": 0.02,
     "rebound_mode": "soften",
     "damping_off_velocity_rad_s": 0.15,

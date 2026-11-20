@@ -1,11 +1,14 @@
 """Quest 右腕输入和桌面/头显共用的场景位姿接口。"""
 
 import json
+import os
 from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from threading import Lock, Thread
+from shutil import copyfileobj
+from threading import Condition, Lock, Thread
 import time
+from urllib.parse import unquote
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -18,6 +21,7 @@ IDENTITY = [0., 0., 0., 0., 0., 0., 1.]
 MISSING_POSE_GRACE_S = .075
 LEFT_POSE_TIMEOUT_S = .12
 LEFT_HAND_POINT_COUNT = 16
+SCENE_WAIT_S = .20
 MISSING_POSE_STATUS = {
     "no_right_controller": "头显未报告右手柄",
     "right_hand_only": "头显只报告右手光学追踪",
@@ -31,6 +35,7 @@ MISSING_POSE_STATUS = {
 class WristBridge:
     def __init__(self):
         self.lock = Lock()
+        self.scene_changed = Condition(self.lock)
         self.space = None
         self.reference = None
         self.sample = None
@@ -45,6 +50,11 @@ class WristBridge:
         self.align_requested = False
         self.left_sample = None
         self.left_received = 0.
+
+    def publish_scene(self, frame):
+        with self.scene_changed:
+            self.scene = frame
+            self.scene_changed.notify_all()
 
     def receive(self, msg):
         space, seq, pose = msg["space"], msg["seq"], msg["pose"]
@@ -158,10 +168,36 @@ def wrist_server(bridge, port, glb=None, control=None):
             except (BrokenPipeError, ConnectionResetError):
                 self.close_connection = True
 
-        def reply_scene(self):
-            with bridge.lock:
+        def reply_scene(self, after=None):
+            with bridge.scene_changed:
+                if after is not None and bridge.scene:
+                    bridge.scene_changed.wait_for(
+                        lambda: bridge.scene is None or bridge.scene.get("frame") != after, timeout=SCENE_WAIT_S)
                 frame = bridge.scene
+            if frame and after is not None and frame.get("frame") == after:
+                return self.reply(204, b"", "application/json")
             self.reply(200 if frame else 503, json.dumps(frame, allow_nan=False).encode(), "application/json")
+
+        def reply_recording(self):
+            path = control.record_ready.value
+            if not path or control.record_requested.is_set():
+                return self.send_error(404)
+            path = Path(os.fsdecode(path))
+            try:
+                file = path.open("rb")
+            except OSError:
+                return self.send_error(404)
+            with file:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/csv; charset=utf-8")
+                self.send_header("Content-Disposition", f'attachment; filename="{path.name}"')
+                self.send_header("Content-Length", str(os.fstat(file.fileno()).st_size))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                try:
+                    copyfileobj(file, self.wfile)
+                except (BrokenPipeError, ConnectionResetError):
+                    self.close_connection = True
 
         def do_GET(self):
             if self.path == "/":
@@ -173,21 +209,47 @@ def wrist_server(bridge, port, glb=None, control=None):
                 self.reply(200, bundle.read_bytes(), "text/javascript")
             elif self.path == "/api/v1/model.glb" and glb is not None:
                 self.reply(200, glb, "model/gltf-binary")
+            elif (self.path.startswith("/api/v1/grasp-model/") and control is not None
+                  and control.grasp is not None):
+                from ve33_grasp_assets import render_model_path
+                path = render_model_path(unquote(self.path.removeprefix("/api/v1/grasp-model/")))
+                if path is None:
+                    return self.send_error(404)
+                try:
+                    model = path.read_bytes()
+                except OSError:
+                    return self.send_error(404)
+                self.reply(200, model, "model/gltf-binary")
             elif self.path == "/api/v1/scene":
                 self.reply_scene()
+            elif self.path.startswith("/api/v1/scene?after="):
+                after = self.path.split("=", 1)[1]
+                if not 1 <= len(after) <= 20 or not after.isascii() or not after.isdecimal():
+                    return self.send_error(400)
+                self.reply_scene(int(after))
+            elif self.path == "/api/v1/recording.csv" and control is not None and control.record_ready is not None:
+                self.reply_recording()
             elif self.path == "/api/v1/control" and control is not None:
                 state = control.read()
+                if control.grasp is not None:
+                    from ve33_grasp_assets import catalog
+                    state["grasp_assets"] = catalog()
                 with bridge.lock:
                     if bridge.scene:
                         for key in ("cube_mode", "scene_revision"):
                             if key in bridge.scene:
                                 state[key] = bridge.scene[key]
+                        grasp = bridge.scene.get("grasp_object")
+                        if grasp is not None:
+                            state["grasp"] = {k: v for k, v in grasp.items() if k not in ("vertices", "indices", "parts")}
                 self.reply(200, json.dumps(state, ensure_ascii=False).encode(), "application/json")
             else:
                 self.send_error(404)
 
         def do_POST(self):
             is_control = self.path == "/api/v1/control" and control is not None
+            if self.path == "/api/v1/wrist" and control is not None and control.grasp is not None:
+                return self.send_error(404)
             if self.path != "/api/v1/wrist" and not is_control:
                 return self.send_error(404)
             origin = self.headers.get("Origin")

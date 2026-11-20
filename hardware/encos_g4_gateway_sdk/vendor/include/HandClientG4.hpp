@@ -7,6 +7,7 @@
 #include <atomic>
 #include <map>
 #include <chrono>
+#include <utility>
 
 namespace lqs {
 struct JointKey {
@@ -56,6 +57,11 @@ public:
         cmd.target_angle = deg; cmd.mit_kp = kp; cmd.mit_kd = kd; cmd.mit_vel = vel; cmd.mit_tor = tor;
         std::lock_guard<std::mutex> lock(cmd_mutex_);
         commands_[{bus, id}] = cmd;
+    }
+
+    void SetCommandBatch(const std::array<std::pair<JointKey, MotorCommand>, 12>& batch) {
+        std::lock_guard<std::mutex> lock(cmd_mutex_);
+        for (const auto& [key, command] : batch) commands_[key] = command;
     }
 
     void DisableJoint(uint8_t bus, uint16_t id) {

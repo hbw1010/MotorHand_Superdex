@@ -14,15 +14,17 @@ button{background:var(--cyan);color:#082537;font-weight:700}button:disabled{opac
 #preview{position:relative;width:100%;aspect-ratio:16/10;min-height:310px;max-height:72vh;overflow:hidden;background:#182331;border:1px solid var(--border);border-radius:12px}
 #preview canvas{display:block;width:100%;height:100%;touch-action:none}
 .controls{display:flex;gap:12px 21px;align-items:center;flex-wrap:wrap;margin:13px 0}
-.controls label{display:flex;gap:9px;align-items:center}
+.controls label{display:flex;gap:9px;align-items:center}.controls [hidden]{display:none}
 .cube-settings{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.cube-settings[hidden],.cube-settings [hidden]{display:none}
 .cube-settings button{background:#20384b;color:var(--bright)}
+.local-grasp{margin:13px 0;padding:13px 15px;border:1px solid var(--border);border-radius:10px;background:#152332}
+.local-grasp .controls{margin:5px 0}.local-grasp output{min-width:50px}
+a{color:var(--cyan)}
 input[type=range]{width:110px;accent-color:var(--cyan)} output{min-width:43px;color:var(--cyan)}
 #status{margin:0;color:#d8eff5}p{line-height:1.55;color:var(--soft)}
 #g4-control{margin-top:24px;border:1px solid var(--border);border-radius:12px;background:#152332;overflow:hidden}
 .g4-header{padding:15px 17px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
 h2{font-size:21px;margin:0 0 5px}.g4-buttons{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.g4-buttons button{font-size:15px;padding:7px 10px}
-.g4-buttons label{display:flex;align-items:center;gap:6px;font-size:15px}.g4-buttons select{padding:7px 9px}
 .g4-buttons button[data-control=disable]{background:#f6a497;color:#26161a}
 #feedback-state{color:#f4ca89}#feedback-state[data-active=yes]{color:#8fe7cf}
 .g4-meta{padding:0 17px 11px;color:var(--soft);font-size:15px;display:flex;gap:11px;flex-wrap:wrap}
@@ -46,16 +48,31 @@ th:nth-child(2),td:nth-child(2){text-align:left}tbody tr:hover{background:#1b304
   <label>颜色满量程 <input id="force-scale" type="range" min="2" max="40" value="12"><output id="scale-value">12 N</output></label>
 </div>
 <p id="status" role="status">正在加载模型…</p>
-<p>头显中保持右手掌背朝上、指尖向前，按右手柄食指扳机对齐。光学定位可用左手捏合对齐。左手或左手柄可扶角块。上方箭头显示右手各连杆的仿真接触合力，电机指令与回报分别列在面板上。</p>
+<p id="xr-hint">头显中保持右手掌背朝上、指尖向前，按右手柄食指扳机对齐。光学定位可用左手捏合对齐。左手或左手柄可扶角块。上方箭头显示右手各连杆的仿真接触合力，电机指令与回报分别列在面板上。</p>
+<section id="local-grasp" class="local-grasp" aria-label="本地抓握设置" hidden>
+  <div class="controls">
+    <label>场景 <select data-grasp="layout"><option value="palm">掌心</option><option value="desk">桌面</option></select></label>
+    <label>物体 <select data-grasp="kind"><option value="ball_soft">软球</option><option value="ball_hard">硬球</option><option value="box_soft">软方块</option><option value="box_hard">硬方块</option><option value="cylinder_soft">软圆柱</option><option value="cylinder_hard">硬圆柱</option></select></label>
+    <label>尺寸 <input data-grasp="size_mm" type="range" min="20" max="90" value="45"><output data-value="size_mm">45 mm</output></label>
+    <label>硬度 <input data-grasp="hardness" type="range" min="0" max="1" step="0.01" value="0.25"><output data-value="hardness">0.25</output></label>
+    <label>旋转 <input data-grasp="angle_deg" type="range" min="-180" max="180" value="0"><output data-value="angle_deg">0°</output></label>
+    <label><input data-grasp="locked" type="checkbox" checked>锁定物体</label>
+    <button id="grasp-home">物体归位</button>
+  </div>
+  <div id="demo-controls" class="controls" hidden>
+    <label>演示闭合 <input id="demo-grip" type="range" min="0" max="1" step="0.01" value="0"></label>
+    <button id="demo-auto">自动开合</button>
+  </div>
+  <div class="controls">
+    <button id="grasp-record">开始记录</button>
+    <a id="grasp-csv" href="/api/v1/recording.csv" download hidden>下载 CSV</a>
+    <span id="grasp-message" role="status"></span>
+  </div>
+</section>
 <section id="g4-control" aria-label="MotorHand 网页控制台">
 <div class="g4-header">
   <div><h2>MotorHand 控制台</h2><span id="feedback-state" role="status">等待控制进程</span></div>
   <div class="g4-buttons">
-    <label>合成反馈倍率 <select id="feedback-gain" disabled>
-      <option value="1">1×</option><option value="1.5">1.5×</option><option value="2">2×</option>
-      <option value="2.5">2.5×</option><option value="3">3×</option><option value="3.5">3.5×</option><option value="4">4×</option>
-      <option value="5">5×</option><option value="6">6×</option><option value="7">7×</option><option value="8">8×</option>
-    </select></label>
     <button disabled data-control="enable">启用力反馈</button>
     <button disabled data-control="disable">停止力反馈</button>
     <button disabled data-control="align">对齐右腕</button>
