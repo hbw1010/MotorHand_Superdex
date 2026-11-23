@@ -73,7 +73,7 @@ def observe_native(sample, axes):
 
 
 def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, recorder,
-                       device, demo, profile, load_zero, capture_zero, mapping_identity):
+                       device, demo, profile, load_zero, capture_zero, mapping_identity, *, fixed_wrist=True):
     zero = dict.fromkeys(axes, 0.) if demo else load_zero(zero_path, axes)
     def start(values, *, fresh_zero=False):
         loop.start([values[mid] for mid in axes] if values else [], fresh_zero=fresh_zero)
@@ -83,7 +83,8 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
                 for mid, bus, valid, alarm, angle, stamp in loop.raw_for_zero()}
 
     status = dict(device="演示" if demo else str(device.resolve()), zero_path=None if demo else str(zero_path.resolve()),
-                  axes=mapping_identity(axes), zero_revision=0, zero_error=None, can_align=False, fixed_wrist=True,
+                  axes=mapping_identity(axes), zero_revision=0, zero_error=None,
+                  can_align=control.align is not None, fixed_wrist=fixed_wrist,
                   demo=demo, can_zero=not demo, can_feedback=not demo, feedback_profile=profile,
                   feedback_source="joint_position_and_contact_force", feedback_gain=1., grasp_backend="cpp",
                   control_backend="cpp", active=False, requested=False)
@@ -109,7 +110,7 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
                 status.update(calibrating=False, zero_revision=status["zero_revision"]+1)
                 control.zero.clear()
 
-            recording = recorder.active or control.record_requested.is_set()
+            recording = recorder is not None and (recorder.active or control.record_requested.is_set())
             new_settings = control.grasp_request()
             samples = loop.samples(seq, not recording)
             for s in samples:
@@ -131,11 +132,16 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
                         control.record_dropped.value += 1
             if samples:
                 settings = new_settings
-                ready = control.record_ready.value
-                status.update(wrist=wrist_state.value.decode(), recording=control.record_requested.is_set(),
-                              demo_grip=control.demo_grip.value if demo else None,
-                              recording_file=Path(ready.decode()).name if ready else None,
-                              recording_error=control.record_error.value.decode(), recording_dropped=control.record_dropped.value)
+                wrist_stamp = control.wrist_stamp.value if control.wrist_stamp is not None else 0
+                status.update(wrist=wrist_state.value.decode() if wrist_state is not None else "",
+                              wrist_ms=(samples[-1]["now"] - wrist_stamp) / 1e6 if wrist_stamp else None,
+                              demo_grip=control.demo_grip.value if demo else None)
+                if control.record_requested is not None:
+                    ready = control.record_ready.value
+                    status.update(recording=control.record_requested.is_set(),
+                                  recording_file=Path(ready.decode()).name if ready else None,
+                                  recording_error=control.record_error.value.decode(),
+                                  recording_dropped=control.record_dropped.value)
                 control.publish(status)
             time.sleep(.025 if recording else .05)
     finally:

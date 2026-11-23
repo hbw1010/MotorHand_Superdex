@@ -462,7 +462,8 @@ def aligned_feedback_display(read, frame, requested, *, wait_s):
     stamp = frame["physics_frame_ns"]
     if not stamp:
         return None
-    revision = frame["grasp_object"]["contact_revision"]
+    grasp = frame.get("grasp_object")
+    revision = grasp["contact_revision"] if grasp is not None else frame.get("scene_revision", 0)
     deadline = time.monotonic() + wait_s
     while True:
         data = read(stamp, revision)
@@ -481,7 +482,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
     grasp_settings = web_control.grasp_request() if web_control is not None else None
     local_grasp = grasp_settings is not None
     # 大球满握由物理工作线程求解，给 G4 与网页留出 CPU。
-    workers = min(6, max(0, len(os.sched_getaffinity(0)) - 2)) if local_grasp else 0
+    workers = min(6, max(0, len(os.sched_getaffinity(0)) - 2)) if use_cpp else 0
     sdp.initialize(num_worker_threads=workers)
     bot = None
     view = None
@@ -592,24 +593,25 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                     from motorhand.native_kinematics import NativeGloveKinematics
                     shared_link = load_native().SharedLink(str(shared_path))
                     native_kin = NativeGloveKinematics(MODEL_DIR, feedback_mapping or fingers.mapping).native
-                    def connect_motion():
-                        obj = environment.prefab
-                        if obj is not None:
-                            rigid, fixed, soft = obj.roots, obj.static_roots, obj.soft
-                            center, axis = obj.center, obj.yaw_axis
-                        else:
-                            soft = environment.actor if environment.soft else None
-                            rigid = [] if environment.soft else [environment.actor]
-                            fixed = []
-                            center = environment.origin
-                            axis = environment.rotation.apply([0., 0., 1.])
-                        center_node = (obj or environment).node if soft is not None else -1
-                        grasp_physics.set_motion(rigid, fixed, [body for _, body in environment.contact_actors],
-                                                 [soft] if soft is not None else [], center_node,
-                                                 center, axis, environment.settings["angle_deg"])
-                    connect_motion()
-                    grasp_physics.motion_command(grasp_settings["locked"], grasp_settings["angle_deg"],
-                                                grasp_settings["drag"] or [])
+                    if local_grasp:
+                        def connect_motion():
+                            obj = environment.prefab
+                            if obj is not None:
+                                rigid, fixed, soft = obj.roots, obj.static_roots, obj.soft
+                                center, axis = obj.center, obj.yaw_axis
+                            else:
+                                soft = environment.actor if environment.soft else None
+                                rigid = [] if environment.soft else [environment.actor]
+                                fixed = []
+                                center = environment.origin
+                                axis = environment.rotation.apply([0., 0., 1.])
+                            center_node = (obj or environment).node if soft is not None else -1
+                            grasp_physics.set_motion(rigid, fixed, [body for _, body in environment.contact_actors],
+                                                     [soft] if soft is not None else [], center_node,
+                                                     center, axis, environment.settings["angle_deg"])
+                        connect_motion()
+                        grasp_physics.motion_command(grasp_settings["locked"], grasp_settings["angle_deg"],
+                                                    grasp_settings["drag"] or [])
             if force_frame is not None and shared_link is None:
                 projector = ContactTorqueProjector(contacts.hand, fingers.kin,
                                                    feedback_mapping or fingers.mapping, indices, motor_indices)
@@ -662,10 +664,10 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
             frame_start = time.monotonic()
             if (view and view.closed) or (debugger and not sdp.debugger.is_attached()):
                 break
-            if shared_link is None:
+            if shared_link is None or not local_grasp:
                 stamp, angles, encoder_sample = read_target()
             if bridge:
-                if shared_link is None:
+                if shared_link is None or not local_grasp:
                     target_tree = np.asarray(angles)
                 reset_grasp = False
                 if web_control is not None and web_control.scene_revision is not None:
@@ -691,6 +693,8 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                             left_support.update(None, 1 / 240)
                         if guard is not None:
                             guard.previous_target_local = None
+                        if shared_link is not None and not local_grasp:
+                            shared_link.invalidate_force()
                         palm_contact = False
                         last_registration = None
                         scene_revision = revision
@@ -722,6 +726,8 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                     if calibrate:
                         align.clear()
                     root_pose, tracking, registration, wrist_stamp = bridge.wrist(calibrate)
+                if web_control is not None and web_control.wrist_stamp is not None:
+                    web_control.wrist_stamp.value = int(wrist_stamp)
                 if registration is not None and registration is not last_registration:
                     # 重新对齐会改变腕部参考位置，旧的接触面需要重建。
                     fingers.proxy = ContactProxy()
@@ -744,7 +750,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 if native_grasp:
                     # 自由抓取用真实接触，保留求解后的姿态和速度以持续夹持。
                     target_contacts, target_fingers, finger_hits = {}, set(), {}
-                    if shared_link is None:
+                    if shared_link is None or not local_grasp:
                         angles = target_tree
                 else:
                     q = target_tree[fingers.motor_rows]
@@ -774,11 +780,48 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 guard_wrist = not (fixed_wrist or native_grasp)
                 if grasp_physics is not None and shared_link is None:
                     grasp_target = list(pose)
-                if shared_link is not None:
+                if shared_link is not None and local_grasp:
                     stamp = grasp_physics.run_until(shared_link, native_kin, PHYSICS_STEP_S,
                                                     round(1e9 / CONFIG["control_hz"]),
                                                     round((frame_start + 1/30) * 1e9),
                                                     grasp_settings["contact_revision"])
+                elif shared_link is not None:
+                    if not fixed_wrist:
+                        root_target = [*root_pose[:3], *Rotation.from_quat(root_pose[3:]).as_rotvec()]
+                        grasp_physics.set_root_target(drive.root.get_trans_offset(), drive.root.get_rot_offset(), root_target)
+                    if native_grasp:
+                        budget_end = time.monotonic_ns() + round(1e9 / CONFIG["control_hz"])
+                        if left_support is None:
+                            _, stamp = grasp_physics.step_contact(shared_link, native_kin, PHYSICS_STEP_S,
+                                                                  budget_end, 4, True, scene_revision)
+                        else:
+                            for substep in range(4):
+                                left_probes = left_support.update(left, PHYSICS_STEP_S)
+                                last = substep == 3 or time.monotonic_ns() >= budget_end
+                                published, stamp = grasp_physics.step_contact(shared_link, native_kin, PHYSICS_STEP_S,
+                                                                              budget_end, 1, last, scene_revision)
+                                if published or last:
+                                    break
+                    else:
+                        for substep in range(4):
+                            if left_support is not None:
+                                left_probes = left_support.update(left, PHYSICS_STEP_S)
+                            if guard_wrist:
+                                points = guard.points()
+                                before = np.asarray(fingers.pose).copy()
+                            drive.set_target(pose, root_pose)
+                            scene.step(PHYSICS_STEP_S)
+                            last = substep == 3 or time.monotonic() - frame_start >= .010
+                            if last:
+                                grasp_physics.publish_contact(
+                                    shared_link, native_kin, float(stamp),
+                                    [float(x) for x in target_tree[fingers.motor_rows]],
+                                    [float(x) for x in encoder_sample], scene_revision)
+                            fingers.project(angles)
+                            if guard_wrist:
+                                wrist_hits.update(limit_wrist(guard, fingers, drive, before, points))
+                            if last:
+                                break
                 else:
                     for substep in range(4):
                         if local_grasp:
@@ -1289,7 +1332,7 @@ def main():
     parser.add_argument("--tabletop", action="store_true", help="使用桌面和单个刚性方块进行接触测试")
     parser.add_argument("--palm-test", action="store_true", help="本地固定腕部与 45 mm 掌心硬球测试")
     parser.add_argument("--local-grasp", action="store_true", help="本地固定腕部掌心与桌面抓握")
-    parser.add_argument("--grasp-backend", choices=("cpp", "python"), help="本地抓握实时后端（默认 cpp）")
+    parser.add_argument("--grasp-backend", choices=("cpp", "python"), help="遥操力反馈实时后端（默认 cpp）")
     parser.add_argument("--feedback-profile", choices=("identity", *CONFIG.get("feedback_profiles", {})), default="identity",
                         help="接触力矩映射配置（默认 identity）")
     parser.add_argument("--demo", action="store_true", help="本地抓握的无串口演示")
@@ -1300,8 +1343,6 @@ def main():
     args = parser.parse_args()
     if args.demo and (not args.local_grasp or args.port or args.zero or args.feedback):
         parser.error("--demo 只用于 --local-grasp 的无串口预览")
-    if args.grasp_backend and not args.local_grasp:
-        parser.error("--grasp-backend 只用于 --local-grasp")
     if not args.demo and args.port is None:
         parser.error("真机运行需要 --port")
     if not 25 <= args.ball_size_mm <= 200 or (args.ball_size_mm != 45. and not args.palm_test):
@@ -1313,6 +1354,8 @@ def main():
         parser.error("--inspect-physics 用于 --official-puzzle")
     if args.headset or args.tabletop or fixed_wrist or not (args.debugger or args.zero):
         args.quest = True
+    if args.grasp_backend and not args.quest:
+        parser.error("--grasp-backend 仅用于 Quest 或本地抓握模式")
     if not args.zero and not (ROOT / "tools/quest_view/build/scene.js").is_file():
         parser.error("请先在 tools/quest_view 下执行 npm ci && npm run build")
     if (args.quest and args.debugger) or not 1 <= args.quest_port <= 65535:
@@ -1323,7 +1366,7 @@ def main():
         parser.error("官方场景缺少 tuning/grip_lift.mochi_scene")
     if args.feedback and (not args.quest or args.zero):
         parser.error("--feedback 需要 --quest 或 --headset 场景")
-    use_cpp = args.local_grasp and args.grasp_backend != "python" and not args.zero
+    use_cpp = args.quest and args.grasp_backend != "python" and not args.zero
     if use_cpp:
         from motorhand.native_runtime import load_native
         try:
@@ -1427,7 +1470,8 @@ def main():
             print(f"MotorHand 网页控制台 http://127.0.0.1:{args.quest_port}/", flush=True)
             if use_cpp:
                 run_native_control(loop, web_control, axes, args.zero_file, wrist_state, renderer, recorder,
-                                   args.port, args.demo, args.feedback_profile, load_zero, capture_zero, mapping_identity)
+                                   args.port, args.demo, args.feedback_profile, load_zero, capture_zero,
+                                   mapping_identity, fixed_wrist=fixed_wrist)
             else:
                 run_control(read, axes, solver, mapping, pending, displayed, renderer, args.zero_file,
                             wrist_state, feedback, proxy_frame, force_frame, fixed_wrist, feedback_display, web_control,

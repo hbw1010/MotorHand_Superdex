@@ -58,6 +58,7 @@ class WebControl:
             self.grasp.value = json.dumps({**DEFAULT_GRASP, "contact_revision": 0}).encode()
         self.cube_fixed = context.Event() if cube_switch else None
         self.scene_revision = context.Value("Q", 0, lock=False) if allow_reset or cube_switch or local_grasp else None
+        self.wrist_stamp = context.Value("q", 0, lock=False)
         if self.cube_fixed is not None:
             self.cube_fixed.set()
         self.snapshot = context.Array("c", 16_384)
@@ -102,8 +103,10 @@ class WebControl:
             if self._native_link is None:
                 from motorhand.native_runtime import load_native
                 self._native_link = load_native().SharedLink(self.native_link_path)
+            revision = (self.grasp_request()["contact_revision"] if self.grasp is not None
+                        else self.scene_revision.value if self.scene_revision is not None else 0)
             self._native_link.command(self.requested.is_set() and not self.zero.is_set(),
-                                      self.grasp_request()["contact_revision"],
+                                      revision,
                                       self.demo_grip.value if self.demo_grip is not None else -1.)
 
     def command(self, message):

@@ -251,7 +251,8 @@ def wrist_server(bridge, port, glb=None, control=None, *, scene_feedback=None):
                             state["grasp"] = {k: v for k, v in grasp.items() if k not in ("vertices", "indices", "parts")}
                 if "control_sample_ns" in state:
                     from ve33_web_control import panel_snapshot
-                    panel_snapshot(state, time.monotonic_ns(), state.get("grasp", {}).get("contact_revision"))
+                    revision = state["grasp"]["contact_revision"] if "grasp" in state else state.get("scene_revision", 0)
+                    panel_snapshot(state, time.monotonic_ns(), revision)
                 self.reply(200, json.dumps(state, ensure_ascii=False).encode(), "application/json")
             else:
                 self.send_error(404)

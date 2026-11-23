@@ -101,6 +101,63 @@ public:
         return last_target_[0];
     }
 
+    void set_root_target(int trans_offset, int rot_offset, const std::array<double, 6>& root) {
+        if (trans_offset < 0 || rot_offset < 0 ||
+            static_cast<std::size_t>(trans_offset + 3) > pose_.size() ||
+            static_cast<std::size_t>(rot_offset + 3) > pose_.size() ||
+            !std::all_of(root.begin(), root.end(), [](double x) {
+                return std::isfinite(x) && std::abs(x) <= std::numeric_limits<real>::max();
+            })) {
+            throw std::invalid_argument("无效的浮动腕部目标");
+        }
+        has_root_target_ = true;
+        root_trans_offset_ = trans_offset;
+        root_rot_offset_ = rot_offset;
+        root_target_ = root;
+    }
+
+    bool publish_contact(ve33::SharedLink& link, ve33::Kinematics& kin, double stamp,
+                         const Axes& sampled_input, const Axes& encoder_sample, std::uint64_t revision) {
+        nb::gil_scoped_release release;
+        const auto solved = steady_ns();
+        const auto finite = [](const auto& a) {
+            return std::all_of(a.begin(), a.end(), [](double x) { return std::isfinite(x); });
+        };
+        bool valid = std::isfinite(stamp) && stamp > 0. && stamp <= static_cast<double>(solved) &&
+                     finite(sampled_input) && finite(encoder_sample);
+        Axes positions{}, speeds{}, torque{};
+        if (valid) {
+            try {
+                auto [usable, q, dq, tree_torque] = sample_effort();
+                positions = q;
+                speeds = dq;
+                valid = usable && finite(q) && finite(dq) && finite(tree_torque);
+                if (valid) {
+                    torque = kin.project(tree_torque, q);
+                    valid = finite(torque);
+                }
+            } catch (const std::runtime_error&) {
+                valid = false;
+            } catch (const std::invalid_argument&) {
+                valid = false;
+            }
+        }
+        frame_[0] = std::isfinite(stamp) ? stamp : 0.;
+        frame_[1] = static_cast<double>(solved);
+        auto cursor = frame_.begin() + 3;
+        cursor = std::copy(torque.begin(), torque.end(), cursor);
+        cursor = std::copy(speeds.begin(), speeds.end(), cursor);
+        cursor = std::copy(positions.begin(), positions.end(), cursor);
+        cursor = std::copy(sampled_input.begin(), sampled_input.end(), cursor);
+        cursor = std::copy(encoder_sample.begin(), encoder_sample.end(), cursor);
+        frame_.back() = static_cast<double>(revision);
+        frame_[2] = valid;
+        link.publish_force(frame_);
+        const auto published = steady_ns();
+        last_timing_ms_ = {valid ? (solved - frame_[0]) / 1e6 : -1., 0., (published - solved) / 1e6};
+        return valid;
+    }
+
     void set_motion(std::vector<Actor*> rigid,std::vector<Actor*> fixed,std::vector<Actor*> surfaces,
                     std::vector<Actor*> soft,int center_node,Force center,Force axis,double angle) {
         motion_=std::make_unique<ve33::GraspMotion>(
@@ -153,6 +210,12 @@ private:
             } else {
                 if (last_target_.empty()) last_target_.resize(1 + tree_.size() + motors_.size());
                 last_target_[0] = 0.;
+            }
+            if (has_root_target_) {
+                for (int i = 0; i < 3; ++i) {
+                    target_[root_trans_offset_ + i] = static_cast<real>(root_target_[i]);
+                    target_[root_rot_offset_ + i] = static_cast<real>(root_target_[3 + i]);
+                }
             }
             advance_scene(dt);
             const auto solved = steady_ns();
@@ -290,6 +353,9 @@ private:
     std::vector<double> last_target_, frame_;
     std::array<double, 3> last_timing_ms_{};
     std::int64_t next_tick_ns_{};
+    bool has_root_target_ = false;
+    int root_trans_offset_ = 0, root_rot_offset_ = 0;
+    std::array<double, 6> root_target_{};
     std::unique_ptr<ve33::GraspMotion> motion_;
 };
 
@@ -307,6 +373,8 @@ NB_MODULE(_ve33_native, module) {
         .def("step", &GraspPhysics::step)
         .def("step_contact", &GraspPhysics::step_contact)
         .def("run_until", &GraspPhysics::run_until)
+        .def("set_root_target", &GraspPhysics::set_root_target)
+        .def("publish_contact", &GraspPhysics::publish_contact)
         .def("set_motion",&GraspPhysics::set_motion)
         .def("clear_motion",&GraspPhysics::clear_motion)
         .def("motion_command",&GraspPhysics::motion_command)
