@@ -3,11 +3,12 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {sizePreview} from './size-preview.mjs';
 
 export class LocalGraspView {
-  constructor(world, camera, canvas, controls) {
+  constructor(world, camera, canvas, controls, invalidate = () => {}) {
     this.world = world;
     this.camera = camera;
     this.canvas = canvas;
     this.controls = controls;
+    this.invalidate = invalidate;
     this.ray = new THREE.Raycaster();
     this.plane = new THREE.Plane();
     this.point = new THREE.Vector3();
@@ -17,11 +18,16 @@ export class LocalGraspView {
     this.material = new THREE.MeshStandardMaterial({roughness: .51});
     this.loader = new GLTFLoader();
     this.models = new Map();
-    this.sizeGroup = new THREE.Group();
+    this.sizeOutline = null;
     this.sizeCenter = new THREE.Vector3();
     this.sizeBounds = new THREE.Box3();
-    world.add(this.sizeGroup);
-    sizePreview.addEventListener('change', () => this.applySizePreview());
+    this.partBounds = new THREE.Box3();
+    this.partTransform = new THREE.Matrix4();
+    this.worldInverse = new THREE.Matrix4();
+    sizePreview.addEventListener('change', () => {
+      this.applySizePreview();
+      this.invalidate();
+    });
     canvas.addEventListener('pointerdown', event => this.begin(event), true);
     canvas.addEventListener('pointermove', event => this.move(event), true);
     for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
@@ -34,7 +40,7 @@ export class LocalGraspView {
     if (this.revision !== object.mesh_revision) {
       this.revision = object.mesh_revision;
       if (this.mesh) {
-        this.sizeGroup.remove(this.mesh);
+        this.world.remove(this.mesh);
         this.mesh.geometry?.dispose();
       }
       if (object.parts) {
@@ -43,7 +49,7 @@ export class LocalGraspView {
       } else {
         this.mesh = this.createPrimitive(object);
       }
-      this.sizeGroup.add(this.mesh);
+      this.world.add(this.mesh);
     }
     if (object.parts) {
       for (const [index, part] of object.parts.entries()) {
@@ -58,6 +64,8 @@ export class LocalGraspView {
       position.needsUpdate = true;
       geometry.computeVertexNormals();
       geometry.computeBoundingSphere();
+      // 变形网格顶点在每个物理帧更新，下一次预览重新计算它的边界。
+      geometry.boundingBox = null;
     } else {
       this.mesh.position.fromArray(object.pose);
       this.mesh.quaternion.fromArray(object.pose, 3);
@@ -69,19 +77,36 @@ export class LocalGraspView {
   applySizePreview() {
     if (!this.object) return;
     const ratio = sizePreview.ratio(this.object);
-    this.sizeGroup.scale.setScalar(1);
-    this.sizeGroup.position.set(0, 0, 0);
-    if (ratio === 1) return;
-    const center = this.sizeCenter.fromArray(this.object.pose);
-    if (this.object.vertices) center.copy(this.mesh.geometry.boundingSphere.center);
-    if (this.object.parts) {
-      // 未锁定的官方部件会移动，使用画面中当前模型的中心。
-      this.sizeGroup.updateWorldMatrix(true, false);
-      this.sizeBounds.setFromObject(this.mesh);
-      if (!this.sizeBounds.isEmpty()) this.world.worldToLocal(this.sizeBounds.getCenter(center));
+    if (ratio === 1) {
+      if (this.sizeOutline) {
+        this.world.remove(this.sizeOutline);
+        this.sizeOutline.dispose();
+        this.sizeOutline = null;
+      }
+      return;
     }
-    this.sizeGroup.scale.setScalar(ratio);
-    this.sizeGroup.position.copy(center).multiplyScalar(1 - ratio);
+    // 在仿真坐标中汇总部件边界，避免相机或 XR 姿态改变预览的尺寸。
+    this.mesh.updateWorldMatrix(true, true);
+    this.worldInverse.copy(this.world.matrixWorld).invert();
+    const bounds = this.sizeBounds.makeEmpty();
+    this.mesh.traverse(node => {
+      if (!node.isMesh) return;
+      if (!node.geometry.boundingBox) node.geometry.computeBoundingBox();
+      this.partTransform.multiplyMatrices(this.worldInverse, node.matrixWorld);
+      bounds.union(this.partBounds.copy(node.geometry.boundingBox).applyMatrix4(this.partTransform));
+    });
+    if (!this.sizeOutline) {
+      this.sizeOutline = new THREE.Box3Helper(bounds, 0x83dcff);
+      this.sizeOutline.material.depthTest = false;
+      this.sizeOutline.material.depthWrite = false;
+      this.sizeOutline.renderOrder = 2;
+      this.world.add(this.sizeOutline);
+    }
+    this.sizeOutline.visible = !bounds.isEmpty();
+    if (!this.sizeOutline.visible) return;
+    bounds.getCenter(this.sizeCenter);
+    bounds.min.sub(this.sizeCenter).multiplyScalar(ratio).add(this.sizeCenter);
+    bounds.max.sub(this.sizeCenter).multiplyScalar(ratio).add(this.sizeCenter);
   }
 
   createPrimitive(object) {
@@ -115,7 +140,13 @@ export class LocalGraspView {
       const path = part.model.split('/').map(encodeURIComponent).join('/');
       this.models.set(part.model, this.loader.loadAsync(`/api/v1/grasp-model/${path}`));
     }
-    this.models.get(part.model).then(({scene}) => basis.add(scene.clone(true))).catch(() => {
+    this.models.get(part.model).then(({scene}) => {
+      basis.add(scene.clone(true));
+      if (node.parent === this.mesh) {
+        this.applySizePreview();
+        this.invalidate();
+      }
+    }).catch(() => {
       this.models.delete(part.model);
     });
     return node;

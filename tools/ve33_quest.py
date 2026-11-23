@@ -152,7 +152,7 @@ class WristBridge:
 
 
 @contextmanager
-def wrist_server(bridge, port, glb=None, control=None):
+def wrist_server(bridge, port, glb=None, control=None, *, scene_feedback=None):
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
         disable_nagle_algorithm = True
@@ -176,6 +176,13 @@ def wrist_server(bridge, port, glb=None, control=None):
                 frame = bridge.scene
             if frame and after is not None and frame.get("frame") == after:
                 return self.reply(204, b"", "application/json")
+            if frame and scene_feedback is not None:
+                frame = {**frame, "motor_feedback": scene_feedback(frame)}
+            feedback = frame.get("motor_feedback") if frame else None
+            if feedback and "expires_ns" in feedback:
+                remaining_ms = (feedback["expires_ns"] - time.monotonic_ns()) / 1e6
+                frame = {**frame, "motor_feedback": {**feedback, "remaining_ms": remaining_ms}
+                         if remaining_ms > 0 else None}
             self.reply(200 if frame else 503, json.dumps(frame, allow_nan=False).encode(), "application/json")
 
         def reply_recording(self):
@@ -242,6 +249,9 @@ def wrist_server(bridge, port, glb=None, control=None):
                         grasp = bridge.scene.get("grasp_object")
                         if grasp is not None:
                             state["grasp"] = {k: v for k, v in grasp.items() if k not in ("vertices", "indices", "parts")}
+                if "control_sample_ns" in state:
+                    from ve33_web_control import panel_snapshot
+                    panel_snapshot(state, time.monotonic_ns(), state.get("grasp", {}).get("contact_revision"))
                 self.reply(200, json.dumps(state, ensure_ascii=False).encode(), "application/json")
             else:
                 self.send_error(404)

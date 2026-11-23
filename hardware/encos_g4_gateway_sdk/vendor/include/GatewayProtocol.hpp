@@ -182,7 +182,7 @@ inline uint32_t Decode(const GatewayWireFrame& frame, MotorFeedback& feedback, u
     return fields;
 }
 inline float Age(uint64_t now, uint64_t timestamp) {
-    return timestamp ? float(now - timestamp) / 1000.f : -1.f;
+    return timestamp ? (now >= timestamp ? float(now - timestamp) / 1000.f : 0.f) : -1.f;
 }
 
 struct ReleaseTracker {
@@ -228,7 +228,7 @@ struct RouteState {
         if (samples) {
             const uint32_t board_gap = frame.timestamp_us - previous_board;
             const uint32_t host_gap = static_cast<uint32_t>(
-                std::min<uint64_t>(now - previous_host, UINT32_MAX));
+                std::min<uint64_t>(now >= previous_host ? now - previous_host : 0, UINT32_MAX));
             max_board_gap = std::max(max_board_gap, board_gap);
             max_host_gap = std::max(max_host_gap, host_gap);
             host_over10 += host_gap > 10000;
@@ -286,7 +286,7 @@ inline void PackMit(float position, float velocity, float kp, float kd, float to
     uint16_t v = uint16_t(std::round((std::clamp(velocity, -10.f, 10.f) + 10) / 20 * 4095));
     uint16_t k = uint16_t(std::round(std::clamp(kp, 0.f, 500.f) / 500 * 4095));
     uint16_t d = uint16_t(std::round(std::clamp(kd, 0.f, 5.f) / 5 * 511));
-    uint16_t t = uint16_t(std::round((std::clamp(torque, -10.f, 10.f) + 10) / 20 * 4095));
+    uint16_t t = uint16_t(std::round((std::clamp(torque, -20.f, 20.f) + 20) / 40 * 4095));
     StoreWord(uint64_t(k) << 49 | uint64_t(d) << 40 | uint64_t(p) << 24 | uint64_t(v) << 12 | t, data);
 }
 inline bool ValidCommand(const MotorCommand& command) {

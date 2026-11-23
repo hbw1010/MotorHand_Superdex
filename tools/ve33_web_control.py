@@ -1,6 +1,44 @@
 """G4 采集进程与场景 HTTP 服务共享的操作和状态。"""
 
 import json
+import math
+
+
+def measure_frame_gaps(rows):
+    """同帧仿真角减驱动目标角。保留符号，避免把输入传输延迟当成受阻。"""
+    largest = None
+    for row in rows:
+        sim, target = row["sim_rad"], row["contact_input_rad"]
+        gap = sim - target if sim is not None and target is not None else None
+        if gap is not None and math.isfinite(gap):
+            largest = abs(gap) if largest is None else max(largest, abs(gap))
+        else:
+            gap = None
+        row["sim_minus_input_rad"] = gap
+    return largest
+
+
+def panel_snapshot(state, now_ns, revision):
+    """使 HTTP 快照在读取时仍能识别观察进程停顿或场景切换。"""
+    stamp = state.get("control_sample_ns")
+    if stamp is None:
+        return state
+    age = now_ns - stamp
+    stale = not 0 <= age < state["diagnostic_ttl_ns"]
+    state["diagnostic_stale"] = stale
+    state["snapshot_age_ms"] = age / 1e6
+    if stale:
+        state.update(active=None, online=None, rows=[], control_state_known=False,
+                     max_angle_error_rad=None, contact_frame_ns=None)
+    elif revision != state["control_revision"] or now_ns >= state["force_expiry_ns"]:
+        for row in state.get("rows", ()):
+            for key in ("contact_motor_nm", "contact_input_rad", "contact_encoder_rad", "position_motor_nm",
+                        "mapped_contact_nm", "contact_gate", "retreat_weight", "nominal_nm", "sent_motor_nm",
+                        "sim_rad", "sim_minus_input_rad"):
+                row[key] = None
+        state["contact_frame_ns"] = None
+        state["max_angle_error_rad"] = None
+    return state
 
 
 class WebControl:
@@ -24,6 +62,8 @@ class WebControl:
             self.cube_fixed.set()
         self.snapshot = context.Array("c", 16_384)
         self.command_lock = context.Lock()
+        self.native_link_path = None
+        self._native_link = None
         if default_enabled:
             self.requested.set()
 
@@ -44,6 +84,27 @@ class WebControl:
     def grasp_scene_request(self):
         with self.command_lock:
             return self.scene_revision.value, self.grasp_request()
+
+    def return_grasp_when_clear(self, expected):
+        """只有仍是物理线程刚检查的摆位，才使旧力帧失效并调度归位。"""
+        with self.command_lock:
+            settings = self.grasp_request()
+            if settings != expected:
+                return False
+            settings["home"] = settings.get("home", 0) + 1
+            settings["contact_revision"] += 1
+            self.grasp.value = json.dumps(settings).encode()
+            self._publish_native_intent()
+            return True
+
+    def _publish_native_intent(self):
+        if self.native_link_path:
+            if self._native_link is None:
+                from motorhand.native_runtime import load_native
+                self._native_link = load_native().SharedLink(self.native_link_path)
+            self._native_link.command(self.requested.is_set() and not self.zero.is_set(),
+                                      self.grasp_request()["contact_revision"],
+                                      self.demo_grip.value if self.demo_grip is not None else -1.)
 
     def command(self, message):
         with self.command_lock:
@@ -113,3 +174,5 @@ class WebControl:
                 self.requested.clear()
             else:
                 raise ValueError("当前模式不支持该操作")
+            if action not in ("start_recording", "stop_recording"):
+                self._publish_native_intent()

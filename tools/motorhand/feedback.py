@@ -148,6 +148,7 @@ class FeedbackLoop:
         self.control_period_ns = round(1e9 / CONFIG["control_hz"])
         self.friction = FrictionCompensator(CONFIG["friction_comp"])
         self.active = False
+        self.rearm_required = False
         self.interruption_count = 0
         self.last_interruption = None
         self.handoff_count = 0
@@ -172,9 +173,14 @@ class FeedbackLoop:
         self.deadline = 0
 
     def start(self, proxy_frame=None):
+        if self.rearm_required:
+            return
         if proxy_frame is not None:
             sample, simulated_at, valid = proxy_frame[:3]
-            if not valid or time.monotonic_ns() >= min(sample, simulated_at) + self.ttl:
+            now = time.monotonic_ns()
+            if (not valid or not all(0 < t <= now for t in (sample, simulated_at))
+                    or now >= min(sample, simulated_at) + self.ttl
+                    or self.refresh_on_contact and min(sample, simulated_at) + self.ttl - now < self.control_period_ns):
                 self.message = "力反馈未启用 · 等待手套采集和仿真接触帧"
                 return
         self.reset()
@@ -187,6 +193,7 @@ class FeedbackLoop:
     def stop(self, reason="力反馈关闭"):
         self.release_output()
         self.pause(reason)
+        self.rearm_required = False
 
     def release_output(self):
         self.gateway.release()
@@ -198,21 +205,31 @@ class FeedbackLoop:
         self.message = reason
 
     def interrupt(self, reason):
+        if self.rearm_required:
+            return
+        trip = self.refresh_on_contact and self.active and self.sent_nm is not None
         if self.active:
             self.interruption_count += 1
             self.last_interruption = reason
-        self.pause(f"暂停提交力反馈 · {reason}")
+        if trip:
+            self.rearm_required = True
+            self.release_output()
+            self.pause(f"保护已卸力 · 先停止再重新启用 · {reason}")
+        else:
+            self.pause(f"暂停提交力反馈 · {reason}")
 
     def follow_request(self, q, raw, stamp, proxy_frame, requested, *, sample_stamps=None, encoder_position=None):
         """请求启用后等待连续有效帧，并沿用驱动阻抗的渐入过程。"""
         now = time.monotonic_ns()
         sample, simulated_at, valid = proxy_frame[:3]
-        if requested and self.output_error:
+        if requested and (self.output_error or self.rearm_required):
             return
-        ready = (valid and stamp > 0 and sample > 0 and simulated_at > 0
+        ready = (valid and all(0 < t <= now for t in (sample, simulated_at, stamp))
                  and 0 <= now - min(stamp, sample, simulated_at) < self.ttl)
+        if not self.active and self.refresh_on_contact:
+            ready = ready and min(stamp, sample, simulated_at) + self.ttl - now >= self.control_period_ns
         if not requested:
-            if self.active:
+            if self.active or self.rearm_required:
                 self.stop()
             elif self.message.startswith("已请求启用"):
                 self.message = "仿真反馈预览 · 真机出力关闭"
@@ -253,8 +270,13 @@ class FeedbackLoop:
 
     def tick(self, q, raw, stamp, proxy_frame, *, sample_stamps=None, encoder_position=None):
         # 只用真实编码器样本与当前场景生成的接触帧续期。
+        if self.rearm_required or self.output_error:
+            return
         sample, simulated_at, valid = proxy_frame[:3]
         now = time.monotonic_ns()
+        if not all(math.isfinite(t) and t <= now for t in (sample, simulated_at, stamp)):
+            self.interrupt("输入时间戳无效")
+            return
         input_expiry = int(min(stamp, sample, simulated_at)) + self.ttl
         if not valid or input_expiry <= now:
             if self.active:
@@ -273,17 +295,15 @@ class FeedbackLoop:
                 self.velocity.reset()
                 self.palm = PalmCue(self.axes)
             return
-        handoff_gap_ns = None
         if self.active and 0 < self.deadline <= now:
-            previous_gap_ns = now - self.deadline
-            if (not self.refresh_on_contact or previous_gap_ns > 2 * self.control_period_ns
-                    or input_expiry - now < self.control_period_ns):
-                self.interrupt("上一批 MIT 指令已到期")
-                return
-            # 看门狗可能已经卸力。用新帧按它自己的期限从零渐入。
-            self.reset()
-            self.started = now
-            handoff_gap_ns = previous_gap_ns
+            self.interrupt("上一批 MIT 指令已到期")
+            return
+        if self.refresh_on_contact and (len(proxy_frame) < FORCE_TORQUE_END
+                or not np.isfinite(q).all() or not np.isfinite(proxy_frame[3:FORCE_INPUT_END]).all()
+                or (encoder_position is not None and not np.isfinite(encoder_position).all())
+                or (sample_stamps is not None and not all(0 <= now - t < self.ttl for t in sample_stamps))):
+            self.interrupt("编码器或仿真接触帧数据不可用")
+            return
         sensor_key = stamp if sample_stamps is None else tuple(sample_stamps)
         plan_key = (sensor_key, simulated_at if self.refresh_on_contact else 0)
         if plan_key == self.last_plan_key:
@@ -298,6 +318,8 @@ class FeedbackLoop:
             dq = self.velocity.dq
         if self.refresh_on_contact:
             dt = (now-self.last_plan_at) / 1e9 if self.last_plan_at else 0.
+            if self.active:
+                dt = min(dt, self.control_period_ns / 1e9)
         self.last_stamp = stamp
         self.last_plan_key = plan_key
         self.last_plan_at = now
@@ -316,20 +338,99 @@ class FeedbackLoop:
         try:
             if time.monotonic_ns() >= deadline:
                 raise TimeoutError("G4 指令已过期")
-            self.gateway.send(batch, deadline)
+            if getattr(type(self.gateway), "send_before", None) is not None:
+                self.gateway.send_before(batch, deadline, self.deadline)
+            else:
+                self.gateway.send(batch, deadline)
             self.deadline = deadline
             self.submitted_until = deadline
             self.sent_nm = [kp * math.radians(target - raw[mid]) + ff
                             for mid, (target, kp, _, _, ff) in enumerate(batch, 1)]
-            if handoff_gap_ns is not None:
-                self.handoff_count += 1
-                self.last_handoff_gap_ms = handoff_gap_ns / 1e6
             self.message = message
         except TimeoutError:
             self.interrupt("G4 指令已过期")
         except Exception as exc:
             self.interrupt(f"力反馈输出故障 · {exc}")
             self.output_error = True
+
+
+def _validate_anchors(cfg):
+    try:
+        anchors = np.asarray(cfg["anchors_nm"], dtype=float)
+        max_output = min(CONFIG["torque_limit_nm"]) * CONFIG["driver_impedance"]["torque_margin"]
+        valid = (anchors.ndim == 2 and anchors.shape[1] == 2 and len(anchors) >= 2
+                 and np.isfinite(anchors).all() and np.array_equal(anchors[0], [0., 0.]))
+        if valid:
+            x, y = anchors.T
+            light = x <= CONTACT_BLEND_END_NM
+            valid = (np.all(np.diff(x) > 0.) and np.all(np.diff(y) >= 0.) and np.all(y <= max_output)
+                     and x[-1] >= CONTACT_BLEND_END_NM and np.array_equal(x[light], y[light])
+                     and math.isclose(np.interp(CONTACT_BLEND_END_NM, x, y), CONTACT_BLEND_END_NM,
+                                      rel_tol=0., abs_tol=1e-12))
+    except (TypeError, KeyError, ValueError, IndexError):
+        valid = False
+    if not valid:
+        raise ValueError("名义反馈曲线无效：要求有限、单调、原点为零、轻触原尺度且不超过有效限幅")
+    return anchors.tolist()
+
+
+def feedback_curves(profile, profile_config=None):
+    """共享曲线与可选分轴曲线，配置和原生接口都用电机编号 J1–J12。"""
+    if profile == "identity":
+        return [], []
+    profiles = CONFIG.get("feedback_profiles", {})
+    if profile not in profiles and profile != "nominal":
+        raise ValueError(f"未知反馈配置：{profile}")
+    cfg = profile_config if profile_config is not None else profiles.get(profile)
+    base = _validate_anchors(cfg)
+    groups = []
+    assigned = set()
+    overrides = cfg.get("axis_curves", [])
+    if not isinstance(overrides, list):
+        raise ValueError("axis_curves 应为列表")
+    for group in overrides:
+        ids = group.get("motor_ids") if isinstance(group, dict) else None
+        if (not isinstance(ids, list) or not ids
+                or any(type(mid) is not int or not 1 <= mid <= MOTOR_COUNT for mid in ids)
+                or len(set(ids)) != len(ids) or assigned.intersection(ids)):
+            raise ValueError("分轴反馈曲线的电机编号应为 1–12 且不能重复分配")
+        groups.append((ids, _validate_anchors(group)))
+        assigned.update(ids)
+    return base, groups
+
+
+def _friction_params(cfg=None):
+    raw = CONFIG.get("friction_comp") if cfg is None else cfg
+    comp = FrictionCompensator(raw)
+    return (comp.enabled, comp.coulomb.tolist(), comp.viscous.tolist(),
+            comp.v_scale, comp.v_dead, comp.gain, comp.limit.tolist())
+
+
+def build_contact_kernel(native, gains, curves, friction=None):
+    limit, stiffness, position_limit = gains
+    base, groups = curves
+    kernel = native.ContactFeedback(limit, stiffness, position_limit, POSITION_DEADBAND_RAD, CONTACT_THRESHOLD_NM,
+                                    CONTACT_BLEND_END_NM, POSITION_FULL_LOAD_NM, MOTOR_DAMPING_NM_S_PER_RAD,
+                                    CONFIG["driver_impedance"]["release_lookahead_s"], base)
+    for ids, curve in groups:
+        for mid in ids:
+            kernel.set_axis_curve(mid, curve)
+    kernel.set_friction(*_friction_params(friction))
+    return kernel
+
+
+def contact_feedback_gains(axes):
+    cfg = CONFIG["driver_impedance"]
+    limits = np.asarray(CONFIG["torque_limit_nm"]) * cfg["torque_margin"]
+    base_stiffness = np.minimum(cfg["k_max_nm_per_rad"],
+                                surface_stiffness() * cfg["gain"] * np.asarray(cfg["joint_gain"]))
+    # 只缩放同向受阻角差对应的前馈位置项，独立上限由 position_limit 控制。
+    gain = cfg.get("position_compensation_gain", 1.)
+    if type(gain) not in (int, float) or not math.isfinite(gain) or gain < 0.:
+        raise ValueError("位置补偿倍率必须是有限的非负数")
+    stiffness = base_stiffness * gain
+    scales = np.asarray([axes[i + 1][1].scale for i in range(MOTOR_COUNT)])
+    return limits, stiffness, cfg["position_compensation_max_nm"] / np.maximum(1., scales)
 
 
 class ContactForceFeedbackLoop(FeedbackLoop):
@@ -340,27 +441,9 @@ class ContactForceFeedbackLoop(FeedbackLoop):
     def __init__(self, gateway, axes, *, native=None, profile="identity", profile_config=None):
         self.native = native
         self.profile = profile
-        profiles = CONFIG.get("feedback_profiles", {})
-        if profile not in ("identity", "nominal") and profile not in profiles:
-            raise ValueError(f"未知反馈配置：{profile}")
-        self.feedback_anchors = []
-        if profile != "identity":
-            cfg = profile_config if profile_config is not None else profiles.get(profile)
-            try:
-                anchors = np.asarray(cfg["anchors_nm"], dtype=float)
-                max_output = min(CONFIG["torque_limit_nm"]) * CONFIG["driver_impedance"]["torque_margin"]
-                valid = (anchors.ndim == 2 and anchors.shape[1] == 2 and len(anchors) >= 2
-                         and np.isfinite(anchors).all() and np.array_equal(anchors[0], [0., 0.])
-                         and np.all(np.diff(anchors[:, 0]) > 0.)
-                         and np.all(np.diff(anchors[:, 1]) >= 0.)
-                         and np.all(anchors[:, 1] <= max_output)
-                         and anchors[-1, 0] >= CONTACT_BLEND_END_NM
-                         and np.allclose(np.interp([.01, .03], anchors[:, 0], anchors[:, 1]), [.01, .03]))
-            except (TypeError, KeyError, ValueError, IndexError):
-                valid = False
-            if not valid:
-                raise ValueError("名义反馈曲线无效：要求有限、单调、原点为零、轻触原尺度且不超过有效限幅")
-            self.feedback_anchors = anchors.tolist()
+        self.curves = feedback_curves(profile, profile_config)
+        self.base_curve = np.asarray(self.curves[0]).T
+        self.axis_curves = [(np.asarray(ids) - 1, np.asarray(curve).T) for ids, curve in self.curves[1]]
         self.grasp_revision = None
         super().__init__(gateway, axes)
 
@@ -371,7 +454,7 @@ class ContactForceFeedbackLoop(FeedbackLoop):
             # 普通中断会清除控制状态，驱动器可能仍持有已接受的指令。
             if self.active or self.submitted_until > time.monotonic_ns():
                 self.release_output()
-            if not self.output_error:
+            if not (self.output_error or self.rearm_required):
                 self.pause("场景更新 · 等待新接触帧")
         return frame is not None and len(frame) >= FORCE_FRAME_SIZE and frame[FORCE_ENCODER_END] == revision
 
@@ -381,19 +464,19 @@ class ContactForceFeedbackLoop(FeedbackLoop):
         self.filtered_torque = np.zeros(MOTOR_COUNT)
         self.position_torque = np.zeros(MOTOR_COUNT)
         self.mapped_contact = np.zeros(MOTOR_COUNT)
+        self.contact_damping = np.zeros(MOTOR_COUNT)
+        self.friction_torque = np.zeros(MOTOR_COUNT)
+        self.friction_blend = np.ones(MOTOR_COUNT)
         self.contact_gate = np.zeros(MOTOR_COUNT, dtype=bool)
         self.frame_weight = np.ones(MOTOR_COUNT)
+        self.friction = FrictionCompensator(CONFIG.get("friction_comp"))
         cfg = CONFIG["driver_impedance"]
-        self.position_stiffness = np.minimum(cfg["k_max_nm_per_rad"],
-                                              surface_stiffness() * cfg["gain"] * np.asarray(cfg["joint_gain"]))
-        motor_scales = np.asarray([self.axes[i + 1][1].scale for i in range(MOTOR_COUNT)])
-        self.position_limit = cfg["position_compensation_max_nm"] / np.maximum(1., motor_scales)
+        self.limit, self.position_stiffness, self.position_limit = contact_feedback_gains(self.axes)
         self.rebound_lookahead = cfg["release_lookahead_s"]
-        self.limit = np.asarray(CONFIG["torque_limit_nm"]) * cfg["torque_margin"]
         if self.native is not None:
-            self.native_feedback = self.native.ContactFeedback(self.limit, self.position_stiffness, self.position_limit,
-                POSITION_DEADBAND_RAD, CONTACT_THRESHOLD_NM, CONTACT_BLEND_END_NM, POSITION_FULL_LOAD_NM,
-                MOTOR_DAMPING_NM_S_PER_RAD, self.rebound_lookahead, self.feedback_anchors)
+            self.native_feedback = build_contact_kernel(
+                self.native, (self.limit, self.position_stiffness, self.position_limit), self.curves,
+                CONFIG.get("friction_comp"))
 
     def plan(self, q, dq, force_frame, ramp, dt, now, *, encoder_position=None):
         reaction = np.asarray(force_frame[3:FORCE_TORQUE_END])
@@ -406,24 +489,33 @@ class ContactForceFeedbackLoop(FeedbackLoop):
             if np.isfinite(sampled_encoder).all():
                 movement = np.asarray(encoder_position) - sampled_encoder
         # 正值表示手套已沿该帧反力的方向退过仿真使用的位置。
-        retreat = np.sign(reaction) * movement
-        progress = np.clip((retreat - RETREAT_BLEND_START_RAD) /
+        sign_r = np.where(reaction < 0., -1., 1.)
+        retreat = sign_r * movement
+        live_encoder = np.asarray(encoder_position) if encoder_position is not None else q
+        remaining_depth = np.maximum(0., -sign_r * (live_encoder - sim_position))
+        effective_retreat = retreat - np.maximum(0., remaining_depth - .03)
+        progress = np.clip((effective_retreat - RETREAT_BLEND_START_RAD) /
                            (RETREAT_BLEND_END_RAD - RETREAT_BLEND_START_RAD), 0., 1.)
-        frame_weight = 1. - progress**2 * (3. - 2. * progress)
+        frame_weight = np.where(reaction == 0., 1., 1. - progress**2 * (3. - 2. * progress))
         self.frame_weight = frame_weight.copy()
         self.contact_gate = np.abs(reaction) >= CONTACT_THRESHOLD_NM
         clipped = np.clip(reaction, -self.limit, self.limit)
         onset = np.clip((np.abs(clipped) - CONTACT_THRESHOLD_NM) / (CONTACT_BLEND_END_NM - CONTACT_THRESHOLD_NM), 0., 1.)
         contact = clipped * onset**2 * (3. - 2. * onset)
-        if self.feedback_anchors:
-            anchors = np.asarray(self.feedback_anchors)
-            contact = np.sign(contact) * np.interp(np.abs(contact), anchors[:, 0], anchors[:, 1])
+        if self.base_curve.size:
+            raw_contact = contact
+            contact = np.sign(raw_contact) * np.interp(np.abs(raw_contact), *self.base_curve)
+            for indices, curve in self.axis_curves:
+                raw = raw_contact[indices]
+                contact[indices] = np.sign(raw) * np.interp(np.abs(raw), *curve)
         self.mapped_contact = contact
         dt = min(self.ttl / 1e9, dt if dt > 0. else 1. / CONFIG["control_hz"])
         if self.native is not None:
             torque, position, loaded = self.native_feedback.plan(q, dq, reaction, sim_position, sampled_position,
                                                                 frame_weight, ramp, dt)
             self.position_torque = np.asarray(position)
+            self.contact_damping = np.asarray(self.native_feedback.damping())
+            self.friction_torque = np.asarray(self.native_feedback.friction())
         else:
             torque, loaded = self.plan_python(q, dq, reaction, sim_position, sampled_position, frame_weight, ramp, dt)
         commands = [ImpedanceCommand(target_rad=0., tau_ff=float(tau)) for tau in torque]
@@ -450,7 +542,13 @@ class ContactForceFeedbackLoop(FeedbackLoop):
         position_budget = np.minimum(self.position_limit, limit - np.abs(contact))
         self.position_torque = np.where(loaded & (position * reaction > 0.),
                                         np.sign(position) * np.minimum(np.abs(position), position_budget), 0.)
-        damped = contact + self.position_torque - blend * MOTOR_DAMPING_NM_S_PER_RAD * speed
+        sign_r = np.where(reaction < 0., -1., 1.)
+        retreat_speed = np.maximum(0., sign_r * dq)
+        press_speed = np.maximum(0., -sign_r * dq)
+        damp_coeff = np.where((MOTOR_DAMPING_NM_S_PER_RAD > 0.) & (press_speed > 0.),
+                              max(MOTOR_DAMPING_NM_S_PER_RAD, .90), MOTOR_DAMPING_NM_S_PER_RAD)
+        damped = contact + self.position_torque - blend * damp_coeff * speed
+        damped = damped / (1. + retreat_speed / .55)
         # 速度阻尼抑制真机回弹，接触力仍决定输出方向。
         target = np.where(damped * reaction > 0, np.clip(damped, -limit, limit), 0.) * np.clip(ramp, 0., 1.)
         target *= frame_weight
@@ -461,17 +559,36 @@ class ContactForceFeedbackLoop(FeedbackLoop):
         np.clip(self.filtered_torque, -cap, cap, out=self.filtered_torque)
         reset = ~loaded | (self.filtered_torque * reaction < 0.)
         self.slew_torque[reset] = self.filtered_torque[reset] = 0.
-        self.slew_torque += np.clip(target - self.slew_torque, -60. * dt, 60. * dt)
-        self.filtered_torque += (1. - math.exp(-2. * math.pi * 25. * dt)) * (self.slew_torque - self.filtered_torque)
+        unloading = (np.abs(target) < np.abs(self.slew_torque)) & (target * self.slew_torque >= 0.)
+        press_blend = np.clip((press_speed - .08) / .35, 0., 1.)
+        rate = np.where(unloading, 160., 50. + press_blend * (115. - 50.))
+        self.slew_torque += np.clip(target - self.slew_torque, -rate * dt, rate * dt)
+        self.filtered_torque += -math.expm1(-2. * math.pi * 15. * dt) * (self.slew_torque - self.filtered_torque)
         self.slew_torque[~loaded] = self.filtered_torque[~loaded] = 0.
-        return self.filtered_torque, np.count_nonzero(loaded)
+        excess_retreat = np.maximum(0., retreat_speed - .6)
+        kd_fade = 1. / (1. + excess_retreat / .4)
+        self.contact_damping = np.where(
+            loaded & (self.filtered_torque != 0.),
+            .28 * np.minimum(1., np.abs(self.filtered_torque) / .8) * frame_weight * kd_fade, 0.)
+        # 自由空间动摩擦力补偿（仅非接触轴，脱离接触后 80 ms 平滑渐入避免松手弹回）。
+        clamped_ramp = float(np.clip(ramp, 0., 1.))
+        raw_fric = self.friction.torque(dq) * clamped_ramp * self.friction_blend
+        target_fric = np.where(loaded, 0., raw_fric)
+        alpha_fric = -math.expm1(-2. * math.pi * 20. * dt)
+        self.friction_torque = np.where(loaded, 0.,
+                                        self.friction_torque + alpha_fric * (target_fric - self.friction_torque))
+        self.friction_torque[(~loaded) & (target_fric == 0.) & (np.abs(self.friction_torque) < 1e-4)] = 0.
+        self.friction_blend = np.where(loaded, 0., np.minimum(1., self.friction_blend + dt / .08))
+        output = np.where(loaded, self.filtered_torque, self.friction_torque)
+        return output, np.count_nonzero(loaded)
 
     def encode(self, commands, q, raw):
-        # MIT 帧带位置和速度字段，KP/KD 为零，只让前馈力矩生效。
-        limit = 10. * CONFIG["driver_impedance"]["torque_margin"]
+        # MIT 帧位置与速度目标及 KP 均为零，仅输出前馈力矩与受载接触轴的安全本地阻尼 KD（<= 0.28）。
+        limit = min(20., max(CONFIG["torque_limit_nm"])) * CONFIG["driver_impedance"]["torque_margin"]
         batch = []
         for i, cmd in enumerate(commands):
             motor = self.axes[i + 1][1]
             torque = cmd.tau_ff * motor.sign * motor.scale * CONFIG["torque_sign"][i]
-            batch.append((0., 0., 0., 0., float(np.clip(torque, -limit, limit))))
+            kd = float(np.clip(self.contact_damping[i] * motor.scale**2, 0., .28))
+            batch.append((0., 0., kd, 0., float(np.clip(torque, -limit, limit))))
         return batch

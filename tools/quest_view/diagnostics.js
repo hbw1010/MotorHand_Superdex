@@ -53,7 +53,7 @@ function motorReadout(card, frame, {axis, loaded, available}) {
   const fb = frame.motor_feedback;
   const tracking = frame.wrist_detail ?? '等待腕部定位';
   const timing = (frame.time_monotonic_s * 1e9 - frame.motor_received_ns) / 1e6;
-  const mode = fb?.active ? '真机出力已启用' : fb?.requested ? '已请求启用 · 等待有效帧' : '仿真反馈预览';
+  const mode = !fb ? '等待有效反馈帧' : fb.active ? '真机出力已启用' : fb.requested ? '已请求启用 · 等待有效帧' : '仿真反馈预览';
   background(card, 'MotorHand', mode);
   text(card.ctx, '右腕', 29, 145, 26, '#95b5cc', '700');
   text(card.ctx, tracking, 163, 145, 26);

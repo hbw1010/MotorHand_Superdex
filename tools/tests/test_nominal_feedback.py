@@ -24,31 +24,53 @@ def settle(instance, reaction, delta=-.1):
     sim = q.copy()
     sim[4] += delta
     frame = [1, 1, True, *raw, *zero, *sim, *q]
-    for _ in range(60):
+    for _ in range(80):
         cmds, _ = instance.plan(q, zero, frame, 1., .01, 0)
     return cmds[4].tau_ff
 
 
 
 class NominalFeedbackTest(unittest.TestCase):
+    def test_finger_profile_boosts_only_loaded_middle_range_and_preserves_j1(self):
+        original, tuned = loop('nominal-plus'), loop('nominal-fingers')
+        zero = np.zeros(12)
+        for force in (.02, .08, -.08, .28, -.8, 0.):
+            frame = [1, 1, True, *np.full(12, force), *zero, *zero, *zero]
+            for _ in range(30):
+                a, _ = original.plan(zero, zero, frame, 1., .01, 0)
+                b, _ = tuned.plan(zero, zero, frame, 1., .01, 0)
+                self.assertEqual(a[0].tau_ff, b[0].tau_ff)
+            if abs(force) == .08:
+                np.testing.assert_allclose(tuned.mapped_contact[1:], np.sign(force) * 6.5)
+                self.assertGreater(abs(b[4].tau_ff), abs(a[4].tau_ff) + 1.)
+            else:
+                np.testing.assert_array_equal(tuned.mapped_contact, original.mapped_contact)
+        self.assertTrue(all(command.tau_ff == 0. for command in b))
+
+    def test_axis_overrides_reject_bad_ids_and_duplicate_assignments(self):
+        anchors = [[0., 0.], [.03, .03], [.28, 5.]]
+        for ids in ([], [0], [13], [True], [2, 2], [5.5]):
+            with self.subTest(ids=ids), self.assertRaises(ValueError):
+                loop(config={'anchors_nm': anchors, 'axis_curves': [{'motor_ids': ids, 'anchors_nm': anchors}]})
+
     def test_nominal_plus_increases_loaded_contact_and_releases_on_no_contact(self):
         nominal, stronger = loop(), loop('nominal-plus')
         reference = -.27745119178421784
-        self.assertAlmostEqual(settle(nominal, reference), -7.)
-        self.assertAlmostEqual(settle(stronger, reference), -8.5)
+        self.assertAlmostEqual(settle(nominal, reference), -12.)
+        self.assertAlmostEqual(settle(stronger, reference), -14.25, places=6)
         self.assertEqual(settle(stronger, .02), settle(nominal, .02))
-        self.assertEqual(settle(stronger, -4.), -9.5)
+        self.assertAlmostEqual(settle(stronger, -4.), -14.25, places=6)
         self.assertEqual(settle(stronger, 0.), 0.)
 
     def test_nominal_maps_contact_only_with_raw_gate_and_position_budget(self):
-        cfg = {'anchors_nm': [[0, 0], [.03, .03], [.28, 5], [1, 9.5]]}
+        cfg = {'anchors_nm': [[0, 0], [.03, .03], [.28, 5], [1, 14.25]]}
         nominal = loop(config=cfg)
-        self.assertAlmostEqual(settle(nominal, -.28), -7, places=6)
-        self.assertAlmostEqual(nominal.position_torque[4], -2)
+        self.assertAlmostEqual(settle(nominal, -.28), -8, places=6)
+        self.assertAlmostEqual(nominal.position_torque[4], -3)
         self.assertEqual(settle(nominal, 0), 0)
         self.assertAlmostEqual(settle(nominal, -.28, delta=.1), -5, places=6)
-        self.assertAlmostEqual(settle(nominal, -.9), -9.5, places=6)
-        self.assertAlmostEqual(settle(loop('identity'), -.28), -2.28, places=6)
+        self.assertAlmostEqual(settle(nominal, -.95), -14.25, places=6)
+        self.assertAlmostEqual(settle(loop('identity'), -.28), -3.28, places=6)
 
     def test_nominal_curve_is_monotone_signed_and_preserves_light_touch(self):
         nominal, identity = loop(), loop('identity')
@@ -63,7 +85,7 @@ class NominalFeedbackTest(unittest.TestCase):
     def test_invalid_anchors_rejected(self):
         cases = [
             [[0, 0], [0, 1]], [[0, 0], [.2, 2], [.1, 3]],
-            [[0, 0], [.1, 2], [.2, 1]], [[0, 0], [.1, 10]],
+            [[0, 0], [.1, 2], [.2, 1]], [[0, 0], [.1, 15]],
             [[0, 0], [float('nan'), 1]], [[.01, 0], [.1, 1]],
         ]
         for anchors in cases:

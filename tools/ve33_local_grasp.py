@@ -80,26 +80,35 @@ def soft_mesh(sdp, kind):
     return points, np.array(mesh.connectivity)
 
 
-def open_hand_surface(sdp, scene, hand):
-    """获取张手时各碰撞表面的腕部局部坐标。"""
+def open_hand_surface(sdp, scene, hand, *, include_target=False):
+    """摆放时在腕部坐标系采样手表面；重建还需避让驱动器当前正在追踪的姿态。"""
     parts = []
-    for handle in hand.get_nested_link_actors():
+    handles = hand.get_nested_link_actors()
+    targets = None
+    if include_target:
+        targets = sdp.DynamicArrayTransformRT(len(handles))
+        hand.get_articulated_target_link_transforms(targets)
+    for i, handle in enumerate(handles):
         part = scene.get_actor(handle)
         if not part.is_query_supported(sdp.QueryType.TOTAL_CONTACT_FORCE):
             continue
         points = np.asarray(part.get_surface_mesh().coordinates).reshape(-1, 3)
-        pose = part.get_root_transform()
-        parts.append(Rotation.from_quat(list(pose.rotation)).apply(points) + np.asarray(pose.translation))
+        poses = (part.get_root_transform(),) if targets is None else (part.get_root_transform(), targets[i])
+        for pose in poses:
+            parts.append(Rotation.from_quat(list(pose.rotation)).apply(points) + np.asarray(pose.translation))
     root = hand.get_root_transform()
     inverse = Rotation.from_quat(list(root.rotation)).inv()
     return inverse.apply(np.concatenate(parts) - np.asarray(root.translation))
 
 
 class LocalGrasp:
-    def __init__(self, sdp, scene, settings, *, open_surface=None):
+    def __init__(self, sdp, scene, settings, *, hand=None, open_surface=None):
         self.sdp = sdp
         self.scene = scene
-        self.open_surface = open_surface
+        self.hand = hand
+        self.placement_surface = open_surface
+        self.open_reference = open_surface
+        self.awaiting_hand_clearance = False
         self.wrist_rotation = Rotation.from_quat(UPRIGHT_WRIST_POSE[3:])
         self.actor = None
         self.prefab = None
@@ -119,13 +128,21 @@ class LocalGrasp:
         old = self.settings
         rebuild = reset or grasp_needs_rebuild(old, settings)
         if rebuild:
+            if self.hand is not None:
+                # 首次构造场景时姿态控制器尚未安装；以后每次几何重建都采样同一刻的两组姿态。
+                self.placement_surface = open_hand_surface(
+                    self.sdp, self.scene, self.hand, include_target=old is not None)
+                if old is None:
+                    self.open_reference = self.placement_surface
+                else:
+                    self.placement_surface = np.concatenate((self.open_reference, self.placement_surface))
             previous = self.actor
             previous_prefab = self.prefab
             previous_rotation = self.soft_rotation
             asset = GRASP_ASSETS.get(settings["kind"])
             if asset is not None:
                 self.prefab = GraspPrefab(self.sdp, self.scene, asset, settings, self.mesh_revision + 1,
-                                          self.wrist_rotation, self.open_surface)
+                                          self.wrist_rotation, self.placement_surface)
                 self.actor = None
                 self.soft_rotation = None
             else:
@@ -133,6 +150,19 @@ class LocalGrasp:
                 if not reset and previous is not None and settings["layout"] == old["layout"] == "desk":
                     bounds = previous.get_aabb_world()
                     home = (np.asarray(bounds.min) + np.asarray(bounds.max)) / 2.
+                if settings["layout"] == "desk" and self.placement_surface is not None:
+                    # 桌面允许拖动，调整尺寸时先沿掌面法线让出被手占据的空间。
+                    radius = settings["size_mm"] / 2000.
+                    half = np.full(3, radius)
+                    if settings["kind"] == "cylinder":
+                        half[1] *= 1.4
+                    rotation = self.object_rotation("desk", settings["angle_deg"])
+                    extent = np.abs(rotation.as_matrix()) @ half + .0015
+                    x, y, z = (self.wrist_rotation.apply(self.placement_surface) - home).T
+                    overlap = (abs(x) < extent[0]) & (abs(z) < extent[2]) & (abs(y) < extent[1])
+                    if overlap.any():
+                        footprint = (abs(x) < extent[0]) & (abs(z) < extent[2])
+                        home[1] += float(y[footprint].min() - extent[1])
                 self.create(settings, home)
                 self.anchor = home
                 self.angle = settings["angle_deg"]
@@ -145,22 +175,42 @@ class LocalGrasp:
             if previous_prefab is not None:
                 previous_prefab.destroy()
             self.mesh_revision += 1
+            self.awaiting_hand_clearance = bool(
+                self.hand is not None and settings["layout"] == "palm" and settings["locked"]
+                and self._placement_z(settings, self.open_reference)
+                - self._placement_z(settings, self.placement_surface) > .002)
+            self.next_clearance_check = 0.
+        if not settings["locked"]:
+            self.awaiting_hand_clearance = False
         self.settings = settings.copy()
         return rebuild
+
+    def _placement_z(self, settings, surface):
+        if self.prefab is not None:
+            return self.prefab.palm_center(self.prefab.half_span, settings["angle_deg"], surface)[2]
+        return self.palm_center(settings, surface)[2]
+
+    def ready_to_return(self, touching, now):
+        if not self.awaiting_hand_clearance or touching or now < self.next_clearance_check:
+            return False
+        self.next_clearance_check = now + .2
+        surface = open_hand_surface(self.sdp, self.scene, self.hand, include_target=True)
+        # 两种姿态都能避让时，下次按新版本重新摆放。允许亚毫米数值误差。
+        return self._placement_z(self.settings, surface) >= self._placement_z(self.settings, self.open_reference) - .0005
 
     def home(self, settings):
         if settings["layout"] == "desk":
             return np.array([.18, -.06, -.05])
-        return self.wrist_rotation.apply(self.palm_center(settings)) + UPRIGHT_WRIST_POSE[:3]
+        return self.wrist_rotation.apply(self.palm_center(settings, self.placement_surface)) + UPRIGHT_WRIST_POSE[:3]
 
-    def palm_center(self, settings):
+    def palm_center(self, settings, placement_surface):
         radius = settings["size_mm"] / 2000.
         center = np.array([.072, -.005, -.007 - radius])
-        if self.open_surface is None:
+        if placement_surface is None:
             return center
-        surface = Rotation.from_euler("z", -settings["angle_deg"], degrees=True).apply(self.open_surface - center)
+        surface = Rotation.from_euler("z", -settings["angle_deg"], degrees=True).apply(placement_surface - center)
         x, y, z = surface.T
-        # 初始落点留出张手间隙，之后由实际接触解算。
+        # 沿掌面法线留出间隙；掌心平面坐标保持不变。
         margin = .0015
         extent = radius + margin
         shape = settings["kind"].split("_")[0]
@@ -285,7 +335,8 @@ class LocalGrasp:
                 self.pins[1].set_target_rotation(self.rigid_pin_rotation.as_quat())
 
     def packet(self):
-        payload = {**self.settings, "mesh_revision": self.mesh_revision}
+        payload = {**self.settings, "mesh_revision": self.mesh_revision,
+                   "awaiting_hand_clearance": self.awaiting_hand_clearance}
         if self.prefab is not None:
             return {**payload, **self.prefab.packet()}
         if self.soft:

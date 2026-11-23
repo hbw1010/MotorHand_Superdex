@@ -13,6 +13,34 @@ from motorhand.mapping import GloveMapping
 
 
 class NativeNominalTest(unittest.TestCase):
+    def test_axis_curve_preserves_other_axes_and_zero_release(self):
+        curve = [[0., 0.], [.03, .03], [.28, 5.], [1., 9.]]
+        limits = [9.5] * 12
+        zero, weights = [0.] * 12, [1.] * 12
+        kernel = load_native().ContactFeedback(limits, zero, zero, .002, .01, .03, .25, 0., .02, curve)
+        baseline = load_native().ContactFeedback(limits, zero, zero, .002, .01, .03, .25, 0., .02, curve)
+        kernel.set_axis_curve(12, [[0., 0.], [.03, .03], [.1, 2.9], [.28, 5.], [1., 9.]])
+        for reaction in (.02, -.10, 0.):
+            for _ in range(60):
+                a = kernel.plan(zero, zero, [reaction] * 12, zero, zero, weights, 1., .01)[0]
+                b = baseline.plan(zero, zero, [reaction] * 12, zero, zero, weights, 1., .01)[0]
+                self.assertEqual(a[:11], b[:11])
+                if reaction != -.1:
+                    self.assertEqual(a[11], b[11])
+            if reaction == -.1:
+                self.assertAlmostEqual(a[11], -2.9)
+                self.assertLess(a[11], b[11])
+
+    def test_bad_axis_curve_is_rejected(self):
+        zero = [0.] * 12
+        f = load_native().ContactFeedback([9.5] * 12, zero, zero, .002, .01, .03, .25, 0., .02)
+        valid = [[0., 0.], [.03, .03], [1., 9.]]
+        for axis, anchors in ((0, valid), (13, valid), (1, []), (1, [[0, 1], [.03, .03]]),
+                              (2, [[0, 0], [.015, .019], [.03, .03], [.2, 3.]]),
+                              (12, [[0, 0], [.03, .03], [.2, 10.]])):
+            with self.subTest(axis=axis, anchors=anchors), self.assertRaises(ValueError):
+                f.set_axis_curve(axis, anchors)
+
     def test_python_and_cpp_match_during_mapped_contact_and_retreat(self):
         axes = {m.motor_id: (m.model_joint, m) for m in GloveMapping.load(MAPPING).motors}
         python = ContactForceFeedbackLoop(Mock(), axes, profile="nominal")

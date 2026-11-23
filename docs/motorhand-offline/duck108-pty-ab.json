@@ -1,0 +1,348 @@
+{
+  "source": "grasp-20261122-213407-cbtnozp2.csv",
+  "scope": "同一 10.86 秒 12 轴编码器记录，经真实 G4 SDK 和伪终端驱动同一场景。各版本单次顺序运行。先在掌心创建锁定鸭灯再移到首帧手势；现场初始物体摆放、系统并发与电机佩戴闭环未复现。",
+  "phases": {
+    "recorded": "原录制角度与时序。",
+    "hold": "原轨迹后张手，再按标准演示手势闭合 80% 并保持 2 秒。",
+    "released": "随后张手并等待 0.7 秒后的 0.8 秒窗口。"
+  },
+  "wire_jumps": "同轴相邻 MIT 包、间隔不超过 20 ms 的绝对力矩差。超过 20 ms 的空档按轴计数，不把未知扭矩补零；零编码解码误差约 ±0.0024 N·m。",
+  "baseline": {
+    "settings": {
+      "kind": "official_duck_lamp",
+      "size_mm": 108.0,
+      "hardness": 1.0,
+      "layout": "palm"
+    },
+    "profile": "nominal-fingers",
+    "hand_first": false,
+    "source_cycles": 1087,
+    "source_seconds": 10.859896734,
+    "dropped": 0,
+    "reconnects": 0,
+    "post_disable_nonzero": 0,
+    "post_disable_query_axes": 12,
+    "recorded": {
+      "cycles": 1086,
+      "age_ms": {
+        "p50": 71.2645,
+        "p95": 94.2396,
+        "p99": 103.8049,
+        "max": 113.3525
+      },
+      "expired": 33,
+      "expiry_episodes": 32,
+      "unavailable": 33,
+      "active": 720,
+      "interruptions": 12,
+      "handoffs": 39,
+      "wire_peaks": [
+        5.917,
+        2.4884,
+        1.7021,
+        0.0024,
+        0.0024,
+        0.0024,
+        2.9475,
+        6.2393,
+        4.1636,
+        3.4408,
+        1.3309,
+        3.9194
+      ],
+      "wire_counts": [
+        1464,
+        1464,
+        1464,
+        1464,
+        1464,
+        1464,
+        1464,
+        1464,
+        1464,
+        1464,
+        1464,
+        1464
+      ],
+      "wire_short_gap_jumps_nm": {
+        "p50": 0.0,
+        "p95": 0.2393,
+        "p99": 0.5421,
+        "max": 6.2369
+      },
+      "wire_gaps_over_20ms": 132,
+      "wire_short_gap_jumps_above_1nm": 116
+    },
+    "hold": {
+      "cycles": 200,
+      "age_ms": {
+        "p50": 60.8811,
+        "p95": 74.7979,
+        "p99": 82.5423,
+        "max": 83.9937
+      },
+      "expired": 0,
+      "expiry_episodes": 0,
+      "unavailable": 0,
+      "active": 200,
+      "interruptions": 0,
+      "handoffs": 0,
+      "wire_peaks": [
+        4.3639,
+        1.7802,
+        0.7253,
+        0.0024,
+        7.5531,
+        1.9365,
+        6.3223,
+        0.1978,
+        0.0024,
+        0.0024,
+        3.2357,
+        5.6044
+      ],
+      "wire_counts": [
+        395,
+        395,
+        395,
+        395,
+        395,
+        395,
+        395,
+        395,
+        395,
+        395,
+        395,
+        395
+      ],
+      "wire_short_gap_jumps_nm": {
+        "p50": 0.0,
+        "p95": 0.0049,
+        "p99": 0.0195,
+        "max": 0.2295
+      },
+      "wire_gaps_over_20ms": 0,
+      "wire_short_gap_jumps_above_1nm": 0
+    },
+    "released": {
+      "cycles": 80,
+      "age_ms": {
+        "p50": 13.1543,
+        "p95": 24.5762,
+        "p99": 25.0012,
+        "max": 25.0012
+      },
+      "expired": 0,
+      "expiry_episodes": 0,
+      "unavailable": 0,
+      "active": 80,
+      "interruptions": 0,
+      "handoffs": 0,
+      "wire_peaks": [
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024
+      ],
+      "wire_counts": [
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158
+      ],
+      "wire_short_gap_jumps_nm": {
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "max": 0.0
+      },
+      "wire_gaps_over_20ms": 0,
+      "wire_short_gap_jumps_above_1nm": 0
+    }
+  },
+  "optimized": {
+    "settings": {
+      "kind": "official_duck_lamp",
+      "size_mm": 108.0,
+      "hardness": 1.0,
+      "layout": "palm"
+    },
+    "profile": "nominal-fingers",
+    "hand_first": false,
+    "source_cycles": 1087,
+    "source_seconds": 10.859896734,
+    "dropped": 0,
+    "reconnects": 0,
+    "post_disable_nonzero": 0,
+    "post_disable_query_axes": 12,
+    "recorded": {
+      "cycles": 1086,
+      "age_ms": {
+        "p50": 12.9585,
+        "p95": 22.1057,
+        "p99": 24.8053,
+        "max": 73.7572
+      },
+      "expired": 0,
+      "expiry_episodes": 0,
+      "unavailable": 0,
+      "active": 1086,
+      "interruptions": 0,
+      "handoffs": 0,
+      "wire_peaks": [
+        4.1099,
+        0.8767,
+        0.2466,
+        0.0024,
+        0.0024,
+        0.0024,
+        2.5275,
+        3.4261,
+        5.9951,
+        3.9096,
+        0.7497,
+        0.486
+      ],
+      "wire_counts": [
+        2146,
+        2146,
+        2146,
+        2146,
+        2146,
+        2146,
+        2146,
+        2146,
+        2146,
+        2146,
+        2146,
+        2146
+      ],
+      "wire_short_gap_jumps_nm": {
+        "p50": 0.0,
+        "p95": 0.0049,
+        "p99": 0.0586,
+        "max": 0.5958
+      },
+      "wire_gaps_over_20ms": 0,
+      "wire_short_gap_jumps_above_1nm": 0
+    },
+    "hold": {
+      "cycles": 200,
+      "age_ms": {
+        "p50": 13.079,
+        "p95": 21.5211,
+        "p99": 22.3976,
+        "max": 22.6204
+      },
+      "expired": 0,
+      "expiry_episodes": 0,
+      "unavailable": 0,
+      "active": 200,
+      "interruptions": 0,
+      "handoffs": 0,
+      "wire_peaks": [
+        1.7314,
+        0.5299,
+        0.2125,
+        0.0024,
+        7.1722,
+        3.1233,
+        5.033,
+        0.0415,
+        0.0317,
+        0.0024,
+        1.4481,
+        1.7998
+      ],
+      "wire_counts": [
+        396,
+        396,
+        396,
+        396,
+        396,
+        396,
+        396,
+        396,
+        396,
+        396,
+        396,
+        396
+      ],
+      "wire_short_gap_jumps_nm": {
+        "p50": 0.0,
+        "p95": 0.0049,
+        "p99": 0.0049,
+        "max": 0.0391
+      },
+      "wire_gaps_over_20ms": 0,
+      "wire_short_gap_jumps_above_1nm": 0
+    },
+    "released": {
+      "cycles": 80,
+      "age_ms": {
+        "p50": 13.2028,
+        "p95": 24.4745,
+        "p99": 24.8564,
+        "max": 24.8564
+      },
+      "expired": 0,
+      "expiry_episodes": 0,
+      "unavailable": 0,
+      "active": 80,
+      "interruptions": 0,
+      "handoffs": 0,
+      "wire_peaks": [
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024,
+        0.0024
+      ],
+      "wire_counts": [
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158
+      ],
+      "wire_short_gap_jumps_nm": {
+        "p50": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "max": 0.0
+      },
+      "wire_gaps_over_20ms": 0,
+      "wire_short_gap_jumps_above_1nm": 0
+    }
+  }
+}

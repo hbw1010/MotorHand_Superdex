@@ -1,7 +1,7 @@
 """右手 G4、VE33 闭链与 SuperDex 的网页操控入口。"""
 
 import argparse
-from contextlib import ExitStack, contextmanager, nullcontext
+from contextlib import ExitStack, contextmanager
 import ctypes
 import fcntl
 import json
@@ -30,7 +30,7 @@ from motorhand.feedback import (CONFIG, FORCE_FRAME_SIZE, FORCE_INPUT_END, FORCE
 from motorhand.kinematics import GloveKinematics, KinematicsError
 from motorhand.mapping import GloveMapping, MODEL_MOTOR_JOINTS
 from motorhand.g4_types import G4Joint
-from ve33_web_control import WebControl
+from ve33_web_control import WebControl, measure_frame_gaps
 
 MODEL_DIR = ROOT / "assets/hand_motor_ve33/hand_motor_ve33_R"
 LIBRARY = ROOT / "hardware/encos_g4_gateway_sdk/build/libg4_shim.so"
@@ -68,15 +68,20 @@ def zero_socket(port):
 
 
 @contextmanager
-def gateway(port, feedback_capable=False):
+def gateway_lock(port):
     lock_dir = runtime_dir()
     with (lock_dir / f"ve33-{port.resolve().name}.lock").open("a") as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
             raise GatewayBusy("该网关已有采集进程") from exc
-        with open_reader(port, feedback_capable) as read:
-            yield read
+        yield
+
+
+@contextmanager
+def gateway(port, feedback_capable=False):
+    with gateway_lock(port), open_reader(port, feedback_capable) as read:
+        yield read
 
 
 @contextmanager
@@ -89,20 +94,30 @@ def open_reader(port, feedback_capable=False):
     lib.g4_close.argtypes = [ctypes.c_void_p]
     lib.g4_close.restype = None
     lib.g4_snapshots.argtypes = [ctypes.c_void_p, ctypes.POINTER(G4Joint), ctypes.c_int]
+    transport_lost = getattr(lib, "g4_transport_lost", None)
+    if transport_lost is not None:
+        transport_lost.argtypes = [ctypes.c_void_p]
+        transport_lost.restype = ctypes.c_int
+    open_fresh = getattr(lib, "g4_open_fresh", None)
+    if open_fresh is not None:
+        open_fresh.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_uint]
+        open_fresh.restype = ctypes.c_void_p
+    port_bytes = str(port).encode()
     if feedback_capable:
         lib.g4_open.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_uint]
         lib.g4_open.restype = ctypes.c_void_p
-        batch_send = getattr(lib, "g4_set_mit_batch", None)
+        batch_send = getattr(lib, "g4_renew_mit_batch", None)
         if batch_send is None:
             raise RuntimeError("缺少 G4 批量指令接口，请按 SDK README 重新编译 shim")
-        batch_send.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int64]
+        batch_send.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.c_int,
+                               ctypes.c_int64, ctypes.c_int64]
         batch_send.restype = ctypes.c_int
         batch_buffer = (ctypes.c_float * (12 * 5))()
         lib.g4_release.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32]
         lib.g4_release.restype = None
-        handle = lib.g4_open(str(port).encode(), 921600, 200)
+        handle = lib.g4_open(port_bytes, 921600, 200)
     else:
-        handle = lib.g4_open_reader(str(port).encode())
+        handle = lib.g4_open_reader(port_bytes)
     if not handle:
         raise OSError(f"无法打开 G4 网关 {port}")
     buf = (G4Joint * 12)()
@@ -114,11 +129,60 @@ def open_reader(port, feedback_capable=False):
         snapshots_with_time.restype = ctypes.c_int
 
     class Session:
-        def __call__(self):
-            if snapshots_with_time is None:
-                count = lib.g4_snapshots(handle, buf, len(buf))
+        _initial_delay_ns = 250_000_000
+        _max_delay_ns = 2_000_000_000
+
+        def __init__(self, initial_handle):
+            self._handle = initial_handle
+            self._delay_ns = self._initial_delay_ns
+            self._retry_at_ns = 0
+            self._closed = False
+            self.reconnect_count = 0
+
+        @property
+        def online(self):
+            return self._handle is not None
+
+        def poll_transport(self, now_ns=None):
+            if self._closed or transport_lost is None:
+                return "none"
+            now = time.monotonic_ns() if now_ns is None else now_ns
+            if self._handle is not None:
+                if not transport_lost(self._handle):
+                    return "none"
+                lib.g4_close(self._handle)
+                self._handle = None
+                self._delay_ns = self._initial_delay_ns
+                self._retry_at_ns = now + self._delay_ns
+                return "lost"
+            if now < self._retry_at_ns:
+                return "none"
+            if feedback_capable:
+                reopened = open_fresh(port_bytes, 921600, 200) if open_fresh is not None else lib.g4_open(port_bytes, 921600, 200)
             else:
-                count = snapshots_with_time(handle, buf, current_times, len(buf))
+                reopened = lib.g4_open_reader(port_bytes)
+            if not reopened:
+                self._delay_ns = min(self._delay_ns * 2, self._max_delay_ns)
+                self._retry_at_ns = now + self._delay_ns
+                return "none"
+            self._handle = reopened
+            self._delay_ns = self._initial_delay_ns
+            self.reconnect_count += 1
+            return "restored"
+
+        def close(self):
+            self._closed = True
+            if self._handle is not None:
+                lib.g4_close(self._handle)
+                self._handle = None
+
+        def __call__(self):
+            if self._handle is None:
+                return {}
+            if snapshots_with_time is None:
+                count = lib.g4_snapshots(self._handle, buf, len(buf))
+            else:
+                count = snapshots_with_time(self._handle, buf, current_times, len(buf))
             result = {}
             for i, joint in enumerate(buf[:count]):
                 joint.current_received_ns = current_times[i]
@@ -126,24 +190,30 @@ def open_reader(port, feedback_capable=False):
             return result
 
         def send(self, batch, deadline):
+            return self.send_before(batch, deadline, 0)
+
+        def send_before(self, batch, deadline, previous):
             if not feedback_capable or len(batch) != 12:
                 raise RuntimeError("G4 会话未配置 12 轴反馈")
+            if self._handle is None:
+                raise RuntimeError("G4 串口已断开")
             batch_buffer[:] = [value for command in batch for value in command]
-            accepted = batch_send(handle, batch_buffer, len(batch), deadline)
+            accepted = batch_send(self._handle, batch_buffer, len(batch), deadline, previous)
             if not accepted:
                 raise TimeoutError("G4 指令已过期")
             if accepted < 0:
                 raise ValueError("G4 批量指令含无效值")
 
         def release(self):
-            if feedback_capable:
+            if feedback_capable and self._handle is not None:
                 for mid in range(1, 13):
-                    lib.g4_release(handle, 3 - (mid-1)//4, mid)
+                    lib.g4_release(self._handle, 3 - (mid-1)//4, mid)
 
+    session = Session(handle)
     try:
-        yield Session()
+        yield session
     finally:
-        lib.g4_close(handle)
+        session.close()
 
 
 class HandContactDrive:
@@ -366,18 +436,45 @@ def publish_contact_frame(output, proxy, stamp, simulated_at, valid, palm_contac
     output[:] = [stamp, simulated_at, valid, *surfaces, *directions, palm_contact, wrist_stamp]
 
 
-def read_feedback_display(source, requested=False):
-    if source is None:
+def read_feedback_display(source, requested=False, *, revision=None, frame_ns=None):
+    if source is None or len(source) < 26:
         return None
     stamp, active, *values = source[:]
-    if not 0 <= time.monotonic_ns() - stamp <= int(CONFIG["command_ttl_s"] * 1e9):
+    now = time.monotonic_ns()
+    if not 0 <= now - stamp < int(CONFIG["command_ttl_s"] * 1e9):
         return None
+    if revision is not None:
+        if len(values) < 26 or values[24] != revision or not now < values[25]:
+            return None
+        if frame_ns is not None and (len(values) != 27 or values[26] != frame_ns):
+            return None
     nominal = [n if math.isfinite(n) else None for n in values[:12]]
-    current = [n if math.isfinite(n) else None for n in values[12:]]
-    return {"active": bool(active), "requested": requested, "nominal_nm": nominal, "current_a": current}
+    current = [n if math.isfinite(n) else None for n in values[12:24]]
+    result = {"active": bool(active), "requested": requested, "nominal_nm": nominal, "current_a": current}
+    if revision is not None:
+        result["expires_ns"] = int(values[25])
+    if frame_ns is not None:
+        result["contact_frame_ns"] = int(frame_ns)
+    return result
 
 
-def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_port=None, cube_dir=None, align=None, wrist_state=None, headset=False, proxy_frame=None, tabletop=False, palm_test=False, official_puzzle=False, ball_size_mm=45., feedback_display=None, web_control=None, control_port=None, force_frame=None, feedback_mapping=None, use_cpp=False):
+def aligned_feedback_display(read, frame, requested, *, wait_s):
+    stamp = frame["physics_frame_ns"]
+    if not stamp:
+        return None
+    revision = frame["grasp_object"]["contact_revision"]
+    deadline = time.monotonic() + wait_s
+    while True:
+        data = read(stamp, revision)
+        if data:
+            return read_feedback_display(data, requested, revision=revision, frame_ns=stamp)
+        left = deadline - time.monotonic()
+        if left <= 0:
+            return None
+        time.sleep(min(.001, left))
+
+
+def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_port=None, cube_dir=None, align=None, wrist_state=None, headset=False, proxy_frame=None, tabletop=False, palm_test=False, official_puzzle=False, ball_size_mm=45., feedback_display=None, web_control=None, control_port=None, force_frame=None, feedback_mapping=None, use_cpp=False, shared_path=None):
     import superdex.physics as sdp
     import superdex.robotics as sdr
 
@@ -389,6 +486,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
     bot = None
     view = None
     grasp_physics = None
+    shared_link = None
     bridge = environment = left_support = None
     puzzle_table = None
     services = ExitStack()
@@ -445,9 +543,9 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
             from ve33_cube import PuzzleCube, link_poses
             from ve33_quest import IDENTITY, WristBridge, wrist_server
             if local_grasp:
-                from ve33_local_grasp import LocalGrasp, grasp_needs_rebuild, open_hand_surface
+                from ve33_local_grasp import LocalGrasp, grasp_needs_rebuild
                 from ve33_tabletop import Tabletop
-                environment = LocalGrasp(sdp, scene, grasp_settings, open_surface=open_hand_surface(sdp, scene, actor))
+                environment = LocalGrasp(sdp, scene, grasp_settings, hand=actor)
                 puzzle_table = Tabletop(sdp, scene, view, grasp_table=True)
                 scene.enable_layer_contact_asymmetric("GraspRigid", "RightHand", False)
                 scene.enable_layer_contact_asymmetric("puzzle_cube_shell", "RightHand", False)
@@ -490,7 +588,29 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 link_names, links = zip(*contacts.hand)
                 palm_index = link_names.index("base_link") if "base_link" in link_names else -1
                 grasp_physics = load_native().GraspPhysics(scene, actor, links, indices, motor_indices, palm_index)
-            if force_frame is not None:
+                if shared_path is not None:
+                    from motorhand.native_kinematics import NativeGloveKinematics
+                    shared_link = load_native().SharedLink(str(shared_path))
+                    native_kin = NativeGloveKinematics(MODEL_DIR, feedback_mapping or fingers.mapping).native
+                    def connect_motion():
+                        obj = environment.prefab
+                        if obj is not None:
+                            rigid, fixed, soft = obj.roots, obj.static_roots, obj.soft
+                            center, axis = obj.center, obj.yaw_axis
+                        else:
+                            soft = environment.actor if environment.soft else None
+                            rigid = [] if environment.soft else [environment.actor]
+                            fixed = []
+                            center = environment.origin
+                            axis = environment.rotation.apply([0., 0., 1.])
+                        center_node = (obj or environment).node if soft is not None else -1
+                        grasp_physics.set_motion(rigid, fixed, [body for _, body in environment.contact_actors],
+                                                 [soft] if soft is not None else [], center_node,
+                                                 center, axis, environment.settings["angle_deg"])
+                    connect_motion()
+                    grasp_physics.motion_command(grasp_settings["locked"], grasp_settings["angle_deg"],
+                                                grasp_settings["drag"] or [])
+            if force_frame is not None and shared_link is None:
                 projector = ContactTorqueProjector(contacts.hand, fingers.kin,
                                                    feedback_mapping or fingers.mapping, indices, motor_indices)
                 if grasp_physics is None:
@@ -514,7 +634,14 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
             support_groups = puzzle_table.groups if puzzle_table is not None else None
             glb = scene_glb(view.groups, {} if local_grasp else environment.groups,
                             collection_name=collection, support_groups=support_groups)
-            services.enter_context(wrist_server(bridge, quest_port, glb, control=web_control))
+            # 在 HTTP 请求线程匹配已完成的物理帧与控制周期，物理线程无需等待反馈。
+            scene_feedback = None
+            if shared_link is not None:
+                def scene_feedback(frame):
+                    return aligned_feedback_display(shared_link.read_display_for, frame,
+                                                    web_control.requested.is_set(), wait_s=1./CONFIG["control_hz"])
+            services.enter_context(wrist_server(bridge, quest_port, glb, control=web_control,
+                                                scene_feedback=scene_feedback))
         frame_id = 0
         scene_revision = 0
         last_view = 0.
@@ -526,7 +653,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
         pairs, contact_forces = {}, {}
 
         def read_target():
-            stamp, *values = pending[:]
+            stamp, *values = shared_link.read_target() if shared_link is not None else pending[:]
             encoder = values[joint_count:]
             return stamp, values[:joint_count], encoder if len(encoder) == MOTOR_COUNT else no_encoder_sample
 
@@ -535,9 +662,11 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
             frame_start = time.monotonic()
             if (view and view.closed) or (debugger and not sdp.debugger.is_attached()):
                 break
-            stamp, angles, encoder_sample = read_target()
+            if shared_link is None:
+                stamp, angles, encoder_sample = read_target()
             if bridge:
-                target_tree = np.asarray(angles)
+                if shared_link is None:
+                    target_tree = np.asarray(angles)
                 reset_grasp = False
                 if web_control is not None and web_control.scene_revision is not None:
                     if local_grasp:
@@ -557,7 +686,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                             for (_, prop), transform in zip(static_objects.contact_actors, static_objects.transforms):
                                 prop.set_root_transform(transform)
                         bridge.reset_scene()
-                        fingers.reset(target_tree)
+                        fingers.reset(np.asarray(read_target()[1]) if shared_link is not None else target_tree)
                         if left_support is not None:
                             left_support.update(None, 1 / 240)
                         if guard is not None:
@@ -572,10 +701,17 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                     if reset_grasp or settings != grasp_settings:
                         # 场景切换后只发布新物体算出的接触反馈。
                         replacing = reset_grasp or grasp_needs_rebuild(grasp_settings, settings)
+                        if replacing and shared_link is not None:
+                            shared_link.invalidate_force()
+                            grasp_physics.clear_motion()
                         if replacing and force_frame is not None:
                             force_frame[2] = 0.
                         if environment.configure(settings, reset=reset_grasp):
                             contacts.shells = environment.contact_actors + puzzle_table.contact_actors
+                            if shared_link is not None:
+                                connect_motion()
+                        if shared_link is not None:
+                            grasp_physics.motion_command(settings["locked"], settings["angle_deg"], settings["drag"] or [])
                         grasp_settings = settings
                 if fixed_wrist:
                     root_pose = UPRIGHT_WRIST_POSE if local_grasp else IDENTITY
@@ -608,7 +744,8 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 if native_grasp:
                     # 自由抓取用真实接触，保留求解后的姿态和速度以持续夹持。
                     target_contacts, target_fingers, finger_hits = {}, set(), {}
-                    angles = target_tree
+                    if shared_link is None:
+                        angles = target_tree
                 else:
                     q = target_tree[fingers.motor_rows]
                     for index, angle in zip(indices, target_tree):
@@ -622,7 +759,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                                          deepening=deepening if stamp else ())
                     finger_hits = fingers.guarded_angles(target_tree, guard, publish_blocks=bool(stamp))
                     angles = fingers.last
-                if proxy_frame is not None:
+                if proxy_frame is not None and shared_link is None:
                     # 转层步进可能拖慢画面，几何受阻角已可独立交给电机线程。
                     publish_contact_frame(proxy_frame, fingers.proxy, stamp, time.monotonic_ns(),
                                           bool(stamp and (native_grasp or fingers.valid)),
@@ -635,63 +772,69 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 left = bridge.left_hand() if left_support is not None else None
                 left_probes = None
                 guard_wrist = not (fixed_wrist or native_grasp)
-                if grasp_physics is not None:
+                if grasp_physics is not None and shared_link is None:
                     grasp_target = list(pose)
-                for substep in range(4):
-                    if local_grasp:
-                        environment.step(PHYSICS_STEP_S)
-                    if left_support is not None:
-                        left_probes = left_support.update(left, PHYSICS_STEP_S)
-                    if guard_wrist:
-                        points = guard.points()
-                        before = np.asarray(fingers.pose).copy()
-                    if native_grasp:
-                        # 同一轮多个子步各自获取最新输入，发布实际驱动末子步的那组采样。
-                        stamp, angles, encoder_sample = read_target()
-                        target_tree = np.asarray(angles)
-                        target = grasp_target if grasp_physics is not None else pose
-                        for index, angle in zip(indices, angles):
-                            target[index] = angle
-                    if grasp_physics is not None:
-                        grasp_physics.step(grasp_target, PHYSICS_STEP_S)
-                    else:
-                        drive.set_target(pose, root_pose)
-                        scene.step(PHYSICS_STEP_S)
-                    last = substep == 3 or time.monotonic() - frame_start >= .010
-                    if last and force_frame is not None:
-                        contact_stamp = time.monotonic_ns()
-                        valid = False
-                        torque = speed = joint_positions = np.zeros(12)
-                        if stamp:
-                            try:
-                                if grasp_physics is not None:
-                                    usable, joint_positions, speed, tree_torque = grasp_physics.effort()
-                                    if usable and all(np.isfinite(values).all() for values in (tree_torque, speed, joint_positions)):
-                                        torque = projector.project_tree(tree_torque, joint_positions)
+                if shared_link is not None:
+                    stamp = grasp_physics.run_until(shared_link, native_kin, PHYSICS_STEP_S,
+                                                    round(1e9 / CONFIG["control_hz"]),
+                                                    round((frame_start + 1/30) * 1e9),
+                                                    grasp_settings["contact_revision"])
+                else:
+                    for substep in range(4):
+                        if local_grasp:
+                            environment.step(PHYSICS_STEP_S)
+                        if left_support is not None:
+                            left_probes = left_support.update(left, PHYSICS_STEP_S)
+                        if guard_wrist:
+                            points = guard.points()
+                            before = np.asarray(fingers.pose).copy()
+                        if native_grasp:
+                            # 同一轮多个子步各自获取最新输入，发布实际驱动末子步的那组采样。
+                            stamp, angles, encoder_sample = read_target()
+                            target_tree = np.asarray(angles)
+                            target = grasp_target if grasp_physics is not None else pose
+                            for index, angle in zip(indices, angles):
+                                target[index] = angle
+                        if grasp_physics is not None:
+                            grasp_physics.step(grasp_target, PHYSICS_STEP_S)
+                        else:
+                            drive.set_target(pose, root_pose)
+                            scene.step(PHYSICS_STEP_S)
+                        last = substep == 3 or time.monotonic() - frame_start >= .010
+                        if last and force_frame is not None:
+                            contact_stamp = time.monotonic_ns()
+                            valid = False
+                            torque = speed = joint_positions = np.zeros(12)
+                            if stamp:
+                                try:
+                                    if grasp_physics is not None:
+                                        usable, joint_positions, speed, tree_torque = grasp_physics.effort()
+                                        if usable and all(np.isfinite(values).all() for values in (tree_torque, speed, joint_positions)):
+                                            torque = projector.project_tree(tree_torque, joint_positions)
+                                        else:
+                                            usable = False
                                     else:
-                                        usable = False
-                                else:
-                                    usable = scene.get_solver_stats().convergence_status != sdp.ConvergenceStatus.DIVERGED
-                                    if usable:
-                                        actor.get_articulated_pose(contact_pose)
-                                        actor.get_articulated_joint_velocities(contact_vel)
-                                        torque = projector.project(contact_pose)
-                                        speed = np.asarray(contact_vel)[motor_indices]
-                                        joint_positions = np.asarray(contact_pose)[motor_indices]
-                                valid = usable and all(np.isfinite(values).all() for values in (torque, speed, joint_positions))
-                            except (KinematicsError, ValueError, sdp.Error):
-                                pass
-                        effort_values = [stamp, contact_stamp, bool(valid), *torque, *speed, *joint_positions,
-                                         *target_tree[fingers.motor_rows], *encoder_sample,
-                                         grasp_settings["contact_revision"] if local_grasp else 0]
-                        force_frame[:] = effort_values[:len(force_frame)]
-                    if not native_grasp:
-                        fingers.project(angles)
-                    if guard_wrist:
-                        wrist_hits.update(limit_wrist(guard, fingers, drive, before, points))
-                    # 碰撞复杂时先发布已完成的步，下一帧立即使用最新手柄输入。
-                    if last or (force_frame is None and time.monotonic() - frame_start >= .010):
-                        break
+                                        usable = scene.get_solver_stats().convergence_status != sdp.ConvergenceStatus.DIVERGED
+                                        if usable:
+                                            actor.get_articulated_pose(contact_pose)
+                                            actor.get_articulated_joint_velocities(contact_vel)
+                                            torque = projector.project(contact_pose)
+                                            speed = np.asarray(contact_vel)[motor_indices]
+                                            joint_positions = np.asarray(contact_pose)[motor_indices]
+                                    valid = usable and all(np.isfinite(values).all() for values in (torque, speed, joint_positions))
+                                except (KinematicsError, ValueError, sdp.Error):
+                                    pass
+                            effort_values = [stamp, contact_stamp, bool(valid), *torque, *speed, *joint_positions,
+                                             *target_tree[fingers.motor_rows], *encoder_sample,
+                                             grasp_settings["contact_revision"] if local_grasp else 0]
+                            force_frame[:] = effort_values[:len(force_frame)]
+                        if not native_grasp:
+                            fingers.project(angles)
+                        if guard_wrist:
+                            wrist_hits.update(limit_wrist(guard, fingers, drive, before, points))
+                        # 碰撞复杂时先发布已完成的步，下一帧立即使用最新手柄输入。
+                        if last or (force_frame is None and time.monotonic() - frame_start >= .010):
+                            break
             elif not bridge:
                 actor.set_articulated_pose_from_joints(pose)
                 actor.set_articulated_joint_velocities(velocities)
@@ -702,6 +845,12 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 measured = (grasp_physics.contacts([body for _, body in contacts.shells])
                             if grasp_physics is not None else None)
                 pairs, contact_forces = contacts.read(measured)
+                if (local_grasp and environment.awaiting_hand_clearance
+                        and 0 <= time.monotonic_ns() - stamp < int(CONFIG["command_ttl_s"] * 1e9)
+                        and (grasp_physics.last_timing_ms()[0] >= 0 if shared_link is not None
+                             else force_frame is not None and force_frame[2])
+                        and environment.ready_to_return(bool(pairs.get("grasp_object")), time.monotonic())):
+                    web_control.return_grasp_when_clear(grasp_settings)
                 for shell, links in [*finger_hits.items(), *wrist_hits.items()]:
                     pairs[shell] = sorted(set(pairs.get(shell, ())) | {str(info.link_names[i]) for i in links})
                 touched = {link.split("_")[0] for group in pairs.values() for link in group}
@@ -713,11 +862,12 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                     if MODEL_MOTOR_JOINTS[i].split("_")[0] in clear:
                         del fingers.proxy.blocks[i]
                 palm_contact = "base" in target_fingers or "base" in touched
-                if proxy_frame is not None:
+                if proxy_frame is not None and shared_link is None:
                     publish_contact_frame(proxy_frame, fingers.proxy, stamp, time.monotonic_ns(),
                                           bool(stamp and (native_grasp or fingers.valid)), palm_contact, wrist_stamp)
-            actor.get_articulated_pose(pose)
-            displayed[:] = [stamp, *(pose[offsets[name]] for name in motor_names)]
+            if shared_link is None:
+                actor.get_articulated_pose(pose)
+                displayed[:] = [stamp, *(pose[offsets[name]] for name in motor_names)]
             if view and show_scene:
                 actor.get_articulated_link_transforms(transforms)
                 if environment:
@@ -752,8 +902,8 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                              collection: {} if local_grasp else link_poses(environment.names, environment.transforms),
                              "hand_cube_contacts": pairs,
                              "right_contact_force_n": contact_forces,
-                             "motor_feedback": read_feedback_display(
-                                 feedback_display, web_control is not None and web_control.requested.is_set()),
+                             "motor_feedback": read_feedback_display(feedback_display,
+                                 web_control is not None and web_control.requested.is_set()),
                              "left_hand_tracking": left,
                              "left_contact_probes": left_probes,
                              "target_cube_contacts": {shell: [str(info.link_names[i]) for i in links]
@@ -769,7 +919,14 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                     if puzzle_table is not None:
                         frame["objects"] = link_poses(puzzle_table.names, puzzle_table.transforms)
                     if local_grasp:
+                        if shared_link is not None and environment.prefab is not None:
+                            environment.prefab.center = np.asarray(grasp_physics.motion_center())
                         frame["grasp_object"] = environment.packet()
+                    if shared_link is not None:
+                        frame["physics_frame_ns"] = int(grasp_physics.last_contact_frame_ns()) if stamp else 0
+                        input_ms, step_ms, publish_ms = grasp_physics.last_timing_ms()
+                        frame["physics_timing_ms"] = {"input_age": input_ms, "last_substep": step_ms,
+                                                      "sample_to_publish": publish_ms}
                     bridge.publish_scene(frame)
                 if not headset:
                     now = time.monotonic()
@@ -779,6 +936,8 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
             period = 1. / CONFIG["control_hz"] if local_grasp else SCENE_VIEW_PERIOD_S if environment else .015
             stop.wait(max(0., period - (time.monotonic() - frame_start)))
     finally:
+        if shared_link is not None and grasp_physics is not None:
+            grasp_physics.clear_motion()
         services.close()
         if view:
             view.close()
@@ -815,7 +974,7 @@ def load_zero(path, axes):
     return values
 
 
-def capture_zero(read, axes, path):
+def capture_zero(read, axes, path, *, accept=None):
     # 每轴至少收到多次独立反馈，静止窗口内取均值。
     samples = {mid: [] for mid in axes}
     last_stamps = dict.fromkeys(axes, 0)
@@ -843,7 +1002,12 @@ def capture_zero(read, axes, path):
     with NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as out:
         json.dump(record, out, indent=2, allow_nan=False)
         out.write("\n")
-    os.replace(out.name, path)
+    try:
+        if accept is not None:
+            accept(zero)
+        os.replace(out.name, path)
+    finally:
+        Path(out.name).unlink(missing_ok=True)
     return zero
 
 
@@ -900,10 +1064,29 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
     period = 1. / CONFIG["control_hz"]
     next_publish = 0.
     was_requested = False
+    requires_new_zero = False
     model_limits = {mid: motor.model_rad_limits() for mid, (_, motor) in axes.items()}
+
+    def poll_transport():
+        nonlocal zero, cached_q, requires_new_zero, was_requested, next_publish
+        if demo or not hasattr(read, "poll_transport"):
+            return "none"
+        event = read.poll_transport()
+        if event != "none":
+            requires_new_zero = True
+            zero = None
+            cached_q = None
+            pending[0] = 0.
+            control.requested.clear()
+            was_requested = False
+            if feedback is not None:
+                feedback.stop("串口连接变化 · 等待重新标零")
+            next_publish = 0.
+        return event
 
     while renderer.is_alive():
         began = time.monotonic()
+        poll_transport()
         if control.zero.is_set():
             control.requested.clear()
             pending[0] = 0.
@@ -912,7 +1095,13 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
             status.update(calibrating=True, requested=False, active=False, feedback_message="标零中 · 真机出力关闭")
             control.publish(status)
             try:
-                zero = capture_zero(read, axes, zero_path)
+                if poll_transport() != "none" or not getattr(read, "online", True):
+                    raise ValueError("串口离线或已重新连接，请重新标零")
+                def accept_zero(_):
+                    if poll_transport() != "none" or not getattr(read, "online", True):
+                        raise ValueError("串口离线或已重新连接，请重新标零")
+                zero = capture_zero(read, axes, zero_path, accept=accept_zero)
+                requires_new_zero = False
                 cached_q = None
                 status["zero_error"] = None
             except (ValueError, OSError) as exc:
@@ -933,7 +1122,7 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
             raw, age, state = position_sample(joint, mid, now)
             alarm |= state.startswith("报警") or state == "路由错误"
             target = encoder_position = None
-            if state == "在线" and zero is not None:
+            if state == "在线" and zero is not None and not requires_new_zero:
                 low, high = model_limits[mid]
                 encoder_position = math.radians((raw - zero[mid]) * motor.sign * motor.scale)
                 target = min(high, max(low, encoder_position))
@@ -946,7 +1135,7 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
                 "input_rad": target, "sim_rad": measured[i] if applied and math.isfinite(measured[i]) else None, "age_ms": age,
                 "state": state, "encoder_rad": encoder_position,
             })
-        requested = control.requested.is_set()
+        requested = control.requested.is_set() and not requires_new_zero
         if feedback is not None:
             if not requested and was_requested:
                 feedback.stop()
@@ -974,7 +1163,7 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
             effort_frame[2] = 0.
         if stamp and feedback is not None:
             # 停止命令可能在求解闭链时到达，提交前重新读取。
-            requested = control.requested.is_set() and not control.zero.is_set()
+            requested = control.requested.is_set() and not control.zero.is_set() and not requires_new_zero
             try:
                 feedback.follow_request(q, raw_angles, stamp, effort_frame, requested,
                                         sample_stamps=sample_stamps, encoder_position=encoder_positions)
@@ -989,7 +1178,7 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
                     feedback.interrupt(f"编码器采集 · {missing}" if missing else "闭链姿态不可用")
                 feedback.ready_since = None
                 feedback.nominal = None
-                if not feedback.output_error:
+                if not feedback.output_error and not feedback.rearm_required:
                     feedback.message = ("暂停提交力反馈 · 电机报警或路由不符" if alarm else
                                         "已请求启用 · 等待有效手套数据" if requested else feedback.message)
 
@@ -1031,10 +1220,26 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
                 row["sent_motor_nm"] = sent[i] if sent is not None else None
                 row["current_a"] = currents[i] if math.isfinite(currents[i]) else None
             contact_input = min(effort_frame[:2]) if effort_frame is not None and frame_matches_grasp else 0
+            has_timing = bool(contact_input and 0 < effort_frame[0] <= effort_frame[1] <= now)
             wrist = proxy_frame[WRIST_STAMP_INDEX] if proxy_frame is not None else 0
-            status.update(rows=rows, online=sum(r["state"] == "在线" for r in rows),
-                          calibrated=zero is not None, requested=requested, active=active,
+            online = sum(r["state"] == "在线" for r in rows)
+            transport_online = True if demo else getattr(read, "online", True)
+            reconnect_count = 0 if demo else getattr(read, "reconnect_count", 0)
+            message = feedback.message if feedback is not None else "仅位置采集"
+            if not transport_online:
+                message = "串口已断开 · 等待重新连接"
+            elif not online and not alarm:
+                message = "串口已打开 · 等待电机位置回包"
+            elif requires_new_zero:
+                message = "网关已重连 · 请重新标零"
+            status.update(rows=rows, online=online,
+                          calibrated=zero is not None and not requires_new_zero, requested=requested, active=active,
+                          can_feedback=feedback is not None and not demo and transport_online and zero is not None and not requires_new_zero,
+                          can_zero=not demo and transport_online,
+                          transport_online=transport_online, reconnect_count=reconnect_count,
+                          requires_new_zero=requires_new_zero,
                           output_error=bool(feedback and feedback.output_error),
+                          feedback_rearm_required=bool(feedback and feedback.rearm_required),
                           feedback_interruptions=feedback.interruption_count if feedback is not None else 0,
                           last_feedback_interruption=feedback.last_interruption if feedback is not None else None,
                           feedback_handoffs=feedback.handoff_count if feedback is not None else 0,
@@ -1042,17 +1247,17 @@ def run_control(read, axes, solver, mapping, pending, displayed, renderer, zero_
                           demo_grip=control.demo_grip.value if demo else None,
                           feedback_gain=1. if feedback is not None else None,
                           pose_error=pose_error,
-                          feedback_message=feedback.message if feedback is not None else "仅位置采集",
+                          feedback_message=message,
                           wrist=wrist_state.value.decode() if wrist_state is not None else "本地调试",
                           wrist_ms=(now-wrist)/1e6 if wrist else None,
                           contact_ms=(now-contact_input)/1e6 if contact_input else None,
                           contact_frame_ns=int(effort_frame[1]) if fresh_contact else None,
+                          physics_input_ns=int(effort_frame[0]) if has_timing else None,
+                          physics_solved_ns=int(effort_frame[1]) if has_timing else None,
                           command_deadline_ns=feedback.deadline if active else None,
                           motor_ms=(now-stamp)/1e6 if stamp else None,
                           applied_ms=(now-applied)/1e6 if applied else None,
-                          max_angle_error_rad=float(np.max(np.abs(np.array(targets)-sim_positions)))
-                          if ((fresh_contact or applied) and len(targets) == 12
-                              and all(map(math.isfinite, sim_positions))) else None)
+                          max_angle_error_rad=measure_frame_gaps(rows))
             if recording:
                 recorder.tick(now, rows, grasp_settings, active, demo, status)
             if publish:
@@ -1135,7 +1340,11 @@ def main():
                 not np.isfinite([m.scale, m.zero_deg, m.min_deg, m.max_deg]).all() or m.min_deg >= m.max_deg):
             parser.error(f"轴 {m.motor_id} 的标定与模型不一致")
     axes = {m.motor_id: (m.model_joint, m) for m in mapping.motors}
-    solver = GloveKinematics(MODEL_DIR, mapping)
+    if use_cpp:
+        from motorhand.native_kinematics import NativeGloveKinematics
+        solver = NativeGloveKinematics(MODEL_DIR, mapping)
+    else:
+        solver = GloveKinematics(MODEL_DIR, mapping)
     if args.zero:
         try:
             with gateway(args.port) as read:
@@ -1155,31 +1364,54 @@ def main():
         print(f"已保存 12 轴零偏：{args.zero_file}")
         return
     ctx = mp.get_context("spawn")
-    pending = ctx.Array("d", 1 + len(solver.joint_names) + MOTOR_COUNT)
-    displayed = ctx.Array("d", 13)
+    pending = None if use_cpp else ctx.Array("d", 1 + len(solver.joint_names) + MOTOR_COUNT)
+    displayed = None if use_cpp else ctx.Array("d", 13)
     stop = ctx.Event()
     align = ctx.Event() if args.quest and not fixed_wrist else None
     wrist_state = ctx.Array("c", 128) if args.quest else None
-    proxy_frame = ctx.Array("d", PROXY_FRAME_SIZE) if args.quest else None
-    force_frame = ctx.Array("d", FORCE_FRAME_SIZE) if args.quest else None
-    feedback_display = ctx.Array("d", 26) if args.quest else None
+    legacy_feedback = args.quest and not use_cpp
+    proxy_frame = ctx.Array("d", PROXY_FRAME_SIZE) if legacy_feedback else None
+    force_frame = ctx.Array("d", FORCE_FRAME_SIZE) if legacy_feedback else None
+    feedback_display = ctx.Array("d", 26) if legacy_feedback else None
     default_enabled = args.quest and not args.preview and (not args.local_grasp or args.feedback)
     web_control = WebControl(ctx, align, default_enabled=default_enabled, allow_reset=args.quest,
                              cube_switch=args.quest and not (fixed_wrist or args.tabletop),
                              local_grasp=args.local_grasp, demo=args.demo)
-    renderer = ctx.Process(target=render, args=(solver.joint_names, [n for n, _ in axes.values()],
-                                               pending, displayed, stop, args.debugger, args.quest_port if args.quest else None,
-                                               args.cube_dir.resolve(), align, wrist_state, args.quest, proxy_frame,
-                                               args.tabletop, args.palm_test,
-                                               args.official_puzzle, args.ball_size_mm, feedback_display, web_control,
-                                               args.quest_port, force_frame, mapping, use_cpp))
-    if args.demo:
-        from ve33_local_grasp import DemoGlove
-        connection = nullcontext(DemoGlove(axes, web_control.demo_grip))
-    else:
-        connection = gateway(args.port, args.quest)
-    with connection as read:
-        feedback = ContactForceFeedbackLoop(read, axes, profile=args.feedback_profile) if args.quest else None
+    with ExitStack() as resources:
+        shared_path = None
+        loop = feedback = read = None
+        if use_cpp:
+            from motorhand.native_control import make_feedback_control
+            from motorhand.native_observer import run_native_control
+            from ve33_local_grasp import DemoGlove
+            folder = resources.enter_context(TemporaryDirectory(prefix="ve33-link-"))
+            shared_path = str(Path(folder) / "control.map")
+            native = load_native()
+            link = native.SharedLink(shared_path, len(solver.joint_names))
+            web_control.native_link_path = shared_path
+            link.command(bool(default_enabled and not args.demo), 0, -1.)
+            if not args.demo:
+                resources.enter_context(gateway_lock(args.port))
+            motors = [motor for _, motor in axes.values()]
+            lo, hi = zip(*(motor.model_rad_limits() for motor in motors))
+            loop = native.NativeLoop(solver.native, make_feedback_control(axes, native, args.feedback_profile),
+                                     link, "" if args.demo else str(args.port),
+                                     [m.sign * m.scale for m in motors], lo, hi, DemoGlove.GRIP,
+                                     round(1e9 / CONFIG["control_hz"]))
+            resources.callback(loop.close)
+        else:
+            if args.demo:
+                from ve33_local_grasp import DemoGlove
+                read = DemoGlove(axes, web_control.demo_grip)
+            else:
+                read = resources.enter_context(gateway(args.port, args.quest))
+            feedback = ContactForceFeedbackLoop(read, axes, profile=args.feedback_profile) if args.quest else None
+        renderer = ctx.Process(target=render, args=(solver.joint_names, [n for n, _ in axes.values()],
+                                                   pending, displayed, stop, args.debugger, args.quest_port if args.quest else None,
+                                                   args.cube_dir.resolve(), align, wrist_state, args.quest, proxy_frame,
+                                                   args.tabletop, args.palm_test,
+                                                   args.official_puzzle, args.ball_size_mm, feedback_display, web_control,
+                                                   args.quest_port, force_frame, mapping, use_cpp, shared_path))
         renderer.start()
         inspector = None
         recorder = None
@@ -1193,9 +1425,13 @@ def main():
                     "--port", str(args.quest_port), "--cube-dir", str(args.cube_dir),
                 ])
             print(f"MotorHand 网页控制台 http://127.0.0.1:{args.quest_port}/", flush=True)
-            run_control(read, axes, solver, mapping, pending, displayed, renderer, args.zero_file,
-                        wrist_state, feedback, proxy_frame, force_frame, fixed_wrist, feedback_display, web_control,
-                        args.port, demo=args.demo, recorder=recorder, use_cpp=use_cpp)
+            if use_cpp:
+                run_native_control(loop, web_control, axes, args.zero_file, wrist_state, renderer, recorder,
+                                   args.port, args.demo, args.feedback_profile, load_zero, capture_zero, mapping_identity)
+            else:
+                run_control(read, axes, solver, mapping, pending, displayed, renderer, args.zero_file,
+                            wrist_state, feedback, proxy_frame, force_frame, fixed_wrist, feedback_display, web_control,
+                            args.port, demo=args.demo, recorder=recorder, use_cpp=use_cpp)
         finally:
             if feedback is not None:
                 feedback.stop()

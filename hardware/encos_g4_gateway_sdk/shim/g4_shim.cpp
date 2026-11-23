@@ -5,6 +5,7 @@
 // 零增益 MIT 卸力帧，再 DisableJoint，避免 SDK 持续发送过期目标。
 // 位置与接收时间一起取自 SDK 的 GetTimedSnapshots，不依赖 watchdog 调度。
 #include "HandClientG4.hpp"
+#include "g4_api.h"
 
 #include <time.h>
 
@@ -63,26 +64,39 @@ struct Shim {
 
 extern "C" {
 
-struct G4Joint {
-    uint32_t bus, id, valid, error;
-    float angle_deg, current_a, temp_c, speed_rpm, hz;
-    uint64_t samples;
-    int64_t received_ns;
-    uint32_t board_timestamp_us, max_board_gap_us, max_host_gap_us, tx_failures;
-};
-
 uint32_t g4_joint_size() { return sizeof(G4Joint); }
 int64_t g4_now_ns() { return MonotonicNs(); }
 
-void* g4_open(const char* port, int baud, unsigned hz) {
+static void* OpenGateway(const char* port, int baud, unsigned hz, bool wait_for_first_packets) {
     auto* shim = new Shim();
-    if (!shim->client.Connect(port, baud, hz)) {
+    if (!shim->client.Connect(port, baud, hz, false, wait_for_first_packets)) {
         delete shim;
         return nullptr;
     }
     shim->running = true;
     shim->watchdog = std::thread(&Shim::Loop, shim);
     return shim;
+}
+
+void* g4_open(const char* port, int baud, unsigned hz) {
+    return OpenGateway(port, baud, hz, true);
+}
+
+// 重连使用干净的 SDK/路由/看门狗状态，以 12 轴实测新样本作为就绪依据。
+void* g4_open_fresh(const char* port, int baud, unsigned hz) {
+    return OpenGateway(port, baud, hz, false);
+}
+
+int g4_transport_lost(void* h) {
+    if (!h) return true;
+    const auto& client = static_cast<Shim*>(h)->client;
+    if (client.TransportLost()) return true;
+    // CH341 bulk 端点可能停止收发，但 tty 仍存在且 poll 没有 HUP。
+    // 只有曾收到有效回包的会话才启用此检查，新句柄无回包时不会反复重开。
+    constexpr uint64_t silence_us = 3'000'000;
+    const auto last = client.LastReplyUs();
+    const auto now_us = gateway::NowUs();
+    return last && now_us > last && now_us - last >= silence_us;
 }
 
 // 仅读取位置。采集期间和关闭时均不发送电机控制帧。
@@ -105,6 +119,11 @@ void g4_set_mit(void* h, uint32_t bus, uint32_t id, float deg, float kp, float k
 
 // 先校验完整批次，再一次提交给 IO 线程。返回 0 表示过期，-1 表示参数无效。
 int g4_set_mit_batch(void* h, const float* commands, int count, int64_t deadline_ns) {
+    return g4_renew_mit_batch(h, commands, count, deadline_ns, 0);
+}
+
+int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadline_ns,
+                      int64_t previous_deadline_ns) {
     constexpr int axes = 12;
     if (!h || !commands || count != axes) return -1;
     std::array<std::pair<lqs::JointKey, MotorCommand>, axes> batch;
@@ -125,8 +144,15 @@ int g4_set_mit_batch(void* h, const float* commands, int count, int64_t deadline
     }
     auto* shim = static_cast<Shim*>(h);
     std::lock_guard<std::mutex> lock(shim->mutex);
-    if (MonotonicNs() >= deadline_ns) return 0;
-    shim->client.SetCommandBatch(batch);
+    if (shim->client.TransportLost()) return -1;
+    if (previous_deadline_ns) {
+        for (const auto& entry : batch) {
+            auto it = shim->pending.find(entry.first);
+            if (it == shim->pending.end() || it->second.deadline_ns != previous_deadline_ns) return 0;
+        }
+    }
+    const auto submit_before = previous_deadline_ns ? std::min(previous_deadline_ns, deadline_ns) : deadline_ns;
+    if (!shim->client.SetCommandBatchBefore(batch, submit_before)) return 0;
     for (const auto& entry : batch) shim->pending[entry.first] = Pending{deadline_ns, 0};
     return 1;
 }

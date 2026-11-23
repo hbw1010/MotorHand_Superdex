@@ -25,6 +25,8 @@ The following work was done to produce this simulation-ready asset:
 - Generated a tetrahedral mesh from the surface mesh geometry.
 - Constructed a soft-body physics simulation and collision model from surface and tetrahedral geometry.
 
+本项目的 `duck_lamp_hand_contact.mochi.h5` 派生自 Meta 的 `duck_lamp.mochi.h5`，沿用下述 CC BY 4.0 许可。为固定腕部抓握添加了由 338 个原始体网格节点驱动的 672 面接触蒙皮（保留三个坐标轴上的尺寸极值节点）；材料仍由原 4059 个四面体求解，画面采用原 1328 面表面。在仓库根目录运行 `.venv/bin/python tools/experiments/bake_duck_contact_skin.py` 可以重新生成此派生文件。在 108 mm 模型的静止姿态，以两套三角面的顶点和面心采样，原表面到接触蒙皮的距离 P95 为 0.79 mm、最大 1.68 mm；反向分别为 0.65 mm、1.20 mm。这里统计的是采样点距离。
+
 ## License & IP Notes
 
 The Meta-authored digital assets in this directory are distributed under the [Creative Commons Attribution 4.0 International License (CC-BY-4.0)](./LICENSE). You must give appropriate credit to Meta Platforms, Inc. when you use or redistribute them.

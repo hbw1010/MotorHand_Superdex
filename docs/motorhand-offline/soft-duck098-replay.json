@@ -1,0 +1,181 @@
+{
+  "source_settings": {
+    "kind": "official_duck_lamp",
+    "size_mm": 108.0,
+    "hardness": 1.0,
+    "layout": "palm"
+  },
+  "tested_settings": {
+    "kind": "official_duck_lamp",
+    "size_mm": 108.0,
+    "hardness": 0.98,
+    "layout": "palm"
+  },
+  "settings": {
+    "kind": "official_duck_lamp",
+    "size_mm": 108.0,
+    "hardness": 0.98,
+    "layout": "palm"
+  },
+  "profile": "nominal-fingers",
+  "hand_first": false,
+  "source_cycles": 1087,
+  "source_seconds": 10.859896734,
+  "dropped": 0,
+  "reconnects": 0,
+  "post_disable_nonzero": 0,
+  "post_disable_query_axes": 12,
+  "recorded": {
+    "cycles": 1086,
+    "age_ms": {
+      "p50": 42.8148,
+      "p95": 54.7861,
+      "p99": 63.838,
+      "max": 72.8757
+    },
+    "expired": 0,
+    "expiry_episodes": 0,
+    "unavailable": 0,
+    "active": 1086,
+    "interruptions": 0,
+    "handoffs": 0,
+    "wire_peaks": [
+      2.967,
+      0.0024,
+      0.0317,
+      0.0024,
+      0.0024,
+      0.0024,
+      1.9463,
+      4.2076,
+      5.9658,
+      2.5519,
+      0.2418,
+      1.3748
+    ],
+    "wire_counts": [
+      2147,
+      2147,
+      2147,
+      2147,
+      2147,
+      2147,
+      2147,
+      2147,
+      2147,
+      2147,
+      2147,
+      2147
+    ],
+    "wire_short_gap_jumps_nm": {
+      "p50": 0.0,
+      "p95": 0.0098,
+      "p99": 0.0586,
+      "max": 0.4835
+    },
+    "wire_gaps_over_20ms": 0,
+    "wire_short_gap_jumps_above_1nm": 0
+  },
+  "hold": {
+    "cycles": 200,
+    "age_ms": {
+      "p50": 34.4256,
+      "p95": 44.6011,
+      "p99": 51.9061,
+      "max": 53.0227
+    },
+    "expired": 0,
+    "expiry_episodes": 0,
+    "unavailable": 0,
+    "active": 200,
+    "interruptions": 0,
+    "handoffs": 0,
+    "wire_peaks": [
+      0.0122,
+      0.0024,
+      0.0024,
+      0.0024,
+      6.3614,
+      0.9353,
+      3.4261,
+      0.0073,
+      0.0024,
+      0.0024,
+      3.2991,
+      3.3236
+    ],
+    "wire_counts": [
+      396,
+      396,
+      396,
+      396,
+      396,
+      396,
+      396,
+      396,
+      396,
+      396,
+      396,
+      396
+    ],
+    "wire_short_gap_jumps_nm": {
+      "p50": 0.0,
+      "p95": 0.0049,
+      "p99": 0.0391,
+      "max": 0.4786
+    },
+    "wire_gaps_over_20ms": 0,
+    "wire_short_gap_jumps_above_1nm": 0
+  },
+  "released": {
+    "cycles": 80,
+    "age_ms": {
+      "p50": 31.41,
+      "p95": 44.5116,
+      "p99": 54.438,
+      "max": 54.438
+    },
+    "expired": 0,
+    "expiry_episodes": 0,
+    "unavailable": 0,
+    "active": 80,
+    "interruptions": 0,
+    "handoffs": 0,
+    "wire_peaks": [
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024,
+      0.0024
+    ],
+    "wire_counts": [
+      159,
+      159,
+      159,
+      159,
+      159,
+      159,
+      159,
+      159,
+      159,
+      159,
+      159,
+      159
+    ],
+    "wire_short_gap_jumps_nm": {
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "wire_gaps_over_20ms": 0,
+    "wire_short_gap_jumps_above_1nm": 0
+  }
+}

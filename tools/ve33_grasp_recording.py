@@ -16,7 +16,9 @@ AXIS_FIELDS = ("id", "joint", "raw_deg", "input_rad", "contact_input_rad", "sim_
 HEADER = ("monotonic_ns", "mode", "kind", "layout", "size_mm", "hardness", "feedback_active", "feedback_gain",
           "contact_ms", "feedback_interruptions", "last_feedback_interruption",
           "feedback_handoffs", "last_feedback_handoff_ms",
-          *AXIS_FIELDS, "feedback_profile", "contact_frame_ns", "command_deadline_ns")
+          *AXIS_FIELDS, "feedback_profile", "contact_frame_ns", "command_deadline_ns",
+          "control_cycle_ms", "control_missed_ticks", "transport_online", "reconnect_count", "sim_minus_input_rad",
+          "physics_input_ns", "physics_solved_ns", "feedback_rearm_required")
 
 
 class GraspRecorder:
@@ -44,7 +46,11 @@ class GraspRecorder:
                       status["feedback_handoffs"], status["last_feedback_handoff_ms"])
             data = [(*prefix, *(row.get(key) for key in AXIS_FIELDS),
                      status.get("feedback_profile"), status.get("contact_frame_ns"),
-                     status.get("command_deadline_ns")) for row in rows]
+                     status.get("command_deadline_ns"), status.get("control_cycle_ms"),
+                     status.get("control_missed_ticks"), status.get("transport_online"),
+                     status.get("reconnect_count"), row.get("sim_minus_input_rad"),
+                     status.get("physics_input_ns"), status.get("physics_solved_ns"),
+                     status.get("feedback_rearm_required")) for row in rows]
             try:
                 self.queue.put_nowait(("sample", data))
             except Full:

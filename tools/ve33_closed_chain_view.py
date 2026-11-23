@@ -111,12 +111,13 @@ def attach_compound_visuals(prefab, model_dir, temporary_dir, sdp, *, full_colli
                     original_type = sdp.ColliderType.MESH
                     sdp.model.save_to_file(model, str(original_path), sdp.FileFormat.H5)
                 preserve_link_inertia(sdp, scene, link, original_path, original_type)
-            # 原始碰撞文件只含第一个零件；这里使用同一局部系的完整三角面。
+            # 原始碰撞文件只含第一个零件；这里使用同一局部系的完整封闭网格并生成 SDF，
+            # 避免软体接触时逐三角面查询导致数十毫秒级求解停顿。
             collision = trimesh.util.concatenate(collision_parts)
             model.mesh = sdp.MeshData(nodes_per_element=3, coordinates=collision.vertices.ravel(),
                                       connectivity=collision.faces.ravel())
             model.sdf = None
-            link.collider_type = sdp.ColliderType.MESH
+            link.collider_type = sdp.ColliderType.SDF
             if fill_sleeve:
                 link.boundary_subsampling = sdp.BoundarySubsamplingParams(
                     strategy=sdp.BoundarySubsamplingStrategy.AREA_PROPORTIONAL,

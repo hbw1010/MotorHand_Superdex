@@ -33,7 +33,7 @@ class Gateway:
 
 
 class WristFeedbackTest(unittest.TestCase):
-    def test_fresh_frame_replaces_a_just_expired_batch_with_a_zero_start(self):
+    def test_fresh_frame_after_expired_output_requires_manual_rearm(self):
         axes = {m.motor_id: (m.model_joint, m) for m in GloveMapping.load(MAPPING).motors}
         gateway = Gateway()
         feedback = ContactForceFeedbackLoop(gateway, axes)
@@ -51,16 +51,19 @@ class WristFeedbackTest(unittest.TestCase):
         frame = [1_055_000_000, 1_104_000_000, True, *reaction, *q, *q, *q]
         with patch("motorhand.feedback.time.monotonic_ns", return_value=1_105_000_000):
             feedback.follow_request(q, raw, 1_104_000_000, frame, True)
-        self.assertTrue(feedback.active)
-        self.assertEqual(feedback.interruption_count, 0)
-        self.assertEqual(feedback.handoff_count, 1)
-        self.assertEqual(gateway.commands[-1][1], 1_155_000_000)
-        self.assertEqual(gateway.commands[-1][0], [(0., 0., 0., 0., 0.)] * 12)
-        with patch("motorhand.feedback.time.monotonic_ns", return_value=1_115_000_000):
-            feedback.follow_request(q, raw, 1_114_000_000, frame, True)
-        self.assertGreater(abs(gateway.commands[-1][0][4][4]), 0.)
-        self.assertLess(abs(gateway.commands[-1][0][4][4]), .15)
-        self.assertFalse(gateway.released)
+        self.assertFalse(feedback.active)
+        self.assertTrue(feedback.rearm_required)
+        self.assertTrue(gateway.released)
+        self.assertEqual(len(gateway.commands), 1)
+        for j in range(35):
+            t = 1_115_000_000 + j*10_000_000
+            frame[:2] = [t, t]
+            with patch("motorhand.feedback.time.monotonic_ns", return_value=t):
+                feedback.follow_request(q, raw, t, frame, True)
+        self.assertTrue(feedback.rearm_required)
+        self.assertEqual(len(gateway.commands), 1)
+        feedback.stop()
+        self.assertFalse(feedback.rearm_required)
 
     def test_expired_batch_with_long_gap_or_short_new_lease_pauses(self):
         axes = {m.motor_id: (m.model_joint, m) for m in GloveMapping.load(MAPPING).motors}

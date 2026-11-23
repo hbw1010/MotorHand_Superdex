@@ -37,6 +37,7 @@ const rotation = new RotationControl((kind, angle) => postCommand(
 const number = (value, digits) => Number.isFinite(value) ? value.toFixed(digits) : '—';
 
 function tracks(state) {
+  if (state.diagnostic_stale) return `等待新控制快照 · 上次采样 ${number(state.snapshot_age_ms, 0)} ms 前`;
   return [
     `${state.online ?? 0}/12 ${state.demo ? '轴演示' : '轴在线'}`,
     state.wrist ?? '等待定位',
@@ -44,7 +45,7 @@ function tracks(state) {
     `仿真使用 ${number(state.applied_ms, 0)} ms`,
     `接触帧 ${number(state.contact_ms, 0)} ms`,
     state.fixed_wrist ? '固定腕部' : `定位 ${number(state.wrist_ms, 0)} ms`,
-    `最大角差 ${number(state.max_angle_error_rad, 3)} rad`,
+    `同帧最大角差 ${number(state.max_angle_error_rad, 3)} rad`,
   ].join(' · ');
 }
 
@@ -62,6 +63,7 @@ function showGrasp(state) {
     return;
   }
   sizePreview.controlSnapshot(grasp);
+  document.querySelector('#grasp-clearance').hidden = !grasp.awaiting_hand_clearance;
   if (state.grasp_assets?.length && !graspKind.querySelector('optgroup')) {
     const group = document.createElement('optgroup');
     group.label = 'SuperDex 官方资产';
@@ -101,12 +103,13 @@ function show(state) {
   sceneRevision = state.scene_revision;
   timing.textContent = tracks(state);
   showGrasp(state);
-  const mode = state.active ? '输出中' : state.requested ? '待命' : '关闭';
+  const mode = state.diagnostic_stale ? '状态待更新' : state.feedback_rearm_required ? '保护停止'
+    : state.active ? '输出中' : state.requested ? '待命' : '关闭';
   const lastPause = state.last_feedback_interruption
     ? ` · 中断 ${state.feedback_interruptions} 次 · 上次 ${state.last_feedback_interruption}` : '';
   const handoff = state.feedback_handoffs
     ? ` · 新帧接续 ${state.feedback_handoffs} 次 · 最近超期 ${number(state.last_feedback_handoff_ms, 1)} ms` : '';
-  feedbackStatus.textContent = `${mode} · ${state.feedback_message ?? '等待控制进程'}${lastPause}${handoff}`;
+  feedbackStatus.textContent = state.diagnostic_stale ? mode : `${mode} · ${state.feedback_message ?? '等待控制进程'}${lastPause}${handoff}`;
   feedbackStatus.dataset.active = state.active ? 'yes' : 'no';
   calibration.textContent = state.demo ? '演示模式 · 无真机输出' : state.calibrating ? '正在标零' : state.zero_error
     ? `标零失败 · ${state.zero_error}` : state.calibrated ? '已标零' : '待标零';
@@ -115,7 +118,8 @@ function show(state) {
     const tr = document.createElement('tr');
     const cells = [
       row.id, row.joint, number(row.raw_deg, 2), number(row.input_rad, 4),
-      number(row.sim_rad, 4), number(row.contact_motor_nm, 3), number(row.position_motor_nm, 3),
+      number(row.contact_input_rad, 4), number(row.sim_rad, 4), number(row.sim_minus_input_rad, 4),
+      number(row.contact_motor_nm, 3), number(row.position_motor_nm, 3),
       number(row.nominal_nm, 3),
       number(row.sent_motor_nm, 3), number(row.current_a, 3),
       number(row.age_ms, 1), row.state,
@@ -131,8 +135,8 @@ function show(state) {
   for (const button of buttons) {
     const action = button.dataset.control;
     button.disabled = busy || state.calibrating ||
-      (action === 'enable' && (!state.can_feedback || state.requested)) ||
-      (action === 'disable' && !(state.requested || state.active)) ||
+      (action === 'enable' && (!state.can_feedback || state.requested || state.diagnostic_stale)) ||
+      (action === 'disable' && !(state.requested || state.active || state.diagnostic_stale)) ||
       (action === 'align' && !state.can_align) || (action === 'zero' && state.can_zero === false);
   }
 }

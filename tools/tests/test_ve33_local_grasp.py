@@ -72,9 +72,10 @@ class LocalGraspTest(unittest.TestCase):
         self.assertEqual(err.exception.code, 404)
         read("control", {"action": "demo_grip", "value": 0})
         read("control", {"action": "reset_scene"})
-        for _ in range(30):
+        for _ in range(60):
             frame = read("scene")
-            if frame["scene_revision"] and not frame["hand_cube_contacts"]:
+            if (frame["scene_revision"] and not frame["hand_cube_contacts"]
+                    and not frame["grasp_object"]["awaiting_hand_clearance"]):
                 break
             time.sleep(.05)
         self.assertFalse(frame["hand_cube_contacts"])

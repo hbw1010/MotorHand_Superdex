@@ -38,6 +38,10 @@ GRASP_ASSETS = {
     "official_shape_box": GraspAsset("形状配对盒", "shape_box/shape_box"),
 }
 
+# 四个独立色块共用相同的刚体碰撞 SDF，组合场景另有内部部件。
+STANDALONE_BLOCKS = frozenset(GRASP_ASSETS[f"official_block_{color}"]
+                              for color in ("blue", "green", "red", "yellow"))
+
 
 def catalog():
     return [{"kind": kind, "label": asset.label} for kind, asset in GRASP_ASSETS.items()]
@@ -102,6 +106,9 @@ def instantiate(sdp, scene, path, *, hardness=None, **placement):
         elif hardness is not None:
             # 0.25 对应鸭灯原始材料，随后按与基础软体相同的倍率变化。
             duck["material"]["neoHookean"]["youngsModulus"] *= 16. ** (hardness - .25)
+            # 原有四面体负责形变，接触蒙皮绑定在同一组体网格节点上。
+            duck["shape"] = "./duck_lamp_hand_contact.mochi.h5"
+            duck["useContactSkin"] = True
         prefab = sdp.prefab.load_from_json_string(json.dumps(data), str(path.parent))
         params.scale = 1.
         return sdp.prefab.add_to_scene(prefab, scene, params)
@@ -173,6 +180,16 @@ class SoftRotationPins:
 
 
 class GraspPrefab:
+    @staticmethod
+    def palm_center(half_span, angle_deg, surface):
+        center = np.array([.072, -.005, -.007 - half_span[2]])
+        if surface is not None:
+            x, y, z = Rotation.from_euler("z", -angle_deg, degrees=True).apply(surface - center).T
+            footprint = (abs(x) <= half_span[0] + .002) & (abs(y) <= half_span[1] + .002)
+            if footprint.any():
+                center[2] += min(0., float(z[footprint].min() - half_span[2] - .002))
+        return center
+
     def __init__(self, sdp, scene, asset, settings, revision, wrist_rotation, open_surface):
         self.sdp, self.scene = sdp, scene
         path = prefab_path(asset)
@@ -181,14 +198,10 @@ class GraspPrefab:
         # size_mm 为初始姿态下整组碰撞包围盒的最长边。
         scale = settings["size_mm"] / (1000. * np.max(span))
         half_span = span * scale / 2.
+        self.half_span = half_span
         yaw = Rotation.from_euler("z", settings["angle_deg"], degrees=True)
         if settings["layout"] == "palm":
-            palm_center = np.array([.072, -.005, -.007 - half_span[2]])
-            if open_surface is not None:
-                x, y, z = yaw.inv().apply(open_surface - palm_center).T
-                footprint = (abs(x) <= half_span[0] + .002) & (abs(y) <= half_span[1] + .002)
-                if footprint.any():
-                    palm_center[2] += min(0., float(z[footprint].min() - half_span[2] - .002))
+            palm_center = self.palm_center(half_span, settings["angle_deg"], open_surface)
             rotation = wrist_rotation * yaw
             self.center = wrist_rotation.apply(palm_center)
         else:
@@ -253,6 +266,33 @@ class GraspPrefab:
             params = part.get_contact_params()
             params.penalty_coefficient = contact_stiffness(hardness)
             part.set_contact_params(params)
+        rigid_duck = asset == GRASP_ASSETS["official_duck_lamp"] and hardness == 1.
+        if asset in STANDALONE_BLOCKS or rigid_duck:
+            # 手部查询原刚体 SDF；软鸭灯无 SDF，必须保留其表面点对手的查询。
+            layer = "MotorHandRigidDuck" if rigid_duck else "MotorHandBlock"
+            for _, part in self.contacts:
+                part.set_contact_layer(layer)
+            scene.enable_layer_contact_asymmetric(layer, "RightHand", False)
+        elif asset == GRASP_ASSETS["official_puzzle_cube"]:
+            # 原版用 8 个自由角块和精细 SDF 的相互接触维持机构。
+            # 仅改变与手套的查询方向，保留部件之间原有的双向碰撞。
+            core, shell = "MotorHandCubeCore", "MotorHandCubeShell"
+            for _, part in self.contacts:
+                part.set_contact_layer(shell if part.get_name().endswith("/corner_shell_link") else core)
+            scene.enable_layer_contact_symmetric(core, "RightHand", False)
+            scene.enable_layer_contact_asymmetric(shell, "RightHand", False)
+        else:
+            # 其他带 SDF 碰撞体的官方刚体同样改为由手部采样点查询物体 SDF，
+            # 避免物体反向遍历 73 段手部三角网格导致百毫秒级求解停顿和超期断联。
+            sdf_parts = [part for _, part in self.contacts
+                         if part.get_type() != sdp.ActorType.SOFT
+                         and part.get_collider_type() == sdp.ColliderType.SDF
+                         and part.get_contact_layer() in ("", "default")]
+            if sdf_parts:
+                layer = "MotorHandRigidPrefab"
+                for part in sdf_parts:
+                    part.set_contact_layer(layer)
+                scene.enable_layer_contact_asymmetric(layer, "RightHand", False)
         self.asset_scale = float(scale)
 
     def release_pins(self):

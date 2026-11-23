@@ -1,0 +1,408 @@
+{
+  "参考提交": "c41046ef16520e3d94130823eb14834a5b7d0269",
+  "场景": "固定腕部；锁定在手心；6 个物理工作线程；FP32；1/240 s 物理子步；100 Hz 控制目标；同一 nominal-plus 标尺；无串口演示",
+  "采样": "操作场景直到物体和首个有效物理帧就绪，每 100 ms 加 0.05 grip；达到目标后等待 1 s，记录保持约 8 s；张手 700 ms 后开始记录约 1 s 的松手窗口。每一条 cycles 为实际控制周期，distinct_frames 和 frame_gap_ms 只统计被观测到的有效物理帧。",
+  "限制": "每次独立创建场景，非确定性物理逐帧配对。鸭灯首次新版本试验与短时物理求解试验并发，单独复测见 native_run_duck_repeat。demo 不启用出力，expired_cycles 是输入龄越过 TTL 的周期数，不能替代佩戴时中断计数。",
+  "结果": {
+    "python_dispatch": [
+      {
+        "case": "duck",
+        "seconds": 8.0,
+        "held": {
+          "cycles": 801,
+          "unavailable_cycles": 4,
+          "expired_cycles": 4,
+          "distinct_frames": 211,
+          "age_ms": {
+            "p50": 61.0899,
+            "p95": 82.2877,
+            "p99": 92.1605,
+            "max": 111.1103
+          },
+          "frame_gap_ms": {
+            "p50": 37.6615,
+            "p95": 45.9398,
+            "p99": 49.8734,
+            "max": 58.6105
+          },
+          "j5_abs_nm": {
+            "p50": 0.002,
+            "p95": 0.0101,
+            "p99": 0.0118,
+            "max": 0.0119
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        },
+        "released": {
+          "cycles": 108,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 70,
+          "age_ms": {
+            "p50": 30.7749,
+            "p95": 41.1388,
+            "p99": 46.0996,
+            "max": 51.044
+          },
+          "frame_gap_ms": {
+            "p50": 15.6049,
+            "p95": 21.0197,
+            "p99": 22.6857,
+            "max": 22.6857
+          },
+          "j5_abs_nm": {
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        }
+      },
+      {
+        "case": "box",
+        "seconds": 8.0,
+        "held": {
+          "cycles": 800,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 733,
+          "age_ms": {
+            "p50": 10.6327,
+            "p95": 20.7892,
+            "p99": 20.9294,
+            "max": 23.4441
+          },
+          "frame_gap_ms": {
+            "p50": 10.2859,
+            "p95": 19.52,
+            "p99": 20.8286,
+            "max": 27.9952
+          },
+          "j5_abs_nm": {
+            "p50": 8.4771,
+            "p95": 8.5035,
+            "p99": 8.5039,
+            "max": 8.5041
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        },
+        "released": {
+          "cycles": 108,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 94,
+          "age_ms": {
+            "p50": 10.745,
+            "p95": 23.2704,
+            "p99": 23.7665,
+            "max": 33.4321
+          },
+          "frame_gap_ms": {
+            "p50": 11.3156,
+            "p95": 14.8055,
+            "p99": 28.3648,
+            "max": 28.3648
+          },
+          "j5_abs_nm": {
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        }
+      }
+    ],
+    "native_substep": [
+      {
+        "case": "duck",
+        "seconds": 8.0,
+        "held": {
+          "cycles": 810,
+          "unavailable_cycles": 3,
+          "expired_cycles": 3,
+          "distinct_frames": 210,
+          "age_ms": {
+            "p50": 60.0099,
+            "p95": 81.5474,
+            "p99": 90.0184,
+            "max": 100.0136
+          },
+          "frame_gap_ms": {
+            "p50": 38.0018,
+            "p95": 48.1116,
+            "p99": 50.146,
+            "max": 53.4988
+          },
+          "j5_abs_nm": {
+            "p50": 0.002,
+            "p95": 0.0105,
+            "p99": 0.0119,
+            "max": 0.012
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        },
+        "released": {
+          "cycles": 113,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 78,
+          "age_ms": {
+            "p50": 29.9372,
+            "p95": 30.0802,
+            "p99": 40.0088,
+            "max": 40.0219
+          },
+          "frame_gap_ms": {
+            "p50": 13.7475,
+            "p95": 21.9422,
+            "p99": 24.309,
+            "max": 24.309
+          },
+          "j5_abs_nm": {
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        }
+      },
+      {
+        "case": "box",
+        "seconds": 8.0,
+        "held": {
+          "cycles": 812,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 775,
+          "age_ms": {
+            "p50": 10.0076,
+            "p95": 20.0066,
+            "p99": 20.0221,
+            "max": 29.9694
+          },
+          "frame_gap_ms": {
+            "p50": 10.1382,
+            "p95": 12.6376,
+            "p99": 20.149,
+            "max": 22.8015
+          },
+          "j5_abs_nm": {
+            "p50": 8.4773,
+            "p95": 8.5034,
+            "p99": 8.5039,
+            "max": 8.5042
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        },
+        "released": {
+          "cycles": 110,
+          "unavailable_cycles": 1,
+          "expired_cycles": 0,
+          "distinct_frames": 98,
+          "age_ms": {
+            "p50": 10.0076,
+            "p95": 20.0098,
+            "p99": 20.026,
+            "max": 20.0401
+          },
+          "frame_gap_ms": {
+            "p50": 10.6424,
+            "p95": 19.3125,
+            "p99": 21.071,
+            "max": 21.071
+          },
+          "j5_abs_nm": {
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        }
+      }
+    ],
+    "native_run": [
+      {
+        "case": "duck",
+        "seconds": 8.0,
+        "held": {
+          "cycles": 812,
+          "unavailable_cycles": 12,
+          "expired_cycles": 12,
+          "distinct_frames": 266,
+          "age_ms": {
+            "p50": 50.005,
+            "p95": 70.0047,
+            "p99": 110.0062,
+            "max": 140.008
+          },
+          "frame_gap_ms": {
+            "p50": 29.7965,
+            "p95": 34.9952,
+            "p99": 39.6838,
+            "max": 139.6732
+          },
+          "j5_abs_nm": {
+            "p50": 0.0089,
+            "p95": 0.0234,
+            "p99": 0.0245,
+            "max": 0.0251
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        },
+        "released": {
+          "cycles": 110,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 74,
+          "age_ms": {
+            "p50": 20.0289,
+            "p95": 30.0278,
+            "p99": 39.9912,
+            "max": 40.0029
+          },
+          "frame_gap_ms": {
+            "p50": 13.8423,
+            "p95": 21.6186,
+            "p99": 23.3934,
+            "max": 23.3934
+          },
+          "j5_abs_nm": {
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        }
+      },
+      {
+        "case": "box",
+        "seconds": 8.0,
+        "held": {
+          "cycles": 810,
+          "unavailable_cycles": 1,
+          "expired_cycles": 0,
+          "distinct_frames": 781,
+          "age_ms": {
+            "p50": 10.0083,
+            "p95": 20.0039,
+            "p99": 20.0245,
+            "max": 20.0352
+          },
+          "frame_gap_ms": {
+            "p50": 10.0827,
+            "p95": 11.7033,
+            "p99": 20.162,
+            "max": 20.9946
+          },
+          "j5_abs_nm": {
+            "p50": 8.4771,
+            "p95": 8.5034,
+            "p99": 8.5039,
+            "max": 8.5041
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        },
+        "released": {
+          "cycles": 110,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 102,
+          "age_ms": {
+            "p50": 10.0085,
+            "p95": 20.0111,
+            "p99": 20.0254,
+            "max": 20.0305
+          },
+          "frame_gap_ms": {
+            "p50": 10.084,
+            "p95": 17.1165,
+            "p99": 20.4807,
+            "max": 20.7572
+          },
+          "j5_abs_nm": {
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        }
+      }
+    ],
+    "native_run_duck_repeat": [
+      {
+        "case": "duck",
+        "seconds": 8.0,
+        "held": {
+          "cycles": 811,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 270,
+          "age_ms": {
+            "p50": 50.0046,
+            "p95": 70.0009,
+            "p99": 70.0114,
+            "max": 80.0113
+          },
+          "frame_gap_ms": {
+            "p50": 29.8589,
+            "p95": 35.4122,
+            "p99": 39.8402,
+            "max": 45.4603
+          },
+          "j5_abs_nm": {
+            "p50": 0.002,
+            "p95": 0.0085,
+            "p99": 0.0115,
+            "max": 0.0115
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        },
+        "released": {
+          "cycles": 113,
+          "unavailable_cycles": 0,
+          "expired_cycles": 0,
+          "distinct_frames": 78,
+          "age_ms": {
+            "p50": 29.9917,
+            "p95": 39.9987,
+            "p99": 40.006,
+            "max": 40.0108
+          },
+          "frame_gap_ms": {
+            "p50": 13.6833,
+            "p95": 23.0274,
+            "p99": 26.3106,
+            "max": 26.3106
+          },
+          "j5_abs_nm": {
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "record_drops": 0,
+          "output_rows": 0
+        }
+      }
+    ]
+  }
+}

@@ -1,13 +1,19 @@
+#include "feedback_bindings.hpp"
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>
 #include <nanobind/stl/tuple.h>
 #include <nanobind/stl/vector.h>
 #include <mochi_physics/cpp_api/mochi_scene.h>
+#include "kinematics.hpp"
+#include "shared_link.hpp"
+#include "grasp_motion.hpp"
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <limits>
+#include <thread>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -19,6 +25,11 @@ using mochi::Actor;
 using mochi::real;
 using Axes = std::array<double, 12>;
 using Force = std::array<double, 3>;
+
+std::int64_t steady_ns() {
+    using namespace std::chrono;
+    return duration_cast<nanoseconds>(steady_clock::now().time_since_epoch()).count();
+}
 
 void check(const mochi::Error& error) {
     if (!error.IsOK()) {
@@ -32,12 +43,17 @@ public:
                  std::vector<int> tree, std::array<int, 12> motors, int palm_index)
         : scene_(scene), hand_(hand), links_(std::move(links)), tree_(std::move(tree)),
           motors_(motors), palm_index_(palm_index), pose_(hand.GetNumDofs()),
-          velocity_(pose_.size()), target_(pose_.size()) {
+          velocity_(pose_.size()), target_(pose_.size()), frame_(3 + 5 * motors.size() + 1) {
         const auto valid_dof = [this](int i) { return i >= 0 && std::size_t(i) < pose_.size(); };
         if (!std::all_of(tree_.begin(), tree_.end(), valid_dof) ||
             !std::all_of(motors_.begin(), motors_.end(), valid_dof) || palm_index_ < -1 ||
             palm_index_ >= static_cast<int>(links_.size())) {
             throw std::invalid_argument("关节索引与 MotorHand 模型不匹配");
+        }
+        for (std::size_t i = 0; i < motors_.size(); ++i) {
+            const auto it = std::find(tree_.begin(), tree_.end(), motors_[i]);
+            if (it == tree_.end()) throw std::invalid_argument("关节树中缺少电机轴");
+            motor_rows_[i] = static_cast<std::size_t>(it - tree_.begin());
         }
     }
 
@@ -50,14 +66,163 @@ public:
         }
         nb::gil_scoped_release release;
         std::copy(target.begin(), target.end(), target_.begin());
+        advance_scene(dt);
+    }
+
+    // 每个子步读取一张完整输入快照。场景约束不动时，一次调用可连续完成预算内的子步。
+    std::tuple<bool, double> step_contact(ve33::SharedLink& link, ve33::Kinematics& kin,
+                                         double dt, std::int64_t budget_end, unsigned max_steps,
+                                         bool publish_last, std::uint64_t revision) {
+        nb::gil_scoped_release release;
+        return advance_contact(link,kin,dt,budget_end,max_steps,publish_last,revision);
+    }
+
+    // 在创建 Mochi 场景的线程上运行。只在下一次场景命令/画面交接边界回到 Python。
+    double run_until(ve33::SharedLink& link, ve33::Kinematics& kin, double dt,
+                     std::int64_t period, std::int64_t view_deadline, std::uint64_t revision) {
+        if (period<=0 || period>100'000'000 || view_deadline-steady_ns()>100'000'000)
+            throw std::invalid_argument("无效的物理调度预算");
+        nb::gil_scoped_release release;
+        do {
+            if (next_tick_ns_ > steady_ns()) {
+                using namespace std::chrono;
+                std::this_thread::sleep_until(steady_clock::time_point(nanoseconds(next_tick_ns_)));
+            }
+            ve33::Intent intent;
+            if (link.read_intent(intent) && intent.revision != static_cast<std::int64_t>(revision)) {
+                frame_[2] = 0.;
+                link.invalidate_force();
+                return 0.;
+            }
+            const auto now=steady_ns();
+            next_tick_ns_=now+period;
+            advance_contact(link,kin,dt,next_tick_ns_,4,true,revision);
+        } while (std::max(steady_ns(),next_tick_ns_) < view_deadline);
+        return last_target_[0];
+    }
+
+    void set_motion(std::vector<Actor*> rigid,std::vector<Actor*> fixed,std::vector<Actor*> surfaces,
+                    std::vector<Actor*> soft,int center_node,Force center,Force axis,double angle) {
+        motion_=std::make_unique<ve33::GraspMotion>(
+            scene_,std::move(rigid),std::move(fixed),std::move(surfaces),std::move(soft),
+            center_node,center,axis,angle);
+    }
+    void clear_motion() {motion_.reset();}
+    void motion_command(bool locked,double angle,const std::vector<double>& drag) {
+        if (!motion_) throw std::runtime_error("没有本地抓握物体");
+        motion_->command(locked,angle,drag);
+    }
+    Force motion_center() const {
+        if (!motion_) throw std::runtime_error("没有本地抓握物体");
+        return motion_->center();
+    }
+private:
+    std::tuple<bool,double> advance_contact(ve33::SharedLink& link,ve33::Kinematics& kin,
+                                         double dt,std::int64_t budget_end,unsigned max_steps,
+                                         bool publish_last,std::uint64_t revision) {
+        if (max_steps < 1 || max_steps > 4 || !std::isfinite(dt) || dt <= 0.)
+            throw std::invalid_argument("无效的物理子步参数");
+        mochi::Error error;
+        hand_.GetArticulatedPose(target_, error);
+        check(error);
+        std::vector<double> sampled;
+        for (unsigned step = 1; step <= max_steps; ++step) {
+            if (motion_) motion_->step(dt);
+            const auto began = steady_ns();
+            bool valid = false;
+            if (link.try_read_target(sampled)) {
+                if (sampled.size() != 1 + tree_.size() + motors_.size())
+                    throw std::invalid_argument("编码器共享快照长度与关节树不匹配");
+                valid = sampled[0] > 0. && sampled[0] <= static_cast<double>(began) &&
+                        std::all_of(sampled.begin()+1, sampled.end(), [](double x) {
+                            return std::isfinite(x) && std::abs(x) <= std::numeric_limits<real>::max();
+                        });
+                if (valid) {
+                    last_target_ = std::move(sampled);
+                    for (std::size_t i = 0; i < tree_.size(); ++i)
+                        target_[tree_[i]] = static_cast<real>(last_target_[1+i]);
+                } else {
+                    // 未收到完整快照时不施加可能撕裂的目标，也不给上一目标续期。
+                    if (last_target_.empty()) last_target_.resize(sampled.size());
+                    last_target_[0] = 0.;
+                }
+            } else if (!last_target_.empty() && last_target_[0] > 0. &&
+                       last_target_[0] <= static_cast<double>(began)) {
+                // 极罕见的 seqlock 并发写入抢占：沿用上一有效目标及其原始时戳，避免误发无效帧触发保护。
+                valid = true;
+            } else {
+                if (last_target_.empty()) last_target_.resize(1 + tree_.size() + motors_.size());
+                last_target_[0] = 0.;
+            }
+            advance_scene(dt);
+            const auto solved = steady_ns();
+            const auto step_ns = std::max<std::int64_t>(0, solved - began);
+            const bool finish_early = publish_last && (
+                (budget_end > 0 && solved + step_ns > budget_end) ||
+                (valid && (solved - static_cast<std::int64_t>(last_target_[0])) >= 35'000'000));
+            if (solved < budget_end && !finish_early && !(step == max_steps && publish_last)) continue;
+            Axes positions{}, speeds{}, torque{};
+            if (valid) {
+                try {
+                    auto [usable, q, dq, tree_torque] = sample_effort();
+                    positions = q;
+                    speeds = dq;
+                    const auto finite = [](const auto& a) {
+                        return std::all_of(a.begin(), a.end(), [](double x) { return std::isfinite(x); });
+                    };
+                    valid = usable && finite(q) && finite(dq) && finite(tree_torque);
+                    if (valid) {
+                        torque = kin.project(tree_torque, q);
+                        valid = finite(torque);
+                    }
+                } catch (const std::runtime_error&) {
+                    valid = false;
+                } catch (const std::invalid_argument&) {
+                    valid = false;
+                }
+            }
+            frame_[0] = last_target_[0];
+            frame_[1] = static_cast<double>(solved);
+            auto cursor = frame_.begin() + 3;
+            cursor = std::copy(torque.begin(), torque.end(), cursor);
+            cursor = std::copy(speeds.begin(), speeds.end(), cursor);
+            cursor = std::copy(positions.begin(), positions.end(), cursor);
+            for (const auto row : motor_rows_) *cursor++ = last_target_[1 + row];
+            for (std::size_t i = 0; i < motors_.size(); ++i) {
+                *cursor++ = last_target_[1 + tree_.size() + i];
+            }
+            frame_.back() = static_cast<double>(revision);
+            frame_[2] = valid;
+            link.publish_force(frame_);
+            const auto published = steady_ns();
+            last_timing_ms_ = {valid ? (began - frame_[0]) / 1e6 : -1.,
+                               (solved - began) / 1e6, (published - solved) / 1e6};
+            return {true, frame_[0]};
+        }
+        return {false, last_target_[0]};
+    }
+
+public:
+    const std::vector<double>& last_target() const { return last_target_; }
+    double last_contact_frame_ns() const { return frame_[2] == 1. ? frame_[1] : 0.; }
+    const std::array<double, 3>& last_timing_ms() const { return last_timing_ms_; }
+
+private:
+    void advance_scene(double dt) {
         mochi::Error error;
         hand_.ResetArticulatedTargetPose(target_, error);
         check(error);
         scene_.Step(dt);
     }
 
+public:
     std::tuple<bool, Axes, Axes, std::vector<double>> effort() {
         nb::gil_scoped_release release;
+        return sample_effort();
+    }
+
+private:
+    std::tuple<bool, Axes, Axes, std::vector<double>> sample_effort() {
         Axes positions{}, speeds{};
         std::vector<double> tree_torque(tree_.size());
         mochi::Error error;
@@ -96,6 +261,7 @@ public:
         return {true, positions, speeds, std::move(tree_torque)};
     }
 
+public:
     std::vector<std::vector<Force>> contacts(const std::vector<Actor*>& surfaces) const {
         nb::gil_scoped_release release;
         std::vector<std::vector<Force>> result(surfaces.size());
@@ -120,111 +286,36 @@ private:
     std::array<int, 12> motors_;
     int palm_index_;
     std::vector<real> pose_, velocity_, target_;
+    std::array<std::size_t, 12> motor_rows_{};
+    std::vector<double> last_target_, frame_;
+    std::array<double, 3> last_timing_ms_{};
+    std::int64_t next_tick_ns_{};
+    std::unique_ptr<ve33::GraspMotion> motion_;
 };
 
-class ContactFeedback {
-public:
-    ContactFeedback(Axes limits, Axes stiffness, Axes position_limits, double deadband, double contact_min,
-                    double blend_end, double full_load, double motor_damping, double rebound_lookahead,
-                    std::vector<std::array<double, 2>> anchors = {})
-        : limits_(limits), stiffness_(stiffness), position_limits_(position_limits),
-          deadband_(deadband), contact_min_(contact_min),
-          blend_end_(blend_end), full_load_(full_load), motor_damping_(motor_damping),
-          rebound_lookahead_(rebound_lookahead), anchors_(std::move(anchors)) {
-        if (!anchors_.empty()) {
-            if (anchors_.size() < 2 || anchors_[0][0] != 0. || anchors_[0][1] != 0.)
-                throw std::invalid_argument("Invalid feedback curve origin");
-            for (std::size_t i = 0; i < anchors_.size(); ++i) {
-                const auto [x, y] = anchors_[i];
-                if (!std::isfinite(x) || !std::isfinite(y) || x < 0. || y < 0. ||
-                    y > *std::min_element(limits_.begin(), limits_.end()) ||
-                    (i && (x <= anchors_[i-1][0] || y < anchors_[i-1][1])))
-                    throw std::invalid_argument("Invalid feedback curve anchor");
-            }
-        }
-    }
-
-    std::tuple<Axes, Axes, int> plan(const Axes& q, const Axes& dq, const Axes& reaction,
-                                    const Axes& sim_pos, const Axes& sampled_pos, const Axes& frame_weight,
-                                    double ramp, double dt) {
-        Axes position{};
-        int loaded_count = 0;
-        const double alpha = -std::expm1(-2. * 3.14159265358979323846 * 25. * dt);
-        for (std::size_t i = 0; i < q.size(); ++i) {
-            if (std::abs(reaction[i]) < contact_min_) {
-                slew_[i] = filtered_[i] = 0.;
-                continue;
-            }
-            ++loaded_count;
-            const double limit = limits_[i];
-            const double load_torque = std::clamp(reaction[i], -limit, limit);
-            const double onset = std::clamp((std::abs(load_torque) - contact_min_) / (blend_end_ - contact_min_), 0., 1.);
-            const double blend = onset * onset * (3. - 2. * onset);
-            const double raw_contact = load_torque * blend;
-            double mapped = std::abs(raw_contact);
-            if (!anchors_.empty()) {
-                const auto upper = std::upper_bound(anchors_.begin(), anchors_.end(), mapped,
-                    [](double x, const auto& point) { return x < point[0]; });
-                if (upper == anchors_.end()) mapped = anchors_.back()[1];
-                else if (upper == anchors_.begin()) mapped = upper->at(1);
-                else {
-                    const auto& a = *(upper - 1);
-                    const auto& b = *upper;
-                    mapped = a[1] + (mapped - a[0]) * (b[1] - a[1]) / (b[0] - a[0]);
-                }
-            }
-            const double contact = std::copysign(mapped, raw_contact);
-            const double sampled_error = sim_pos[i] - sampled_pos[i];
-            const double direction = std::copysign(1., sampled_error);
-            const double speed = std::clamp(dq[i], -2., 2.);
-            const double live_gap = direction * (sim_pos[i] - q[i]) - rebound_lookahead_ * std::max(direction * speed, 0.);
-            const double error = direction * std::min(std::abs(sampled_error), std::max(live_gap, 0.));
-            const double load = std::clamp((std::abs(load_torque) - contact_min_) / (full_load_ - contact_min_), 0., 1.);
-            const double position_effort = std::copysign(std::max(std::abs(error) - deadband_, 0.), error) *
-                stiffness_[i] * load * load * (3. - 2. * load);
-            if (position_effort * load_torque > 0.) {
-                const double position_budget = std::min(position_limits_[i], limit - std::abs(contact));
-                position[i] = std::copysign(std::min(std::abs(position_effort), position_budget),
-                                            position_effort);
-            }
-            const double damped = contact + position[i] - blend * motor_damping_ * speed;
-            const double target = damped * load_torque > 0. ?
-                std::clamp(damped, -limit, limit) * std::clamp(ramp, 0., 1.) * frame_weight[i] : 0.;
-            position[i] *= frame_weight[i];
-            if (frame_weight[i] < 1.) {
-                const double cap = limit * frame_weight[i];
-                slew_[i] = std::clamp(slew_[i], -cap, cap);
-                filtered_[i] = std::clamp(filtered_[i], -cap, cap);
-            }
-            if (filtered_[i] * load_torque < 0.) {
-                slew_[i] = filtered_[i] = 0.;
-            }
-            slew_[i] += std::clamp(target - slew_[i], -60. * dt, 60. * dt);
-            filtered_[i] += alpha * (slew_[i] - filtered_[i]);
-        }
-        return {filtered_, position, loaded_count};
-    }
-
-private:
-    Axes limits_, stiffness_, position_limits_;
-    double deadband_, contact_min_, blend_end_, full_load_, motor_damping_;
-    double rebound_lookahead_;
-    std::vector<std::array<double, 2>> anchors_;
-    Axes slew_{}, filtered_{};
-};
 } // namespace
 
+void bind_native_loop(nanobind::module_&);
 NB_MODULE(_ve33_native, module) {
+    module.attr("runtime_api") = 5;
+    bind_kinematics(module);
+    bind_native_loop(module);
     module.attr("double_precision") = bool(MOCHI_USE_DOUBLE_PRECISION);
     nb::class_<GraspPhysics>(module, "GraspPhysics")
         .def(nb::init<mochi::Scene&, Actor&, std::vector<Actor*>, std::vector<int>, std::array<int, 12>, int>(),
              nb::keep_alive<1, 2>(), nb::keep_alive<1, 3>())
         .def("step", &GraspPhysics::step)
+        .def("step_contact", &GraspPhysics::step_contact)
+        .def("run_until", &GraspPhysics::run_until)
+        .def("set_motion",&GraspPhysics::set_motion)
+        .def("clear_motion",&GraspPhysics::clear_motion)
+        .def("motion_command",&GraspPhysics::motion_command)
+        .def("motion_center",&GraspPhysics::motion_center)
+        .def("last_target", &GraspPhysics::last_target)
+        .def("last_contact_frame_ns", &GraspPhysics::last_contact_frame_ns)
+        .def("last_timing_ms", &GraspPhysics::last_timing_ms)
         .def("effort", &GraspPhysics::effort)
         .def("contacts", &GraspPhysics::contacts);
-    nb::class_<ContactFeedback>(module, "ContactFeedback")
-        .def(nb::init<Axes, Axes, Axes, double, double, double, double, double, double>())
-        .def(nb::init<Axes, Axes, Axes, double, double, double, double, double, double,
-                      std::vector<std::array<double, 2>>>())
-        .def("plan", &ContactFeedback::plan);
+    ve33::bind_feedback(module);
+
 }

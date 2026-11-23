@@ -24,6 +24,12 @@ let renderer, session, space, latest, align = false, sending = false, seq = 0, l
 let previewPlaced = false;
 let mode = 'controller';
 let diagnostics, leftView, graspView, controls, shown, lastPoll = 0, polling = false;
+let feedbackExpiresAt = Infinity;
+let desktopDirty = true;
+function invalidateDesktop() {
+  desktopDirty = true;
+}
+showDiagnostics.addEventListener('change', invalidateDesktop);
 const wristJoint = 'wrist';
 const leftJointNames = [wristJoint, 'thumb-metacarpal', 'thumb-phalanx-distal', 'thumb-tip'];
 for (const finger of ['index', 'middle', 'ring', 'pinky']) {
@@ -33,6 +39,7 @@ for (const finger of ['index', 'middle', 'ring', 'pinky']) {
 forceScale.addEventListener('input', () => {
   scaleValue.textContent = `${forceScale.value} N`;
   shown = null;
+  invalidateDesktop();
 });
 
 function isController(s, handedness) {
@@ -126,14 +133,25 @@ function pollScene(t, interval) {
   const after = graspView && !session ? latest?.frame : undefined;
   const path = after === undefined ? '/api/v1/scene' : `/api/v1/scene?after=${after}`;
   fetch(path, {signal:AbortSignal.timeout(session ? 150 : 700)})
-    .then(response => response.status === 200 ? response.json() : null)
-    .then(frame => {
-      if (session === sessionSent && frame?.version === 1) latest = frame;
+    .then(async response => {
+      if (response.status !== 200) return;
+      const receivedAt = performance.now();
+      const frame = await response.json();
+      if (session === sessionSent && frame?.version === 1) {
+        if (latest && frame.frame === latest.frame && frame.time_monotonic_s === latest.time_monotonic_s) return;
+        latest = frame;
+        const remaining = frame.motor_feedback?.remaining_ms;
+        feedbackExpiresAt = receivedAt + (Number.isFinite(remaining) ? remaining : 100);
+      }
     })
     .catch(() => {}).finally(() => { polling = false; });
 }
 
 function applyFrame() {
+  if (latest?.motor_feedback && performance.now() >= feedbackExpiresAt) {
+    latest = {...latest, motor_feedback: null};
+    feedbackExpiresAt = Infinity;
+  }
   if (!latest || shown === latest) return;
   for (const [group, nodes] of Object.entries(groups)) {
     for (const [name, node] of nodes) {
@@ -149,6 +167,7 @@ function applyFrame() {
   }
   shown = latest;
   world.visible = true;
+  invalidateDesktop();
 }
 
 function draw(t, frame) {
@@ -172,12 +191,15 @@ function drawDesktop(t) {
   pollScene(t, graspView ? 0 : 50);
   applyFrame();
   controls.update();
+  if (!desktopDirty) return;
+  desktopDirty = false;
   diagnostics.anchor.visible = Boolean(latest && showDiagnostics.checked);
   if (diagnostics.anchor.visible) diagnostics.place({transform:{position:camera.position, orientation:camera.quaternion}}, camera.aspect);
   renderer.render(scene, camera);
 }
 
 function startDesktop() {
+  invalidateDesktop();
   scene.background = previewColor;
   world.position.set(0, -.045, .08);
   world.quaternion.setFromRotationMatrix(xrBasis);
@@ -235,11 +257,13 @@ async function prepare() {
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    invalidateDesktop();
   };
   new ResizeObserver(resize).observe(preview);
   resize();
   camera.position.set(.24, .17, .40);
   controls = new OrbitControls(camera, renderer.domElement);
+  controls.addEventListener('change', invalidateDesktop);
   controls.target.set(0, -.01, -.04);
   controls.minDistance = .22;
   controls.maxDistance = 1.15;
@@ -272,7 +296,7 @@ async function prepare() {
     camera.position.set(.43, .22, .24);
     controls.target.set(.014, .098, .055);
     controls.update();
-    graspView = new LocalGraspView(world, camera, renderer.domElement, controls);
+    graspView = new LocalGraspView(world, camera, renderer.domElement, controls, invalidateDesktop);
   }
   startDesktop();
   if (localGrasp) {
