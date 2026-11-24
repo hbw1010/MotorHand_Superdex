@@ -39,6 +39,7 @@ class NativeLoop {
     const Axes ratio_,lo_,hi_,amplitude_;
     const int64_t period_;
     const uint32_t disabled_mask_;
+    const bool preserve_zero_on_reconnect_;
     std::optional<GatewayTransport> transport_;
     bool demo_;
     Axes zero_{},last_q_{};
@@ -68,14 +69,18 @@ class NativeLoop {
     GatewayTransport::Event poll_transport(int64_t now) {
         const auto event = transport_->poll(now);
         if (event != GatewayTransport::Event::none) {
-            // 串口重新枚举后，即使路径相同也可能换了手套。旧零位与旧使能不得沿用。
-            requires_new_zero_=true;
-            calibrated_=false;
-            zero_.fill(0.);
+            if (!preserve_zero_on_reconnect_ || !calibrated_) {
+                // 默认模式下串口重新枚举不得沿用旧零位；开启保留模式时仅安全卸力，保留已标定零位。
+                requires_new_zero_=true;
+                calibrated_=false;
+                zero_.fill(0.);
+            }
             zero_capture_ns_=0;
             last_force_={};
             link_.disarm();
-            control_.stop("串口连接变化 · 等待重新标零");
+            control_.stop(preserve_zero_on_reconnect_ && calibrated_
+                          ? "串口连接变化 · 已安全卸力"
+                          : "串口连接变化 · 等待重新标零");
             control_.released();  // 旧句柄已由 transport 销毁，新句柄只读位置。
             clear_target();
             if (auto device=transport_->handle()) g4_set_disabled_mask(device, disabled_mask_);
@@ -269,9 +274,11 @@ class NativeLoop {
     }
 public:
     NativeLoop(Kinematics& kin,const FeedbackControl& control,SharedLink& link,const std::string& port,
-               Axes ratio,Axes lo,Axes hi,Axes amplitude,int64_t period_ns,uint32_t disabled_mask=0)
+               Axes ratio,Axes lo,Axes hi,Axes amplitude,int64_t period_ns,uint32_t disabled_mask=0,
+               bool preserve_zero_on_reconnect=false)
         : kin_(kin),control_(control),link_(link),ratio_(ratio),lo_(lo),hi_(hi),amplitude_(amplitude),
-          period_(period_ns),disabled_mask_(disabled_mask),demo_(port.empty()),target_(link.target_size()) {
+          period_(period_ns),disabled_mask_(disabled_mask),preserve_zero_on_reconnect_(preserve_zero_on_reconnect),
+          demo_(port.empty()),target_(link.target_size()) {
         if (period_<=0 || period_>100'000'000) throw std::invalid_argument("无效控制周期");
         for(int i=0;i<12;++i) if (!std::isfinite(ratio[i]) || ratio[i]==0 || !std::isfinite(lo[i]) ||
                 !std::isfinite(hi[i]) || lo[i]>=hi[i] || !std::isfinite(amplitude[i]))
@@ -331,6 +338,20 @@ public:
         zero_capture_ns_=(raw.size==12 && valid_mask==0xfff) ? now : 0;
         return result;
     }
+    int homing_send(const std::array<float,60>& batch, uint32_t active_mask, int64_t ttl_ns) {
+        std::lock_guard lock(lifecycle_lock_);
+        if (worker_.joinable() || !transport_) throw std::runtime_error("自动回零前必须停控制线程");
+        if (ttl_ns <= 0 || ttl_ns > 200'000'000) throw std::invalid_argument("无效回零指令期限");
+        const auto now = ns_now();
+        if (poll_transport(now) != GatewayTransport::Event::none || !transport_->handle())
+            return -1;
+        return g4_homing_mit_batch(transport_->handle(), batch.data(), 12, active_mask, now + ttl_ns);
+    }
+    void homing_release() {
+        std::lock_guard lock(lifecycle_lock_);
+        if (worker_.joinable() || !transport_) return;
+        release();
+    }
     nb::list samples(int64_t after,bool latest) {
         // 只有拷贝时持锁，构造 Python 字典以及写 CSV 不占用控制线程。
         std::vector<Sample> batch;
@@ -373,11 +394,13 @@ void bind_native_loop(nb::module_& m) {
         .def("invalidate_force",&SharedLink::invalidate_force)
         .def("command",&SharedLink::command);
     nb::class_<NativeLoop>(m,"NativeLoop")
-        .def(nb::init<Kinematics&,const FeedbackControl&,SharedLink&,const std::string&,Axes,Axes,Axes,Axes,int64_t,uint32_t>(),
-             "kin"_a,"control"_a,"link"_a,"port"_a,"ratio"_a,"lo"_a,"hi"_a,"amplitude"_a,"period_ns"_a,"disabled_mask"_a=0,
+        .def(nb::init<Kinematics&,const FeedbackControl&,SharedLink&,const std::string&,Axes,Axes,Axes,Axes,int64_t,uint32_t,bool>(),
+             "kin"_a,"control"_a,"link"_a,"port"_a,"ratio"_a,"lo"_a,"hi"_a,"amplitude"_a,"period_ns"_a,
+             "disabled_mask"_a=0,"preserve_zero_on_reconnect"_a=false,
              nb::keep_alive<1,2>(),nb::keep_alive<1,4>())
         .def("start",&NativeLoop::start,"zero"_a,"fresh_zero"_a=false)
         .def("stop",&NativeLoop::stop,nb::call_guard<nb::gil_scoped_release>())
         .def("close",&NativeLoop::close,nb::call_guard<nb::gil_scoped_release>())
-        .def("samples",&NativeLoop::samples).def("raw_for_zero",&NativeLoop::raw_for_zero);
+        .def("samples",&NativeLoop::samples).def("raw_for_zero",&NativeLoop::raw_for_zero)
+        .def("homing_send",&NativeLoop::homing_send).def("homing_release",&NativeLoop::homing_release);
 }

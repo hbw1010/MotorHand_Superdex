@@ -175,8 +175,8 @@ function show(state) {
     ? ` · 新帧接续 ${state.feedback_handoffs} 次 · 最近超期 ${number(state.last_feedback_handoff_ms, 1)} ms` : '';
   feedbackStatus.textContent = state.diagnostic_stale ? mode : `${mode} · ${state.feedback_message ?? '等待控制进程'}${lastPause}${handoff}`;
   feedbackStatus.dataset.active = state.active ? 'yes' : 'no';
-  calibration.textContent = state.demo ? '演示模式 · 无真机输出' : state.calibrating ? '正在标零' : state.zero_error
-    ? `标零失败 · ${state.zero_error}` : state.calibrated ? '已标零' : '待标零';
+  calibration.textContent = state.demo ? '演示模式 · 无真机输出' : state.homing ? '自动顶限位回零中' : state.calibrating ? '正在标零' : state.zero_error
+    ? `标零/回零失败 · ${state.zero_error}` : state.calibrated ? '已标零' : '待标零';
   calibration.title = state.zero_path ?? '';
   const contents = (state.rows ?? []).map(row => {
     const tr = document.createElement('tr');
@@ -198,10 +198,11 @@ function show(state) {
   rows.replaceChildren(...contents);
   for (const button of buttons) {
     const action = button.dataset.control;
-    button.disabled = busy || state.calibrating ||
+    button.disabled = busy || (state.calibrating && !(action === 'disable' && state.homing)) ||
       (action === 'enable' && (!state.can_feedback || state.requested || state.diagnostic_stale)) ||
-      (action === 'disable' && !(state.requested || state.active || state.diagnostic_stale)) ||
-      (action === 'align' && !state.can_align) || (action === 'zero' && state.can_zero === false);
+      (action === 'disable' && !(state.requested || state.active || state.homing || state.diagnostic_stale)) ||
+      (action === 'align' && !state.can_align) ||
+      ((action === 'zero' || action === 'home') && state.can_zero === false);
   }
 }
 
@@ -258,6 +259,7 @@ for (const button of buttons) {
   button.addEventListener('click', () => {
     const action = button.dataset.control;
     if (action === 'zero' && !confirm('将关闭真机出力并重录零位。请保持手套在参考姿态。')) return;
+    if (action === 'home' && !confirm('将用极小力矩轻推手指至伸直机械硬限位并自动保存零位。\n\n请确认手套已取下并放在支架上（切勿佩戴在人手上）！')) return;
     submit({action}, commandMessage);
   });
 }

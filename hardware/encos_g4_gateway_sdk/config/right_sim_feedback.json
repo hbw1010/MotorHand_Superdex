@@ -127,9 +127,61 @@
     -0.312492,
     0.608394
   ],
-  "disabled_motor_ids": [
-    4
-  ],
+  "disabled_motor_ids": [],
+  "preserve_zero_on_reconnect": true,
+  "stall_homing": {
+    "enabled": true,
+    "torque_nm": [
+      1.2,
+      0.9,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "damping_kd": 0.12,
+    "direction_sign": [
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0
+    ],
+    "stop_offset_deg": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stall_velocity_deg_s": 3.0,
+    "stall_span_deg": 1.2,
+    "stall_dwell_s": 0.25,
+    "min_run_s": 0.35,
+    "timeout_s": 5.0,
+    "max_travel_deg": 180.0,
+    "skip_motor_ids": []
+  },
   "feedback_profiles": {
     "nominal": {
       "anchors_nm": [

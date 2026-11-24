@@ -47,6 +47,8 @@ class WebControl:
         self.align = align
         self.requested = context.Event()
         self.zero = context.Event()
+        self.home = context.Event()
+        self.cancel_home = context.Event()
         self.task_names = tuple(switchable_tasks)
         default_task = initial_task or ("local_grasp" if local_grasp else (self.task_names[0] if self.task_names else ""))
         self.task = context.Array("c", 32)
@@ -142,7 +144,7 @@ class WebControl:
                 self._native_link = load_native().SharedLink(self.native_link_path)
             revision = (self.grasp_request()["contact_revision"] if self.is_local_grasp()
                         else self.scene_revision.value if self.scene_revision is not None else 0)
-            self._native_link.command(self.requested.is_set() and not self.zero.is_set(),
+            self._native_link.command(self.requested.is_set() and not self.zero.is_set() and not self.home.is_set(),
                                       revision,
                                       self.demo_grip.value if self.demo_grip is not None else -1.)
 
@@ -150,19 +152,21 @@ class WebControl:
         with self.command_lock:
             action = message.get("action")
             if action == "enable" and self.read().get("can_feedback"):
-                if self.zero.is_set():
-                    raise ValueError("正在标零")
+                if self.zero.is_set() or self.home.is_set():
+                    raise ValueError("正在标零或自动回零")
                 self.requested.set()
             elif action == "disable":
                 self.requested.clear()
+                if self.home.is_set():
+                    self.cancel_home.set()
             elif action == "align" and self.align is not None and not self.is_local_grasp():
                 self.align.set()
             elif action == "switch_task" and self.task_names:
                 target = message.get("task")
                 if target not in self.task_names:
                     raise ValueError("未知的仿真任务")
-                if self.zero.is_set():
-                    raise ValueError("标零期间不能切换任务")
+                if self.zero.is_set() or self.home.is_set():
+                    raise ValueError("标零或自动回零期间不能切换任务")
                 if target != self.current_task():
                     self.requested.clear()
                     if self.record_requested is not None:
@@ -215,13 +219,25 @@ class WebControl:
             elif action == "zero":
                 if self.demo_grip is not None:
                     raise ValueError("演示模式没有真机零位")
-                if self.zero.is_set():
-                    raise ValueError("正在标零")
+                if self.zero.is_set() or self.home.is_set():
+                    raise ValueError("正在标零或自动回零")
                 current = self.read()
                 for key in ("device", "zero_path", "axes"):
                     if key in message and message[key] != current.get(key):
                         raise ValueError("请求与当前网关、标零文件或轴映射不同")
                 self.zero.set()
+                self.requested.clear()
+            elif action == "home":
+                if self.demo_grip is not None:
+                    raise ValueError("演示模式没有真机自动回零")
+                if self.zero.is_set() or self.home.is_set():
+                    raise ValueError("正在标零或自动回零")
+                current = self.read()
+                for key in ("device", "zero_path", "axes"):
+                    if key in message and message[key] != current.get(key):
+                        raise ValueError("请求与当前网关、标零文件或轴映射不同")
+                self.cancel_home.clear()
+                self.home.set()
                 self.requested.clear()
             else:
                 raise ValueError("当前模式不支持该操作")

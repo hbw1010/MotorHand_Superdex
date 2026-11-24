@@ -98,13 +98,50 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
     try:
         while renderer.is_alive():
             next_task = control.pending_task()
-            if next_task and on_switch_task is not None and not control.zero.is_set():
+            if next_task and on_switch_task is not None and not control.zero.is_set() and not control.home.is_set():
                 status.update(requested=False, active=False, feedback_message="正在切换仿真任务…")
                 control.publish(status)
                 renderer, fixed_wrist = on_switch_task(renderer, next_task)
                 status.update(task=next_task, fixed_wrist=fixed_wrist,
                               can_align=not fixed_wrist and control.align is not None)
                 settings = control.grasp_request()
+                control.publish(status)
+                continue
+            if control.home.is_set():
+                import json as _json
+                from .feedback import CONFIG_DIR
+                from .stall_homing import load_homing_config, run_stall_homing
+                loop.stop()
+                status.update(calibrating=True, homing=True, requested=False, active=False,
+                              zero_error=None, feedback_message="自动顶限位回零中 · 切勿佩戴在人手上")
+                control.publish(status)
+                try:
+                    live_cfg = _json.loads((CONFIG_DIR / "right_sim_feedback.json").read_text(encoding="utf-8"))
+                    homing_cfg = load_homing_config(
+                        live_cfg.get("stall_homing"),
+                        disabled_motor_ids=live_cfg.get("disabled_motor_ids", ()),
+                    )
+                    ratios = [axes[i + 1][1].sign * axes[i + 1][1].scale * live_cfg["torque_sign"][i]
+                              for i in range(len(axes))]
+                    def _progress(done_n, total_n):
+                        status["feedback_message"] = f"自动顶限位回零中 · 已到位 {done_n}/{total_n} 轴（按停止可急停）"
+                        control.publish(status)
+                    zero = run_stall_homing(
+                        read_for_zero, loop.homing_send, loop.homing_release,
+                        axes, ratios, homing_cfg,
+                        zero_path=zero_path, mapping_identity=mapping_identity,
+                        accept=lambda values: start(values, fresh_zero=True),
+                        cancel_event=control.cancel_home, on_progress=_progress,
+                    )
+                    status["zero_error"] = None
+                    status["feedback_message"] = "自动顶限位回零完成 · 零位已保存"
+                except (ValueError, OSError, RuntimeError) as exc:
+                    status["zero_error"] = str(exc)
+                    loop.stop()
+                    start(zero)
+                status.update(calibrating=False, homing=False, zero_revision=status["zero_revision"] + 1)
+                control.cancel_home.clear()
+                control.home.clear()
                 control.publish(status)
                 continue
             if control.zero.is_set():

@@ -186,6 +186,46 @@ int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadli
     return 1;
 }
 
+int g4_homing_mit_batch(void* h, const float* commands, int count, uint32_t active_mask, int64_t deadline_ns) {
+    constexpr int axes = 12;
+    if (!h || !commands || count != axes) return -1;
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    if (shim->client.TransportLost()) return -1;
+    const uint32_t effective_mask = active_mask & ~shim->disabled_mask;
+    std::array<std::pair<lqs::JointKey, MotorCommand>, axes> batch;
+    for (int axis = 0; axis < axes; ++axis) {
+        const float* fields = commands + axis * 5;
+        for (int field = 0; field < 5; ++field) {
+            if (!std::isfinite(fields[field])) return -1;
+        }
+        auto& [key, command] = batch[axis];
+        const uint16_t id = static_cast<uint16_t>(axis + 1);
+        key = {shim->client.BusForId(id), id};
+        if (effective_mask & (1u << axis)) {
+            command.enabled = true;
+            command.is_mit_mode = true;
+            command.target_angle = fields[0];
+            command.mit_kp = fields[1];
+            command.mit_kd = fields[2];
+            command.mit_vel = fields[3];
+            command.mit_tor = fields[4];
+        } else {
+            command.enabled = false;
+            command.is_mit_mode = false;
+        }
+    }
+    if (!shim->client.SetCommandBatchBefore(batch, deadline_ns)) return 0;
+    for (int axis = 0; axis < axes; ++axis) {
+        if (effective_mask & (1u << axis)) {
+            shim->pending[batch[axis].first] = Pending{deadline_ns, 0};
+        } else {
+            shim->pending.erase(batch[axis].first);
+        }
+    }
+    return 1;
+}
+
 void g4_set_servo(void* h, uint32_t bus, uint32_t id, float deg, float spd, float cur,
                   int64_t deadline_ns) {
     auto* shim = static_cast<Shim*>(h);

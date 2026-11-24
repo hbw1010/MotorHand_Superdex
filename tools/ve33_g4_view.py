@@ -1469,7 +1469,8 @@ def main():
             loop = native.NativeLoop(solver.native, make_feedback_control(axes, native, args.feedback_profile),
                                      link, "" if args.demo else str(args.port),
                                      [m.sign * m.scale for m in motors], lo, hi, DemoGlove.GRIP,
-                                     round(1e9 / CONFIG["control_hz"]), disabled_mask)
+                                     round(1e9 / CONFIG["control_hz"]), disabled_mask,
+                                     bool(CONFIG.get("preserve_zero_on_reconnect", False)))
             resources.callback(loop.close)
         else:
             if args.demo:
