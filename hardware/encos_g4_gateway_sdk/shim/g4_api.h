@@ -19,6 +19,7 @@ void g4_close(void* handle);
 int g4_snapshots_with_current_time(void* handle, G4Joint* out, int64_t* current_times, int capacity);
 int g4_set_mit_batch(void* handle, const float* commands, int count, int64_t deadline_ns);
 int g4_renew_mit_batch(void* handle, const float* commands, int count, int64_t deadline_ns, int64_t previous_deadline_ns);
+void g4_set_disabled_mask(void* handle, uint32_t mask);
 void g4_release(void* handle, uint32_t bus, uint32_t id);
 #ifdef __cplusplus
 }

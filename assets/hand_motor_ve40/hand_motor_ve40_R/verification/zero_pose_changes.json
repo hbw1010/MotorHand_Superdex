@@ -1,0 +1,220 @@
+{
+  "components": 97,
+  "pose_changes": [
+    {
+      "name": "中指电机外骨骼-1/侧摆从动连杆-1",
+      "transform_max_difference": 0.05780078293924884
+    },
+    {
+      "name": "中指电机外骨骼-1/指根-1",
+      "transform_max_difference": 0.05780078293924885
+    },
+    {
+      "name": "中指电机外骨骼-1/指节3-模型-1",
+      "transform_max_difference": 0.057800782939249284
+    },
+    {
+      "name": "中指电机外骨骼-1/测试-关节1-1-1",
+      "transform_max_difference": 0.057800782939248924
+    },
+    {
+      "name": "中指电机外骨骼-1/测试-关节1-2-1",
+      "transform_max_difference": 0.057800782939248854
+    },
+    {
+      "name": "中指电机外骨骼-1/测试-关节1-3-1",
+      "transform_max_difference": 0.05780078293924873
+    },
+    {
+      "name": "中指电机外骨骼-1/测试-关节1-4-1",
+      "transform_max_difference": 0.05780078293924906
+    },
+    {
+      "name": "中指电机外骨骼-1/第一指节主动连杆-1",
+      "transform_max_difference": 0.05780078293924884
+    },
+    {
+      "name": "中指电机外骨骼-1/第一指节从动连杆-1",
+      "transform_max_difference": 0.05780078293924895
+    },
+    {
+      "name": "小拇指电机外骨骼-2/指根-1",
+      "transform_max_difference": 0.04784554206731526
+    },
+    {
+      "name": "小拇指电机外骨骼-2/指节3-模型-1",
+      "transform_max_difference": 0.047845542067315075
+    },
+    {
+      "name": "小拇指电机外骨骼-2/测试-关节1-1-1",
+      "transform_max_difference": 0.04784554206731524
+    },
+    {
+      "name": "小拇指电机外骨骼-2/测试-关节1-2-1",
+      "transform_max_difference": 0.04784554206731541
+    },
+    {
+      "name": "小拇指电机外骨骼-2/测试-关节1-3-1",
+      "transform_max_difference": 0.047845542067315686
+    },
+    {
+      "name": "小拇指电机外骨骼-2/测试-关节1-4-1",
+      "transform_max_difference": 0.04784554206731531
+    },
+    {
+      "name": "小拇指电机外骨骼-2/第一指节主动连杆-1",
+      "transform_max_difference": 0.04784554206731517
+    },
+    {
+      "name": "小拇指电机外骨骼-2/第一指节从动连杆-1",
+      "transform_max_difference": 0.04784554206731534
+    },
+    {
+      "name": "无名指电机外骨骼-1/指根-1",
+      "transform_max_difference": 0.010210525102448952
+    },
+    {
+      "name": "无名指电机外骨骼-1/指节3-模型-1",
+      "transform_max_difference": 0.010210525102448922
+    },
+    {
+      "name": "无名指电机外骨骼-1/测试-关节1-1-1",
+      "transform_max_difference": 0.010210525102448909
+    },
+    {
+      "name": "无名指电机外骨骼-1/测试-关节1-2-1",
+      "transform_max_difference": 0.010210525102448907
+    },
+    {
+      "name": "无名指电机外骨骼-1/测试-关节1-3-1",
+      "transform_max_difference": 0.010210525102449242
+    },
+    {
+      "name": "无名指电机外骨骼-1/测试-关节1-4-1",
+      "transform_max_difference": 0.010210525102449353
+    },
+    {
+      "name": "无名指电机外骨骼-1/第一指节主动连杆-1",
+      "transform_max_difference": 0.010210525102448909
+    },
+    {
+      "name": "无名指电机外骨骼-1/第一指节从动连杆-1",
+      "transform_max_difference": 0.010210525102449464
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/指节3-模型-1",
+      "transform_max_difference": 0.057800782939248174
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/第三指节从动连杆-1",
+      "transform_max_difference": 0.057800782939248896
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/第三指节联动连杆-1",
+      "transform_max_difference": 0.05780078293924838
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/第二三指节主动连杆-1",
+      "transform_max_difference": 0.05780078293924873
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/第二指节从动连杆-1",
+      "transform_max_difference": 0.05780078293924881
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/第二指节联动连杆-1",
+      "transform_max_difference": 0.05780078293924876
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第一指关节-1",
+      "transform_max_difference": 0.05780078293924884
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第三指关节-1",
+      "transform_max_difference": 0.05780078293924884
+    },
+    {
+      "name": "中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第二指关节-1",
+      "transform_max_difference": 0.05780078293924884
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/指节3-模型-1",
+      "transform_max_difference": 0.047845542067315304
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/第三指节从动连杆-1",
+      "transform_max_difference": 0.04784554206731541
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/第三指节联动连杆-1",
+      "transform_max_difference": 0.047845542067315165
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/第二三指节主动连杆-1",
+      "transform_max_difference": 0.047845542067314784
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/第二指节从动连杆-1",
+      "transform_max_difference": 0.047845542067315006
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/第二指节联动连杆-1",
+      "transform_max_difference": 0.04784554206731495
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第一指关节-1",
+      "transform_max_difference": 0.04784554206731517
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第三指关节-1",
+      "transform_max_difference": 0.047845542067314714
+    },
+    {
+      "name": "小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第二指关节-1",
+      "transform_max_difference": 0.04784554206731517
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/指节3-模型-1",
+      "transform_max_difference": 0.010210525102448745
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/第三指节从动连杆-1",
+      "transform_max_difference": 0.010210525102448655
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/第三指节联动连杆-1",
+      "transform_max_difference": 0.010210525102448588
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/第二三指节主动连杆-1",
+      "transform_max_difference": 0.010210525102449247
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/第二指节从动连杆-1",
+      "transform_max_difference": 0.010210525102448955
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/第二指节联动连杆-1",
+      "transform_max_difference": 0.010210525102449013
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第一指关节-1",
+      "transform_max_difference": 0.010210525102448909
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第三指关节-1",
+      "transform_max_difference": 0.01021052510244842
+    },
+    {
+      "name": "无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第二指关节-1",
+      "transform_max_difference": 0.010210525102448909
+    }
+  ],
+  "source_files_changed_from_original": [
+    "大拇指电机外骨骼.SLDASM",
+    "手部电机外骨骼.SLDASM",
+    "指间电机.SLDASM"
+  ],
+  "source_path": "C:\\Users\\current robotics\\Desktop\\motorhand\\vE.4.0\\手部电机外骨骼.SLDASM",
+  "saved_mtime": 1795430384.6414652
+}

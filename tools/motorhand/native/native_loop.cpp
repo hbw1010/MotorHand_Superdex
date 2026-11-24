@@ -38,6 +38,7 @@ class NativeLoop {
     SharedLink& link_;
     const Axes ratio_,lo_,hi_,amplitude_;
     const int64_t period_;
+    const uint32_t disabled_mask_;
     std::optional<GatewayTransport> transport_;
     bool demo_;
     Axes zero_{},last_q_{};
@@ -55,7 +56,7 @@ class NativeLoop {
 
     void release() {
         if (auto device=transport_->handle())
-            for (int i=0;i<12;++i) g4_release(device,3-i/4,i+1);
+            for (int i=0;i<12;++i) g4_release(device,0,i+1);
         control_.released();
     }
     void disarm_feedback(const char* reason, int64_t now) {
@@ -77,6 +78,7 @@ class NativeLoop {
             control_.stop("串口连接变化 · 等待重新标零");
             control_.released();  // 旧句柄已由 transport 销毁，新句柄只读位置。
             clear_target();
+            if (auto device=transport_->handle()) g4_set_disabled_mask(device, disabled_mask_);
         }
         return event;
     }
@@ -127,13 +129,13 @@ class NativeLoop {
             // 错误路由/同 ID 双应答不能被后一个正确应答覆盖。
             if (s.joints[i].id) { s.status[i]=-2; continue; }
             s.joints[i]=j; s.stamps[i]=j.received_ns;
-            if ((j.valid&2) && j.bus==3-i/4 && data.currents[k]>0 && now>=data.currents[k] &&
+            if ((j.valid&2) && j.bus>=1 && j.bus<=3 && data.currents[k]>0 && now>=data.currents[k] &&
                 now-data.currents[k]<=100'000'000 && std::isfinite(j.current_a)) s.current[i]=j.current_a;
             if (!(j.valid&1) || !std::isfinite(j.angle_deg)) continue;
             s.raw[i]=j.angle_deg;
             if (j.received_ns<=0 || j.received_ns>now || now-j.received_ns>=100'000'000) continue;
             if (j.error) { s.status[i]=-1; continue; }
-            if (j.bus!=3-i/4) { s.status[i]=-2; continue; }
+            if (j.bus<1 || j.bus>3) { s.status[i]=-2; continue; }
             s.status[i]=1;
             if (calibrated_) {
                 s.encoder[i]=(j.angle_deg-zero_[i])*ratio_[i]*(std::numbers::pi/180.);
@@ -164,12 +166,32 @@ class NativeLoop {
         if (s.stamp) {
             control_.step(ns_now(),s.q,s.encoder,s.stamps,s.force,s.requested,s.scene);
         } else {
-            control_.missing(ns_now(),s.requested,calibrated_ ? "编码器采集或闭链姿态不可用" : "等待标零");
+            std::string reason = calibrated_ ? "编码器采集或闭链姿态不可用" : "等待标零";
+            if (calibrated_) {
+                if (!s.pose_error.empty()) {
+                    reason = "闭链姿态求解失败: " + s.pose_error;
+                } else {
+                    std::string bad;
+                    for (int i = 0; i < 12; ++i) {
+                        if (s.status[i] == 1) continue;
+                        if (!bad.empty()) bad += ",";
+                        bad += "J" + std::to_string(i + 1) + "(";
+                        if (s.status[i] == -1) bad += "err=" + std::to_string(s.joints[i].error);
+                        else if (s.status[i] == -2) bad += "bus=" + std::to_string(s.joints[i].bus);
+                        else if (s.stamps[i] > 0) bad += "age=" + std::to_string((now - s.stamps[i]) / 1'000'000) + "ms";
+                        else bad += "none";
+                        bad += ")";
+                    }
+                    if (!bad.empty()) reason = "编码器异常: " + bad;
+                }
+            }
+            control_.missing(ns_now(),s.requested,reason);
         }
         if (control_.state().need_release) release();
         if (control_.state().need_send) {
             std::array<float,60> batch{};
             for (int i=0;i<12;++i) {
+                if (disabled_mask_ & (1u << i)) continue;
                 batch[i*5+2]=static_cast<float>(control_.state().motor_kd[i]);
                 batch[i*5+4]=static_cast<float>(control_.state().motor[i]);
             }
@@ -247,14 +269,15 @@ class NativeLoop {
     }
 public:
     NativeLoop(Kinematics& kin,const FeedbackControl& control,SharedLink& link,const std::string& port,
-               Axes ratio,Axes lo,Axes hi,Axes amplitude,int64_t period_ns)
+               Axes ratio,Axes lo,Axes hi,Axes amplitude,int64_t period_ns,uint32_t disabled_mask=0)
         : kin_(kin),control_(control),link_(link),ratio_(ratio),lo_(lo),hi_(hi),amplitude_(amplitude),
-          period_(period_ns),demo_(port.empty()),target_(link.target_size()) {
+          period_(period_ns),disabled_mask_(disabled_mask),demo_(port.empty()),target_(link.target_size()) {
         if (period_<=0 || period_>100'000'000) throw std::invalid_argument("无效控制周期");
         for(int i=0;i<12;++i) if (!std::isfinite(ratio[i]) || ratio[i]==0 || !std::isfinite(lo[i]) ||
                 !std::isfinite(hi[i]) || lo[i]>=hi[i] || !std::isfinite(amplitude[i]))
             throw std::invalid_argument("无效编码器映射");
         transport_.emplace(port);
+        if (auto device=transport_->handle()) g4_set_disabled_mask(device, disabled_mask_);
     }
     ~NativeLoop() { close(); }
     void close() {
@@ -301,7 +324,7 @@ public:
         unsigned valid_mask=0;
         for(int k=0;k<raw.size;++k) {
             const auto& j=raw.joints[k]; result.append(nb::make_tuple(j.id,j.bus,j.valid,j.error,j.angle_deg,j.received_ns));
-            if(j.id>=1 && j.id<=12 && j.bus==3-(j.id-1)/4 && !j.error && (j.valid&1) &&
+            if(j.id>=1 && j.id<=12 && j.bus>=1 && j.bus<=3 && !j.error && (j.valid&1) &&
                std::isfinite(j.angle_deg) && j.received_ns>0 && j.received_ns<=now &&
                now-j.received_ns<control_.ttl_ns()) valid_mask |= 1u<<(j.id-1);
         }
@@ -350,7 +373,8 @@ void bind_native_loop(nb::module_& m) {
         .def("invalidate_force",&SharedLink::invalidate_force)
         .def("command",&SharedLink::command);
     nb::class_<NativeLoop>(m,"NativeLoop")
-        .def(nb::init<Kinematics&,const FeedbackControl&,SharedLink&,const std::string&,Axes,Axes,Axes,Axes,int64_t>(),
+        .def(nb::init<Kinematics&,const FeedbackControl&,SharedLink&,const std::string&,Axes,Axes,Axes,Axes,int64_t,uint32_t>(),
+             "kin"_a,"control"_a,"link"_a,"port"_a,"ratio"_a,"lo"_a,"hi"_a,"amplitude"_a,"period_ns"_a,"disabled_mask"_a=0,
              nb::keep_alive<1,2>(),nb::keep_alive<1,4>())
         .def("start",&NativeLoop::start,"zero"_a,"fresh_zero"_a=false)
         .def("stop",&NativeLoop::stop,nb::call_guard<nb::gil_scoped_release>())

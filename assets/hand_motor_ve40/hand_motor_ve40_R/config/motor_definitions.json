@@ -1,0 +1,278 @@
+[
+  {
+    "joint": "middle_mcp_motor_joint",
+    "label": "中指 MCP 电机",
+    "parent": "middle_mcp_connecting_rod_3",
+    "child": "middle_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -8.881784197001262e-16,
+      -1.0,
+      3.9429924734491454e-16
+    ],
+    "origin_base_zero_m": [
+      0.07263261973812377,
+      8.673617379884035e-18,
+      0.041953777733654496
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "middle_pip_dip_motor_joint",
+    "label": "中指 PIP/DIP 联动电机",
+    "parent": "middle_mcp_link",
+    "child": "middle_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -2.2204460492503012e-16,
+      1.0,
+      -1.484219012998792e-15
+    ],
+    "origin_base_zero_m": [
+      0.12634298153179851,
+      -6.938893903907228e-18,
+      0.016368968610731116
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "index_mcp_motor_joint",
+    "label": "食指 MCP 电机",
+    "parent": "index_mcp_connecting_rod_3",
+    "child": "index_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      2.220446049250313e-16,
+      -1.0,
+      -6.599219706079788e-16
+    ],
+    "origin_base_zero_m": [
+      0.06763261973814425,
+      0.023999999999999987,
+      0.041953777733652844
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "index_pip_dip_motor_joint",
+    "label": "食指 PIP/DIP 联动电机",
+    "parent": "index_mcp_link",
+    "child": "index_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -2.1799309280034445e-16,
+      1.0,
+      3.0309636135108434e-16
+    ],
+    "origin_base_zero_m": [
+      0.1173429999999955,
+      0.024,
+      0.016369000000005074
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "ring_mcp_motor_joint",
+    "label": "无名指 MCP 电机",
+    "parent": "ring_mcp_connecting_rod_3",
+    "child": "ring_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -6.6613381477509215e-16,
+      -1.0,
+      -5.639022086883738e-16
+    ],
+    "origin_base_zero_m": [
+      0.06763261973810251,
+      -0.02400000000000002,
+      0.04195377773365618
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "ring_pip_dip_motor_joint",
+    "label": "无名指 PIP/DIP 联动电机",
+    "parent": "ring_mcp_link",
+    "child": "ring_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      1.110223024625155e-15,
+      1.0,
+      1.9460679234790033e-17
+    ],
+    "origin_base_zero_m": [
+      0.11734299999996706,
+      -0.024000000000000035,
+      0.016369000000058385
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "pinky_mcp_motor_joint",
+    "label": "小指 MCP 电机",
+    "parent": "pinky_mcp_connecting_rod_3",
+    "child": "pinky_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -1.2098029496354525e-15,
+      -1.0,
+      3.8285686989269484e-16
+    ],
+    "origin_base_zero_m": [
+      0.06233261973812065,
+      -0.04634,
+      0.03639377773365476
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "pinky_pip_dip_motor_joint",
+    "label": "小指 PIP/DIP 联动电机",
+    "parent": "pinky_mcp_link",
+    "child": "pinky_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      1.8759367644105462e-15,
+      1.0,
+      -4.892010244921982e-16
+    ],
+    "origin_base_zero_m": [
+      0.10319999999998199,
+      -0.04634000000000008,
+      0.01034000000000556
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "thumb_cmc_flex_motor_joint",
+    "label": "拇指 CMC 屈伸电机",
+    "parent": "base_link",
+    "child": "thumb_cmc_flex_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -1.0877048587575128e-31,
+      -1.2246467991473532e-16,
+      -1.0
+    ],
+    "origin_base_zero_m": [
+      -0.008000000000000632,
+      0.02925000000000007,
+      0.01826273086610742
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "thumb_cmc_abd_motor_joint",
+    "label": "拇指 CMC 侧摆电机",
+    "parent": "thumb_cmc_flex_link",
+    "child": "thumb_cmc_abd_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -0.883969718852141,
+      0.4675441542276693,
+      3.2559922469919787e-16
+    ],
+    "origin_base_zero_m": [
+      -0.03181173022293177,
+      0.04184436271440837,
+      -0.028500000000000247
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "thumb_mcp_motor_joint",
+    "label": "拇指 MCP 电机",
+    "parent": "thumb_mcp_connecting_rod_3",
+    "child": "thumb_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      0.017316450156582962,
+      0.03273961921674514,
+      0.9993138935727438
+    ],
+    "origin_base_zero_m": [
+      -0.02462968754175727,
+      0.08647162767056855,
+      -0.024582759501577692
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  },
+  {
+    "joint": "thumb_ip_motor_joint",
+    "label": "拇指 IP 电机",
+    "parent": "thumb_mcp_link",
+    "child": "thumb_ip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -0.0173164501565816,
+      -0.03273961921674451,
+      -0.9993138935727438
+    ],
+    "origin_base_zero_m": [
+      0.016864682004452097,
+      0.11020198200765355,
+      -0.03432216885372472
+    ],
+    "zero": "2026-11-23T18:39:44.641465+08:00",
+    "positive": "right-hand rule about local +Z; anatomical output direction follows V1.4"
+  }
+]

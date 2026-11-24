@@ -1,0 +1,128 @@
+{
+  "engine": {
+    "repository": "https://github.com/OpenLegged/URDF-Studio",
+    "commit": "23b96e2f3d5b1b68ad9629925d4479e9847d35a5",
+    "three": "0.181.2"
+  },
+  "compatible": true,
+  "pinky_mcp_preview_range": [
+    -0.45,
+    0.6
+  ],
+  "steps": 624,
+  "maxResidual": 0.000009647956608325433,
+  "maxJointStepRad": 0.10822248322078983,
+  "notConverged": 0,
+  "flips": 0,
+  "clamped": 0,
+  "details": [
+    {
+      "joint": "middle_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.0016729140896828004
+    },
+    {
+      "joint": "middle_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.00004410929753946103
+    },
+    {
+      "joint": "index_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.001672914089404268
+    },
+    {
+      "joint": "index_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000043427553661550596
+    },
+    {
+      "joint": "ring_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.0016729140894803686
+    },
+    {
+      "joint": "ring_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000042773266305395994
+    },
+    {
+      "joint": "pinky_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.45,
+        0.6
+      ],
+      "return_drift_rad": 0.0010299773044241756
+    },
+    {
+      "joint": "pinky_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.15,
+        0.6
+      ],
+      "return_drift_rad": 0.0017388410041130654
+    },
+    {
+      "joint": "thumb_cmc_flex_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0
+    },
+    {
+      "joint": "thumb_cmc_abd_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0
+    },
+    {
+      "joint": "thumb_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.0016729140896580164
+    },
+    {
+      "joint": "thumb_ip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000005727025930099506
+    }
+  ]
+}

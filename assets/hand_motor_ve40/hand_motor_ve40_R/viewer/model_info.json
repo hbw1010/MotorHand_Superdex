@@ -1,0 +1,7 @@
+{
+  "side": "R",
+  "model": "vE.4.0",
+  "actuators": 12,
+  "coordinate_reference": "V1.4 J1-J21 right-hand convention",
+  "zero": "2026-11-23T18:39:44.641465+08:00"
+}

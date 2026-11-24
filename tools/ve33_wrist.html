@@ -7,7 +7,14 @@
 :root{color-scheme:dark;--base:#101b28;--border:#344a5d;--bright:#edf6fa;--soft:#a6bfce;--cyan:#86deed}
 *{box-sizing:border-box}body{margin:0;background:var(--base);color:var(--bright);font:16px system-ui,sans-serif}
 main{max-width:1440px;margin:auto;padding:clamp(16px,4vw,42px)}
-header{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+header{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+.header-left{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.task-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:10px;background:#152332}
+.task-tabs[hidden]{display:none}
+.task-tab{background:transparent;color:var(--soft);border:none;border-radius:7px;padding:7px 14px;font-weight:600;cursor:pointer}
+.task-tab:hover:not(:disabled){color:var(--bright);background:#20384b}
+.task-tab[aria-pressed="true"]{background:var(--cyan);color:#082537;font-weight:700}
+#task-switch-status{font-size:14px;color:#f4ca89}
 h1{font-size:clamp(22px,4vw,32px);margin:0;letter-spacing:.025em}
 button,select{font:inherit;border:1px solid var(--border);border-radius:7px;padding:9px 13px;background:#20384b;color:var(--bright)}
 button{background:var(--cyan);color:#082537;font-weight:700}button:disabled{opacity:.5}
@@ -33,7 +40,17 @@ th,td{text-align:right;border-top:1px solid #293e50;padding:9px 11px}th{color:va
 th:nth-child(2),td:nth-child(2){text-align:left}tbody tr:hover{background:#1b3040}
 </style>
 <main>
-<header><h1>右手与二阶魔方</h1><button id="start" disabled>进入头显场景</button></header>
+<header>
+  <div class="header-left">
+    <h1>右手与二阶魔方</h1>
+    <nav id="task-tabs" class="task-tabs" aria-label="仿真任务切换" hidden>
+      <button type="button" class="task-tab" data-task="local_grasp" aria-pressed="false">固定腕部抓握</button>
+      <button type="button" class="task-tab" data-task="tabletop" aria-pressed="false">VR 桌面多物体</button>
+    </nav>
+    <span id="task-switch-status" role="status"></span>
+  </div>
+  <button id="start" disabled>进入头显场景</button>
+</header>
 <div id="preview" aria-label="实时仿真与受力诊断视窗"></div>
 <div class="controls">
   <div id="cube-settings" class="cube-settings" hidden>
@@ -48,7 +65,17 @@ th:nth-child(2),td:nth-child(2){text-align:left}tbody tr:hover{background:#1b304
   <label>颜色满量程 <input id="force-scale" type="range" min="2" max="40" value="12"><output id="scale-value">12 N</output></label>
 </div>
 <p id="status" role="status">正在加载模型…</p>
-<p id="xr-hint">头显中保持右手掌背朝上、指尖向前，按右手柄食指扳机对齐。光学定位可用左手捏合对齐。左手或左手柄可扶角块。上方箭头显示右手各连杆的仿真接触合力，电机指令与回报分别列在面板上。</p>
+<p id="xr-hint">头显内全程左手柄操作：<strong>左手 Y 键</strong> = 开启 / 关闭力反馈；<strong>左手扳机</strong> = 对齐水平桌面；<strong>左手 X 键 / 侧握键</strong> = 进入虚实重合标定（标定中按左手扳机/X 确认保存、侧握重摆位置、Y 取消）。</p>
+<section id="wrist-offset-cal" class="local-grasp" aria-label="手柄 6DoF 虚实重合标定" hidden>
+  <div class="controls">
+    <strong>虚实重合标定（头显内左手柄操作）</strong>
+    <span id="offset-cal-current">当前: 未标定</span>
+    <button id="offset-cal-start">进入虚实重合标定</button>
+    <button id="offset-cal-cancel" hidden>取消标定</button>
+    <button id="offset-cal-reset">清除标定</button>
+  </div>
+  <p id="offset-cal-status" role="status" style="margin:4px 0 0;font-size:14px">全程在头显内用左手柄完成：左手侧握=把虚拟手摆到眼前 · 真实手套与虚拟手重合后按左手扳机/X=确认并自动保存 · 左手Y=取消。</p>
+</section>
 <section id="local-grasp" class="local-grasp" aria-label="本地抓握设置" hidden>
   <div class="controls">
     <label>场景 <select data-grasp="layout"><option value="palm">掌心</option><option value="desk">桌面</option></select></label>

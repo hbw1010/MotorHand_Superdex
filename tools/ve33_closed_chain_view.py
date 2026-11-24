@@ -235,8 +235,13 @@ def main():
     import superdex.physics as sdp
     import superdex.robotics as sdr
     side = "L" if args.hand == "left" else "R"
-    model_dir = ROOT / "assets" / "hand_motor_ve33" / f"hand_motor_ve33_{side}"
-    bot_path = model_dir / f"hand_motor_ve33_{args.hand}_closed_chain.superdex_bot"
+    ve40_dir = ROOT / "assets" / "hand_motor_ve40" / f"hand_motor_ve40_{side}"
+    if ve40_dir.is_dir():
+        model_dir = ve40_dir
+        bot_path = model_dir / f"hand_motor_ve40_{args.hand}_closed_chain.superdex_bot"
+    else:
+        model_dir = ROOT / "assets" / "hand_motor_ve33" / f"hand_motor_ve33_{side}"
+        bot_path = model_dir / f"hand_motor_ve33_{args.hand}_closed_chain.superdex_bot"
     solver = load_kinematics(args.motorhand_src)(args.hand, model_dir=model_dir)
     sdp.initialize(num_worker_threads=0)
     bot = None

@@ -17,8 +17,8 @@ class SleeveCollisionTest(unittest.TestCase):
         import superdex.physics as sdp
         import superdex.robotics as sdr
 
-        model_dir = ROOT / "assets/hand_motor_ve33/hand_motor_ve33_R"
-        prefab = sdr.load_bot_prefab_from_file(str(model_dir / "hand_motor_ve33_right_closed_chain.superdex_bot"))
+        model_dir = ROOT / "assets/hand_motor_ve40/hand_motor_ve40_R"
+        prefab = sdr.load_bot_prefab_from_file(str(model_dir / "hand_motor_ve40_right_closed_chain.superdex_bot"))
         links = {link.name: link for link in prefab.links}
         sleeve = links["index_pip_link"]
         rod_path = links["index_pip_connecting_rod_1"].shape_file

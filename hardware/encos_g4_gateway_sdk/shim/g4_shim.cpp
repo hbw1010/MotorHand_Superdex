@@ -35,6 +35,7 @@ struct Shim {
     std::atomic<bool> running{false};
     std::thread watchdog;
     uint64_t releases = 0;
+    uint32_t disabled_mask = 0;
 
     void Limp(const lqs::JointKey& k, Pending& p, int64_t now) {
         client.SetMitCommand(k.bus, k.id, 0.f, 0.f, 0.f, 0.f, 0.f);
@@ -122,10 +123,27 @@ int g4_set_mit_batch(void* h, const float* commands, int count, int64_t deadline
     return g4_renew_mit_batch(h, commands, count, deadline_ns, 0);
 }
 
+void g4_set_disabled_mask(void* h, uint32_t mask) {
+    if (!h) return;
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    shim->disabled_mask = mask;
+    for (uint16_t id = 1; id <= 12; ++id) {
+        if (mask & (1u << (id - 1))) {
+            const uint8_t bus = shim->client.BusForId(id);
+            shim->pending.erase({bus, id});
+            shim->client.DisableJoint(bus, id);
+        }
+    }
+}
+
 int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadline_ns,
                       int64_t previous_deadline_ns) {
     constexpr int axes = 12;
     if (!h || !commands || count != axes) return -1;
+    auto* shim = static_cast<Shim*>(h);
+    std::lock_guard<std::mutex> lock(shim->mutex);
+    if (shim->client.TransportLost()) return -1;
     std::array<std::pair<lqs::JointKey, MotorCommand>, axes> batch;
     for (int axis = 0; axis < axes; ++axis) {
         const float* fields = commands + axis * 5;
@@ -133,27 +151,38 @@ int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadli
             if (!std::isfinite(fields[field])) return -1;
         }
         auto& [key, command] = batch[axis];
-        key = {uint8_t(3 - axis / 4), uint16_t(axis + 1)};
-        command.enabled = true;
-        command.is_mit_mode = true;
-        command.target_angle = fields[0];
-        command.mit_kp = fields[1];
-        command.mit_kd = fields[2];
-        command.mit_vel = fields[3];
-        command.mit_tor = fields[4];
+        const uint16_t id = static_cast<uint16_t>(axis + 1);
+        key = {shim->client.BusForId(id), id};
+        if (shim->disabled_mask & (1u << axis)) {
+            command.enabled = false;
+            command.is_mit_mode = false;
+        } else {
+            command.enabled = true;
+            command.is_mit_mode = true;
+            command.target_angle = fields[0];
+            command.mit_kp = fields[1];
+            command.mit_kd = fields[2];
+            command.mit_vel = fields[3];
+            command.mit_tor = fields[4];
+        }
     }
-    auto* shim = static_cast<Shim*>(h);
-    std::lock_guard<std::mutex> lock(shim->mutex);
-    if (shim->client.TransportLost()) return -1;
     if (previous_deadline_ns) {
-        for (const auto& entry : batch) {
+        for (int axis = 0; axis < axes; ++axis) {
+            if (shim->disabled_mask & (1u << axis)) continue;
+            const auto& entry = batch[axis];
             auto it = shim->pending.find(entry.first);
             if (it == shim->pending.end() || it->second.deadline_ns != previous_deadline_ns) return 0;
         }
     }
     const auto submit_before = previous_deadline_ns ? std::min(previous_deadline_ns, deadline_ns) : deadline_ns;
     if (!shim->client.SetCommandBatchBefore(batch, submit_before)) return 0;
-    for (const auto& entry : batch) shim->pending[entry.first] = Pending{deadline_ns, 0};
+    for (int axis = 0; axis < axes; ++axis) {
+        if (shim->disabled_mask & (1u << axis)) {
+            shim->pending.erase(batch[axis].first);
+            continue;
+        }
+        shim->pending[batch[axis].first] = Pending{deadline_ns, 0};
+    }
     return 1;
 }
 
@@ -169,7 +198,13 @@ void g4_set_servo(void* h, uint32_t bus, uint32_t id, float deg, float spd, floa
 void g4_release(void* h, uint32_t bus, uint32_t id) {
     auto* shim = static_cast<Shim*>(h);
     std::lock_guard<std::mutex> lock(shim->mutex);
-    lqs::JointKey key{uint8_t(bus), uint16_t(id)};
+    const uint8_t target_bus = bus == 0 ? shim->client.BusForId(uint16_t(id)) : uint8_t(bus);
+    lqs::JointKey key{target_bus, uint16_t(id)};
+    if (id >= 1 && id <= 12 && (shim->disabled_mask & (1u << (id - 1)))) {
+        shim->pending.erase(key);
+        shim->client.DisableJoint(target_bus, uint16_t(id));
+        return;
+    }
     shim->Limp(key, shim->pending[key], MonotonicNs());
 }
 

@@ -48,8 +48,8 @@ def main():
         scene = sdp.create_scene("Puzzle Cube · 实机姿态只读镜像")
         scene.set_gravity((0, 0, 0))
         context = sdr.create_context()
-        model = MODEL_DIR / "hand_motor_ve33_right_closed_chain.superdex_bot"
-        prefab = sdr.load_bot_prefab_from_file(str(model))
+        from ve33_g4_view import MODEL_BOT
+        prefab = sdr.load_bot_prefab_from_file(str(MODEL_BOT))
         prefab.joints[0].type = sdp.ArticulatedJointType.HARD
         for link in prefab.links:
             link.layer = "RightHand"

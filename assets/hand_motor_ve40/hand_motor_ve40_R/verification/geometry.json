@@ -1,0 +1,27 @@
+{
+  "configuration": "12自由度",
+  "visible_instances": 97,
+  "unique_mesh_configurations": 38,
+  "hidden_excluded": [
+    "左手柄支架-1",
+    "PICO 4U L1-1"
+  ],
+  "max_cad_visual_transform_error": 5.550671294628276e-15,
+  "source_files_unchanged": true,
+  "zero_source_saved_at": "2026-11-23T18:39:44.641465+08:00",
+  "zero_closure_gap_m": 2.893662274657725e-17,
+  "closure_jacobian_rank": 56,
+  "mobility": 12,
+  "bounds_m": [
+    [
+      -0.040415987530040026,
+      -0.06559000164270402,
+      -0.044161180501018804
+    ],
+    [
+      0.17550000089405876,
+      0.13106173424678697,
+      0.05270184114501791
+    ]
+  ]
+}

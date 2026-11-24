@@ -43,21 +43,28 @@ def panel_snapshot(state, now_ns, revision):
 
 class WebControl:
     def __init__(self, context, align, *, default_enabled=True, cube_switch=False, allow_reset=False,
-                 local_grasp=False, demo=False):
+                 local_grasp=False, demo=False, switchable_tasks=(), initial_task=None):
         self.align = align
         self.requested = context.Event()
         self.zero = context.Event()
-        self.grasp = context.Array("c", 2048) if local_grasp else None
-        self.record_requested = context.Event() if local_grasp else None
-        self.record_ready = context.Array("c", 4096) if local_grasp else None
-        self.record_error = context.Array("c", 256) if local_grasp else None
-        self.record_dropped = context.Value("Q", 0) if local_grasp else None
+        self.task_names = tuple(switchable_tasks)
+        default_task = initial_task or ("local_grasp" if local_grasp else (self.task_names[0] if self.task_names else ""))
+        self.task = context.Array("c", 32)
+        self.task.value = default_task.encode()
+        self.requested_task = context.Array("c", 32)
+        self.requested_task.value = b""
+        has_local_grasp = local_grasp or ("local_grasp" in self.task_names)
+        self.grasp = context.Array("c", 2048) if has_local_grasp else None
+        self.record_requested = context.Event() if has_local_grasp else None
+        self.record_ready = context.Array("c", 4096) if has_local_grasp else None
+        self.record_error = context.Array("c", 256) if has_local_grasp else None
+        self.record_dropped = context.Value("Q", 0) if has_local_grasp else None
         self.demo_grip = context.Value("d", -1.) if demo else None
-        if local_grasp:
+        if has_local_grasp:
             from ve33_local_grasp import DEFAULT_GRASP
             self.grasp.value = json.dumps({**DEFAULT_GRASP, "contact_revision": 0}).encode()
         self.cube_fixed = context.Event() if cube_switch else None
-        self.scene_revision = context.Value("Q", 0, lock=False) if allow_reset or cube_switch or local_grasp else None
+        self.scene_revision = context.Value("Q", 0, lock=False) if allow_reset or cube_switch or has_local_grasp else None
         self.wrist_stamp = context.Value("q", 0, lock=False)
         if self.cube_fixed is not None:
             self.cube_fixed.set()
@@ -67,6 +74,36 @@ class WebControl:
         self._native_link = None
         if default_enabled:
             self.requested.set()
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state["_native_link"] = None
+        return state
+
+    def current_task(self):
+        return self.task.value.decode()
+
+    def is_local_grasp(self):
+        return self.grasp is not None and (not self.task_names or self.current_task() == "local_grasp")
+
+    def pending_task(self):
+        target = self.requested_task.value.decode()
+        return target if target and target != self.current_task() else None
+
+    def commit_task(self, task_name):
+        with self.command_lock:
+            self.requested.clear()
+            if self.record_requested is not None:
+                self.record_requested.clear()
+            self.task.value = task_name.encode()
+            self.requested_task.value = b""
+            if self.scene_revision is not None:
+                self.scene_revision.value += 1
+            if self.grasp is not None:
+                settings = json.loads(self.grasp.value)
+                settings["contact_revision"] += 1
+                self.grasp.value = json.dumps(settings).encode()
+            self._publish_native_intent()
 
     def publish(self, status):
         self.snapshot.value = json.dumps(status, ensure_ascii=False, allow_nan=False).encode()
@@ -80,7 +117,7 @@ class WebControl:
             return fixed, self.scene_revision.value
 
     def grasp_request(self):
-        return json.loads(self.grasp.value) if self.grasp is not None else None
+        return json.loads(self.grasp.value) if self.is_local_grasp() else None
 
     def grasp_scene_request(self):
         with self.command_lock:
@@ -103,7 +140,7 @@ class WebControl:
             if self._native_link is None:
                 from motorhand.native_runtime import load_native
                 self._native_link = load_native().SharedLink(self.native_link_path)
-            revision = (self.grasp_request()["contact_revision"] if self.grasp is not None
+            revision = (self.grasp_request()["contact_revision"] if self.is_local_grasp()
                         else self.scene_revision.value if self.scene_revision is not None else 0)
             self._native_link.command(self.requested.is_set() and not self.zero.is_set(),
                                       revision,
@@ -118,9 +155,20 @@ class WebControl:
                 self.requested.set()
             elif action == "disable":
                 self.requested.clear()
-            elif action == "align" and self.align is not None:
+            elif action == "align" and self.align is not None and not self.is_local_grasp():
                 self.align.set()
-            elif action == "configure_grasp" and self.grasp is not None:
+            elif action == "switch_task" and self.task_names:
+                target = message.get("task")
+                if target not in self.task_names:
+                    raise ValueError("未知的仿真任务")
+                if self.zero.is_set():
+                    raise ValueError("标零期间不能切换任务")
+                if target != self.current_task():
+                    self.requested.clear()
+                    if self.record_requested is not None:
+                        self.record_requested.clear()
+                    self.requested_task.value = target.encode()
+            elif action == "configure_grasp" and self.is_local_grasp():
                 from ve33_local_grasp import grasp_needs_rebuild, grasp_settings
                 current = self.grasp_request()
                 if "expected_kind" in message and message["expected_kind"] != current["kind"]:
@@ -134,12 +182,12 @@ class WebControl:
                 if value is not None and (type(value) not in (int, float) or not 0. <= value <= 1.):
                     raise ValueError("演示抓握比例应在 0 到 1 之间")
                 self.demo_grip.value = -1. if value is None else value
-            elif action == "home_grasp" and self.grasp is not None:
+            elif action == "home_grasp" and self.is_local_grasp():
                 settings = self.grasp_request()
                 settings.update(layout="palm", drag=None, angle_deg=0., home=settings.get("home", 0) + 1)
                 settings["contact_revision"] += 1
                 self.grasp.value = json.dumps(settings).encode()
-            elif action == "start_recording" and self.record_requested is not None:
+            elif action == "start_recording" and self.is_local_grasp() and self.record_requested is not None:
                 if not self.record_requested.is_set():
                     self.record_ready.value = b""
                     self.record_error.value = b""
@@ -158,7 +206,7 @@ class WebControl:
             elif action == "reset_scene" and self.scene_revision is not None:
                 if self.cube_fixed is not None:
                     self.cube_fixed.set()
-                if self.grasp is not None:
+                if self.is_local_grasp():
                     settings = self.grasp_request()
                     settings.update(layout="palm", drag=None, angle_deg=0.)
                     settings["contact_revision"] += 1

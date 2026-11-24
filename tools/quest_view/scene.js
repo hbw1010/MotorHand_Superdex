@@ -3,6 +3,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {ForceDiagnostics, LeftHandView} from './diagnostics.js';
+import {CalibrationGuide} from './calibration-guide.js';
 import {LocalGraspView} from './local-grasp.js';
 import './web-control.js';
 
@@ -22,8 +23,13 @@ const groups = {right_hand: new Map(), puzzle_cube: new Map(), objects: new Map(
 const xrBasis = new THREE.Matrix4().set(0,-1,0,0, 0,0,1,0, -1,0,0,0, 0,0,0,1);
 let renderer, session, space, latest, align = false, sending = false, seq = 0, lastSend = 0;
 let previewPlaced = false;
+let overlayPlaced = false, overlayAutoChecked = false;
+let lastRightCtrlPose = null, overlayLocalWarning = '';
 let mode = 'controller';
-let diagnostics, leftView, graspView, controls, shown, lastPoll = 0, polling = false;
+let diagnostics, calibrationGuide, leftView, graspView, controls, shown, lastPoll = 0, polling = false;
+let leftXPrev = false, leftYPrev = false, lastCalActionMs = 0;
+const _tmpPos = new THREE.Vector3();
+const _tmpQuat = new THREE.Quaternion();
 let feedbackExpiresAt = Infinity;
 let desktopDirty = true;
 function invalidateDesktop() {
@@ -89,9 +95,79 @@ function pauseWrist() {
     .catch(() => {}); // 后端按最后一次真实位姿的时间卸力。
 }
 
+function postOffsetAction(action, extra = {}) {
+  const now = performance.now();
+  if (now - lastCalActionMs < 350) return;
+  lastCalActionMs = now;
+  overlayLocalWarning = '';
+  fetch('/api/v1/control', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({action, ...extra}),
+    signal: AbortSignal.timeout(1000),
+  }).then(async response => {
+    if (!response.ok) {
+      if (action === 'confirm_overlay_cal') overlayLocalWarning = '确认失败：请确保真实手套与虚拟手重合且右手柄在视野内';
+      return;
+    }
+    const cal = await response.json();
+    if (latest && cal && typeof cal === 'object') {
+      latest = {...latest, wrist_offset: cal};
+      shown = null;
+      invalidateDesktop();
+    }
+  }).catch(() => {});
+}
+
+function confirmOverlayOverlap() {
+  if (!lastRightCtrlPose) {
+    overlayLocalWarning = '未检测到右手柄 6DoF 位姿，请确保右手柄亮灯并在头显视野内';
+    return;
+  }
+  const baseNode = groups.right_hand.get('base_link');
+  let handPose;
+  if (baseNode) {
+    world.updateMatrixWorld(true);
+    baseNode.getWorldPosition(_tmpPos);
+    baseNode.getWorldQuaternion(_tmpQuat);
+    handPose = [_tmpPos.x, _tmpPos.y, _tmpPos.z, _tmpQuat.x, _tmpQuat.y, _tmpQuat.z, _tmpQuat.w];
+  } else {
+    handPose = [world.position.x, world.position.y, world.position.z,
+      world.quaternion.x, world.quaternion.y, world.quaternion.z, world.quaternion.w];
+  }
+  postOffsetAction('confirm_overlay_cal', {
+    space, ctrl_pose: lastRightCtrlPose, hand_pose: handPose, auto_save: true,
+  });
+}
+
+function enterOverlayCalibration() {
+  overlayPlaced = false;
+  overlayLocalWarning = '';
+  postOffsetAction('start_overlay_cal');
+}
+
+function pollLeftCalibrationButtons(sources) {
+  const left = sources.find(s => isController(s, 'left'));
+  const buttons = left?.gamepad?.buttons;
+  const xDown = Boolean(buttons?.[4]?.pressed);
+  const yDown = Boolean(buttons?.[5]?.pressed);
+  const overlayActive = Boolean(latest?.wrist_offset?.overlay_active);
+  if (xDown && !leftXPrev) {
+    if (overlayActive) confirmOverlayOverlap();
+    else enterOverlayCalibration();
+  }
+  if (yDown && !leftYPrev) {
+    if (overlayActive) postOffsetAction('cancel_overlay_cal');
+    else postOffsetAction('toggle_feedback');
+  }
+  leftXPrev = xDown;
+  leftYPrev = yDown;
+}
+
 function sendWrist(t, frame, ref) {
   if (!sending && t - lastSend >= 16 && session.visibilityState !== "hidden") {
     const sources = Array.from(session.inputSources);
+    pollLeftCalibrationButtons(sources);
     let tracked, sourceStatus;
     if (mode === 'controller') {
       const controller = sources.find(source => isController(source, 'right'));
@@ -110,7 +186,9 @@ function sendWrist(t, frame, ref) {
       const {position:p, orientation:q} = tracked.transform;
       pose = [p.x,p.y,p.z,q.x,q.y,q.z,q.w];
       sourceStatus = "tracked";
+      overlayLocalWarning = '';
     }
+    lastRightCtrlPose = pose;
     const left = leftInput(frame, ref, sources);
     const requestAlign = align && pose !== null;
     const spaceSent = space;
@@ -153,14 +231,17 @@ function applyFrame() {
     feedbackExpiresAt = Infinity;
   }
   if (!latest || shown === latest) return;
+  const overlayActive = Boolean(latest.wrist_offset?.overlay_active);
   for (const [group, nodes] of Object.entries(groups)) {
     for (const [name, node] of nodes) {
       const pose = latest[group]?.[name];
       if (pose) applyPose(node, pose);
+      if (group === 'objects' || group === 'puzzle_cube') node.visible = !overlayActive;
     }
   }
   diagnostics.update(latest, Number(forceScale.value));
-  leftView?.update(latest.left_hand_tracking, latest.left_contact_probes);
+  calibrationGuide?.update(latest, Boolean(session), Boolean(lastRightCtrlPose), overlayLocalWarning);
+  leftView?.update(overlayActive ? null : latest.left_hand_tracking, overlayActive ? [] : latest.left_contact_probes);
   if (graspView && latest.grasp_object) {
     graspView.update(latest.grasp_object);
     groups.objects.get('table').visible = latest.grasp_object.layout === 'desk';
@@ -180,9 +261,22 @@ function draw(t, frame) {
   if (!viewer) return;
   if (!previewPlaced) { placePreview(viewer); previewPlaced = true; }
   applyFrame();
-  if (latest?.registration?.space === space) applyPose(world, latest.registration.xr_from_world);
-  diagnostics.anchor.visible = Boolean(latest && showDiagnostics.checked);
+  if (latest && !overlayAutoChecked && mode === 'controller') {
+    overlayAutoChecked = true;
+    if (latest.wrist_offset && !latest.wrist_offset.calibrated_6dof && !latest.wrist_offset.overlay_active) {
+      enterOverlayCalibration();
+    }
+  }
+  const overlayActive = Boolean(latest?.wrist_offset?.overlay_active);
+  if (overlayActive) {
+    if (!overlayPlaced) { placePreview(viewer); overlayPlaced = true; }
+  } else {
+    overlayPlaced = false;
+    if (latest?.registration?.space === space) applyPose(world, latest.registration.xr_from_world);
+  }
+  diagnostics.anchor.visible = Boolean(latest && showDiagnostics.checked && !overlayActive);
   if (diagnostics.anchor.visible) diagnostics.place(viewer);
+  calibrationGuide?.place(viewer);
   renderer.render(scene, camera);
 }
 
@@ -193,8 +287,10 @@ function drawDesktop(t) {
   controls.update();
   if (!desktopDirty) return;
   desktopDirty = false;
+  const desktopViewer = {transform:{position:camera.position, orientation:camera.quaternion}};
   diagnostics.anchor.visible = Boolean(latest && showDiagnostics.checked);
-  if (diagnostics.anchor.visible) diagnostics.place({transform:{position:camera.position, orientation:camera.quaternion}}, camera.aspect);
+  if (diagnostics.anchor.visible) diagnostics.place(desktopViewer, camera.aspect);
+  calibrationGuide?.place(desktopViewer, camera.aspect);
   renderer.render(scene, camera);
 }
 
@@ -229,9 +325,26 @@ async function enter() {
       status.textContent = '已退出沉浸场景。';
     }, {once:true});
     space = crypto.randomUUID(); seq = 0; lastSend = -Infinity; sending = false; latest = null; shown = null;
-    align = false; previewPlaced = false; world.visible = false;
+    align = false; previewPlaced = false; overlayPlaced = false; overlayAutoChecked = false;
+    lastRightCtrlPose = null; overlayLocalWarning = ''; world.visible = false;
+    leftXPrev = false; leftYPrev = false;
     session.addEventListener('select', e => {
-      if (mode === 'controller' ? isController(e.inputSource, 'right') : e.inputSource.handedness === 'left') align = true;
+      const overlayActive = Boolean(latest?.wrist_offset?.overlay_active);
+      if (overlayActive) {
+        if (isController(e.inputSource, 'left')) confirmOverlayOverlap();
+        return;
+      }
+      if (mode === 'controller'
+        ? (isController(e.inputSource, 'left') || isController(e.inputSource, 'right'))
+        : e.inputSource.handedness === 'left') align = true;
+    });
+    session.addEventListener('squeeze', e => {
+      if (!isController(e.inputSource, 'left')) return;
+      if (latest?.wrist_offset?.overlay_active) {
+        overlayPlaced = false; // 虚实重合模式下按侧握把虚拟手重新摆到眼前
+      } else {
+        enterOverlayCalibration();
+      }
     });
     await renderer.xr.setSession(session);
     renderer.xr.getReferenceSpace().addEventListener('reset', () => {
@@ -276,7 +389,7 @@ async function prepare() {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(env, .04).texture;
   env.dispose(); pmrem.dispose();
-  const model = await new GLTFLoader().loadAsync('/api/v1/model.glb');
+  const model = await new GLTFLoader().loadAsync(`/api/v1/model.glb?v=${Date.now()}`);
   world.add(model.scene);
   model.scene.traverse(node => {
     for (const [group, nodes] of Object.entries(groups)) {
@@ -289,7 +402,10 @@ async function prepare() {
   if (groups.right_hand.size !== 73 || (!tabletop && !palmTest && !localGrasp && groups.puzzle_cube.size !== 16)) throw Error('模型链接不完整');
   document.querySelector('h1').textContent = palmTest ? 'MotorHand 掌心测试' : tabletop ? 'MotorHand 桌面测试' : '右手与二阶魔方';
   diagnostics = new ForceDiagnostics(scene, groups.right_hand, {localGrasp});
-  if (!localGrasp) leftView = new LeftHandView(world);
+  if (!localGrasp) {
+    calibrationGuide = new CalibrationGuide(scene, world);
+    leftView = new LeftHandView(world);
+  }
   if (localGrasp) {
     button.hidden = sourceSelect.closest('label').hidden = document.querySelector('#xr-hint').hidden = true;
     document.querySelector('h1').textContent = 'MotorHand 本地抓握';

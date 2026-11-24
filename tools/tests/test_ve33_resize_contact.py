@@ -23,7 +23,8 @@ class ResizeContactTest(unittest.TestCase):
         self.addCleanup(sdp.shutdown)
         scene = sdp.create_scene("握持时增大红方块")
         scene.set_gravity([0., 0., 0.])
-        prefab = sdr.load_bot_prefab_from_file(str(MODEL_DIR / "hand_motor_ve33_right_closed_chain.superdex_bot"))
+        from ve33_g4_view import MODEL_BOT
+        prefab = sdr.load_bot_prefab_from_file(str(MODEL_BOT))
         prefab.world_from_root = sdp.TransformRT(rotation=UPRIGHT_WRIST_POSE[3:], translation=UPRIGHT_WRIST_POSE[:3])
         prefab.joints[0].type = sdp.ArticulatedJointType.HARD
         for link in prefab.links:

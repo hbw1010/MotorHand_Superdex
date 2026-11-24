@@ -32,7 +32,8 @@ from motorhand.mapping import GloveMapping, MODEL_MOTOR_JOINTS
 from motorhand.g4_types import G4Joint
 from ve33_web_control import WebControl, measure_frame_gaps
 
-MODEL_DIR = ROOT / "assets/hand_motor_ve33/hand_motor_ve33_R"
+MODEL_DIR = ROOT / "assets/hand_motor_ve40/hand_motor_ve40_R"
+MODEL_BOT = MODEL_DIR / "hand_motor_ve40_right_closed_chain.superdex_bot"
 LIBRARY = ROOT / "hardware/encos_g4_gateway_sdk/build/libg4_shim.so"
 PHYSICS_STEP_S = 1. / 240.
 SCENE_VIEW_PERIOD_S = 1. / 60.
@@ -207,7 +208,7 @@ def open_reader(port, feedback_capable=False):
         def release(self):
             if feedback_capable and self._handle is not None:
                 for mid in range(1, 13):
-                    lib.g4_release(self._handle, 3 - (mid-1)//4, mid)
+                    lib.g4_release(self._handle, 0, mid)
 
     session = Session(handle)
     try:
@@ -475,7 +476,7 @@ def aligned_feedback_display(read, frame, requested, *, wait_s):
         time.sleep(min(.001, left))
 
 
-def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_port=None, cube_dir=None, align=None, wrist_state=None, headset=False, proxy_frame=None, tabletop=False, palm_test=False, official_puzzle=False, ball_size_mm=45., feedback_display=None, web_control=None, control_port=None, force_frame=None, feedback_mapping=None, use_cpp=False, shared_path=None):
+def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_port=None, cube_dir=None, align=None, wrist_state=None, headset=False, proxy_frame=None, tabletop=False, palm_test=False, official_puzzle=False, ball_size_mm=45., feedback_display=None, web_control=None, control_port=None, force_frame=None, feedback_mapping=None, use_cpp=False, shared_path=None, wrist_offset=(0., 0., 0.), wrist_pose=None):
     import superdex.physics as sdp
     import superdex.robotics as sdr
 
@@ -495,9 +496,9 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
     puzzle_on_table = bool(quest_port) and not (fixed_wrist or tabletop)
     try:
         scene = sdp.create_scene("Puzzle Cube · MotorHand grip_lift" if official_puzzle else "VE33 G4 - right")
-        scene.set_gravity([0., 0., -9.81 if puzzle_on_table else 0.])
+        scene.set_gravity([0., 0., -9.81 if (puzzle_on_table or tabletop) else 0.])
         context = sdr.create_context()
-        prefab = sdr.load_bot_prefab_from_file(str(MODEL_DIR / "hand_motor_ve33_right_closed_chain.superdex_bot"))
+        prefab = sdr.load_bot_prefab_from_file(str(MODEL_BOT))
         if local_grasp:
             from ve33_local_grasp import UPRIGHT_WRIST_POSE
             prefab.world_from_root = sdp.TransformRT(rotation=UPRIGHT_WRIST_POSE[3:], translation=UPRIGHT_WRIST_POSE[:3])
@@ -509,7 +510,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 # 角块反复查询复合手部的高精度三角网格，按压时成本很高。
                 for link in prefab.links:
                     link.layer = "RightHand"
-                    if puzzle_on_table:
+                    if puzzle_on_table or tabletop:
                         link.has_gravity = False
                     link.boundary_element_type = sdp.ActorBoundaryElementType.P1Q1
                     link.boundary_subsampling = sdp.BoundarySubsamplingParams(
@@ -579,10 +580,13 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
             scene.set_solver_params(params)
             fingers = MeasuredFingers(actor, tree_names, indices, sdp)
             drive = HandContactDrive(sdp, actor, info, motor_names, fixed_wrist=fixed_wrist)
-            contacts = ShellContacts(sdp, scene, actor, environment.contact_actors)
+            contact_targets = environment.dynamic_actors if tabletop else environment.contact_actors
+            contacts = ShellContacts(sdp, scene, actor, contact_targets)
             if local_grasp:
                 drive.set_free_grip(True)
-                contacts.shells += puzzle_table.contact_actors
+            elif tabletop:
+                drive.set_free_grip(True)
+                contacts.set_grip_surfaces(sdp, scene, True)
             motor_indices = [offsets[name] for name in motor_names]
             if use_cpp:
                 from motorhand.native_runtime import load_native
@@ -618,13 +622,14 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 if grasp_physics is None:
                     contact_pose = sdp.DynamicArrayReal(actor.get_num_dofs())
                     contact_vel = sdp.DynamicArrayReal(actor.get_num_dofs())
-            bridge = WristBridge()
-            if not fixed_wrist and collection == "puzzle_cube":
+            bridge = WristBridge(controller_offset=wrist_offset, controller_to_hand=wrist_pose)
+            if not fixed_wrist and (collection == "puzzle_cube" or tabletop):
                 from ve33_left_hand import LeftHandSupport
-                left_support = LeftHandSupport(sdp, scene, environment.contact_actors)
+                left_shells = environment.dynamic_actors if tabletop else environment.contact_actors
+                left_support = LeftHandSupport(sdp, scene, left_shells)
             from ve33_contact_guard import CubeContactGuard
             guard = None
-            if not local_grasp:
+            if not (local_grasp or tabletop):
                 solid_surfaces = {name: scene.get_actor(handle) for name, handle in
                                   zip(info.link_names, actor.get_nested_link_actors())
                                   if name in FINGER_SLEEVE_LINKS}
@@ -642,8 +647,9 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 def scene_feedback(frame):
                     return aligned_feedback_display(shared_link.read_display_for, frame,
                                                     web_control.requested.is_set(), wait_s=1./CONFIG["control_hz"])
-            services.enter_context(wrist_server(bridge, quest_port, glb, control=web_control,
-                                                scene_feedback=scene_feedback))
+            services.enter_context(wrist_server(
+                bridge, quest_port, glb, control=web_control, scene_feedback=scene_feedback,
+                offset_config_path=ROOT / "hardware/encos_g4_gateway_sdk/config/right_sim_feedback.json"))
         frame_id = 0
         scene_revision = 0
         last_view = 0.
@@ -680,7 +686,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                         static_objects = puzzle_table
                         if local_grasp:
                             reset_grasp = True
-                        elif collection == "puzzle_cube":
+                        elif hasattr(environment, "reset"):
                             environment.reset()
                         else:
                             static_objects = environment
@@ -711,7 +717,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                         if replacing and force_frame is not None:
                             force_frame[2] = 0.
                         if environment.configure(settings, reset=reset_grasp):
-                            contacts.shells = environment.contact_actors + puzzle_table.contact_actors
+                            contacts.shells = environment.contact_actors
                             if shared_link is not None:
                                 connect_motion()
                         if shared_link is not None:
@@ -731,14 +737,16 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                 if registration is not None and registration is not last_registration:
                     # 重新对齐会改变腕部参考位置，旧的接触面需要重建。
                     fingers.proxy = ContactProxy()
-                    guard.previous_target_local = None
+                    if guard is not None:
+                        guard.previous_target_local = None
                     palm_contact = False
                     last_registration = registration
                 cube_free = collection == "puzzle_cube" and environment.mode == "free"
                 if cube_free != was_cube_free:
                     # 切换支撑方式后，旧参考位姿建立的受阻面需要重新探测。
                     fingers.proxy = ContactProxy()
-                    guard.previous_target_local = None
+                    if guard is not None:
+                        guard.previous_target_local = None
                     palm_contact = False
                     drive.set_free_grip(cube_free)
                     contacts.set_grip_surfaces(sdp, scene, cube_free)
@@ -746,7 +754,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                         actor.get_articulated_pose(pose)
                         fingers.last = np.asarray(pose)[indices]
                     was_cube_free = cube_free
-                native_grasp = cube_free or local_grasp
+                native_grasp = cube_free or local_grasp or tabletop
                 if native_grasp:
                     # 自由抓取用真实接触，保留求解后的姿态和速度以持续夹持。
                     target_contacts, target_fingers, finger_hits = {}, set(), {}
@@ -914,7 +922,7 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
             if view and show_scene:
                 actor.get_articulated_link_transforms(transforms)
                 if environment:
-                    if collection == "puzzle_cube":
+                    if hasattr(environment, "update"):
                         environment.update()
                     frame_id += 1
                     if pairs or palm_contact:
@@ -924,7 +932,9 @@ def render(tree_names, motor_names, pending, displayed, stop, debugger, quest_po
                         elif palm_test:
                             contacted = "掌心球"
                         elif tabletop:
-                            contacted = "桌面" if "table" in (pairs or target_contacts) else "测试方块"
+                            from ve33_tabletop import OBJECT_LABELS
+                            hit_names = [OBJECT_LABELS.get(k, k) for k in pairs if k != "table"]
+                            contacted = "、".join(hit_names[:2]) if hit_names else "桌面"
                         contact_status = (" · 掌部接触" if palm_contact else " · 接触") + contacted
                     else:
                         contact_status = " · 自由空间"
@@ -996,7 +1006,7 @@ def position_sample(j, mid, now):
         return raw, age, "缺失或过期"
     if j.error:
         return raw, age, f"报警 {j.error}"
-    if j.bus != 3 - (mid - 1) // 4:
+    if not (1 <= j.bus <= 3):
         return raw, age, "路由错误"
     return raw, age, "在线"
 
@@ -1340,9 +1350,21 @@ def main():
     parser.add_argument("--inspect-physics", action="store_true", help="同时打开官方 Physics Debugger")
     parser.add_argument("--ball-size-mm", type=float, default=45.,
                         help="--palm-test 的球直径，范围 25–200 mm")
+    parser.add_argument("--wrist-offset", type=float, nargs=3, metavar=("X", "Y", "Z"),
+                        help="手柄相对手套 base_link 原点的刚体偏移 (米，FLU：+X指尖 +Y拇指 +Z手背)")
     args = parser.parse_args()
-    if args.demo and (not args.local_grasp or args.port or args.zero or args.feedback):
-        parser.error("--demo 只用于 --local-grasp 的无串口预览")
+    from ve33_quest import parse_controller_offset, parse_controller_to_hand
+    try:
+        wrist_offset = tuple(parse_controller_offset(
+            args.wrist_offset if args.wrist_offset is not None else CONFIG.get("wrist_tracker_offset_m", (0., 0., 0.))
+        ).tolist())
+        wrist_pose = None if args.wrist_offset is not None else CONFIG.get("wrist_tracker_pose")
+        if wrist_pose is not None:
+            parse_controller_to_hand(wrist_pose)
+    except ValueError as exc:
+        parser.error(f"--wrist-offset 无效：{exc}")
+    if args.demo and (not (args.local_grasp or args.tabletop) or args.port or args.zero or args.feedback):
+        parser.error("--demo 只用于 --local-grasp 或 --tabletop 的无串口预览")
     if not args.demo and args.port is None:
         parser.error("真机运行需要 --port")
     if not 25 <= args.ball_size_mm <= 200 or (args.ball_size_mm != 45. and not args.palm_test):
@@ -1410,7 +1432,9 @@ def main():
     pending = None if use_cpp else ctx.Array("d", 1 + len(solver.joint_names) + MOTOR_COUNT)
     displayed = None if use_cpp else ctx.Array("d", 13)
     stop = ctx.Event()
-    align = ctx.Event() if args.quest and not fixed_wrist else None
+    switchable_tasks = ("local_grasp", "tabletop") if (use_cpp and (args.local_grasp or args.tabletop)) else ()
+    initial_task = "local_grasp" if args.local_grasp else "tabletop" if args.tabletop else ""
+    align = ctx.Event() if args.quest and (not fixed_wrist or bool(switchable_tasks)) else None
     wrist_state = ctx.Array("c", 128) if args.quest else None
     legacy_feedback = args.quest and not use_cpp
     proxy_frame = ctx.Array("d", PROXY_FRAME_SIZE) if legacy_feedback else None
@@ -1419,7 +1443,8 @@ def main():
     default_enabled = args.quest and not args.preview and (not args.local_grasp or args.feedback)
     web_control = WebControl(ctx, align, default_enabled=default_enabled, allow_reset=args.quest,
                              cube_switch=args.quest and not (fixed_wrist or args.tabletop),
-                             local_grasp=args.local_grasp, demo=args.demo)
+                             local_grasp=args.local_grasp, demo=args.demo,
+                             switchable_tasks=switchable_tasks, initial_task=initial_task)
     with ExitStack() as resources:
         shared_path = None
         loop = feedback = read = None
@@ -1437,10 +1462,14 @@ def main():
                 resources.enter_context(gateway_lock(args.port))
             motors = [motor for _, motor in axes.values()]
             lo, hi = zip(*(motor.model_rad_limits() for motor in motors))
+            disabled_mask = 0
+            for mid in CONFIG.get("disabled_motor_ids", ()):
+                if isinstance(mid, int) and 1 <= mid <= MOTOR_COUNT:
+                    disabled_mask |= 1 << (mid - 1)
             loop = native.NativeLoop(solver.native, make_feedback_control(axes, native, args.feedback_profile),
                                      link, "" if args.demo else str(args.port),
                                      [m.sign * m.scale for m in motors], lo, hi, DemoGlove.GRIP,
-                                     round(1e9 / CONFIG["control_hz"]))
+                                     round(1e9 / CONFIG["control_hz"]), disabled_mask)
             resources.callback(loop.close)
         else:
             if args.demo:
@@ -1449,17 +1478,54 @@ def main():
             else:
                 read = resources.enter_context(gateway(args.port, args.quest))
             feedback = ContactForceFeedbackLoop(read, axes, profile=args.feedback_profile) if args.quest else None
-        renderer = ctx.Process(target=render, args=(solver.joint_names, [n for n, _ in axes.values()],
-                                                   pending, displayed, stop, args.debugger, args.quest_port if args.quest else None,
-                                                   args.cube_dir.resolve(), align, wrist_state, args.quest, proxy_frame,
-                                                   args.tabletop, args.palm_test,
-                                                   args.official_puzzle, args.ball_size_mm, feedback_display, web_control,
-                                                   args.quest_port, force_frame, mapping, use_cpp, shared_path))
-        renderer.start()
+
+        def load_live_wrist_calibration():
+            if args.wrist_offset is not None:
+                return wrist_offset, None
+            try:
+                cfg_data = json.loads((ROOT / "hardware/encos_g4_gateway_sdk/config/right_sim_feedback.json").read_text())
+                off = tuple(parse_controller_offset(cfg_data.get("wrist_tracker_offset_m", (0., 0., 0.))).tolist())
+                pose_val = cfg_data.get("wrist_tracker_pose")
+                if pose_val is not None:
+                    parse_controller_to_hand(pose_val)
+                return off, pose_val
+            except (OSError, ValueError):
+                return wrist_offset, wrist_pose
+
+        def spawn_renderer(task_name):
+            is_tabletop = task_name == "tabletop" if switchable_tasks else args.tabletop
+            live_offset, live_pose = load_live_wrist_calibration()
+            proc = ctx.Process(target=render, args=(solver.joint_names, [n for n, _ in axes.values()],
+                                                    pending, displayed, stop, args.debugger, args.quest_port if args.quest else None,
+                                                    args.cube_dir.resolve(), align, wrist_state, args.quest, proxy_frame,
+                                                    is_tabletop, args.palm_test,
+                                                    args.official_puzzle, args.ball_size_mm, feedback_display, web_control,
+                                                    args.quest_port, force_frame, mapping, use_cpp, shared_path,
+                                                    live_offset, live_pose))
+            proc.start()
+            return proc
+
+        renderer = spawn_renderer(initial_task)
+        active_renderer = [renderer]
+
+        def switch_task(old_renderer, new_task):
+            stop.set()
+            old_renderer.join(timeout=6.)
+            if old_renderer.is_alive():
+                old_renderer.terminate()
+                old_renderer.join(timeout=2.)
+            stop.clear()
+            if wrist_state is not None:
+                wrist_state.value = b""
+            web_control.commit_task(new_task)
+            new_renderer = spawn_renderer(new_task)
+            active_renderer[0] = new_renderer
+            return new_renderer, new_task == "local_grasp"
+
         inspector = None
         recorder = None
         try:
-            if args.local_grasp:
+            if args.local_grasp or "local_grasp" in switchable_tasks:
                 from ve33_grasp_recording import GraspRecorder
                 recorder = GraspRecorder(web_control)
             if args.inspect_physics:
@@ -1471,7 +1537,8 @@ def main():
             if use_cpp:
                 run_native_control(loop, web_control, axes, args.zero_file, wrist_state, renderer, recorder,
                                    args.port, args.demo, args.feedback_profile, load_zero, capture_zero,
-                                   mapping_identity, fixed_wrist=fixed_wrist)
+                                   mapping_identity, fixed_wrist=fixed_wrist,
+                                   on_switch_task=switch_task if switchable_tasks else None)
             else:
                 run_control(read, axes, solver, mapping, pending, displayed, renderer, args.zero_file,
                             wrist_state, feedback, proxy_frame, force_frame, fixed_wrist, feedback_display, web_control,
@@ -1484,10 +1551,11 @@ def main():
                 recorder.close()
             if inspector is not None and inspector.poll() is None:
                 inspector.terminate()
-            renderer.join(timeout=2)
-            if renderer.is_alive():
-                renderer.terminate()
-                renderer.join()
+            cur = active_renderer[0]
+            cur.join(timeout=2)
+            if cur.is_alive():
+                cur.terminate()
+                cur.join()
 
 
 if __name__ == "__main__":

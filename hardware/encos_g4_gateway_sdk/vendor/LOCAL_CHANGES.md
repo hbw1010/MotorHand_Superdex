@@ -26,3 +26,5 @@
 2026-11-22：加固非阻塞串口收发与断线检测。`PosixSerial::Open` 增加 `O_CLOEXEC`；新增 `WriteAll` 与 `WaitReadableNs`（基于 `ppoll`），在 `HandClientG4::IoLoop` 与 `SendReleaseBatchAll` 中处理 `EINTR`/`EAGAIN` 与部分写并保留半帧尾字节，避免 32 字节协议帧被腰斩；周期等待改为事件驱动 `ppoll` 即时读取并发布快照，同时防护 `g4_transport_lost` 与年龄计算的无符号下溢。
 
 2026-11-23：同步 `LQS_Gateway_GUI v0.4.0`（MIT 力矩量程调整版）改动，将 `GatewayProtocol.hpp` 中 `PackMit()` 的前馈力矩限幅与 12-bit 线性映射量程由 `[-10.0, 10.0]` 放宽至 `[-20.0, 20.0] N·m`，完整保留本地串口与时间戳扩展。
+
+2026-11-23：在 `HandClientG4.hpp` 与 `g4_shim.cpp` 中增加三路 CAN 动态路由发现。离线且无有效控制命令的轴按 10 ms 节拍轮询 CAN 1–3，收到有效回包后自动绑定 `BusForId(id)`（同时保留双总线重号检测），兼容旧版 `3-(id-1)/4` 接线与新版混合总线接线。

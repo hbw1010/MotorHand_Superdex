@@ -171,8 +171,12 @@ class SceneFeedbackTest(unittest.TestCase):
                 break
             time.sleep(.05)
         self.assertEqual(frame["scene_kind"], "tabletop")
+        self.assertEqual(frame["finger_control"], "physics")
         self.assertGreater(frame["physics_frame_ns"], 0)
         self.assertIsNotNone(state["wrist_ms"])
+        expected_objects = {"table", "test_box", "block_blue", "block_yellow",
+                            "block_green", "paper_cup", "sphere_ball", "peg_cylinder", "duck_lamp"}
+        self.assertTrue(expected_objects.issubset(frame["objects"].keys()))
 
         # 验证场景复位更新 scene_revision 后 C++ 控制线程同步切版且保持在线。
         api("control", {"action": "reset_scene"})

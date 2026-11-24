@@ -40,7 +40,8 @@ class NativePhysicsTest(unittest.TestCase):
             self.addCleanup(sdp.shutdown)
             scene = sdp.create_scene("抓握原生子步")
             scene.set_gravity([0., 0., 0.])
-            prefab = sdr.load_bot_prefab_from_file(str(MODEL_DIR / "hand_motor_ve33_right_closed_chain.superdex_bot"))
+            from ve33_g4_view import MODEL_BOT
+            prefab = sdr.load_bot_prefab_from_file(str(MODEL_BOT))
             prefab.joints[0].type = sdp.ArticulatedJointType.HARD
             prefab.world_from_root = sdp.TransformRT(translation=[2., 0., 0.])
             bot = sdr.create_bot(scene, prefab, sdr.create_context())

@@ -1,0 +1,54 @@
+{
+  "assembly": "C:\\Users\\current robotics\\Desktop\\motorhand\\vE.4.0\\手部电机外骨骼.SLDASM",
+  "configuration": "12自由度",
+  "hidden": [
+    "左手柄支架-1",
+    "PICO 4U L1-1"
+  ],
+  "visible": 97,
+  "unique_meshes": 38,
+  "active": 12,
+  "tree_joints": 72,
+  "closures": 28,
+  "cad_to_base": [
+    [
+      0.0,
+      0.0,
+      -1.0,
+      0.04
+    ],
+    [
+      -1.0,
+      8.36534599342605e-34,
+      0.0,
+      0.0
+    ],
+    [
+      -8.365345993426268e-34,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "coordinate_units": "metres",
+  "joint_zero": "All moving joints q=0 reproduce the supplied saved 12自由度 CAD pose",
+  "fixed_by_user": [
+    "four finger abduction",
+    "pinky CMC"
+  ],
+  "coordinate_reference": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\outputs\\hand_v14_J_named\\R\\hand_tree_only.urdf",
+  "local_hinge_axis": [
+    0,
+    0,
+    1
+  ],
+  "source_sha256": "ac03253c78dc9ca2bc454d61277d42617b2ae867212d819396ce904d2a5e874b",
+  "zero_source_saved_at": "2026-11-23T18:39:44.641465+08:00",
+  "assembly_pose_mates": "Motor locking pins/angle-positioning mates used to hold the saved pose are not permanent motion locks"
+}

@@ -73,7 +73,8 @@ def observe_native(sample, axes):
 
 
 def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, recorder,
-                       device, demo, profile, load_zero, capture_zero, mapping_identity, *, fixed_wrist=True):
+                       device, demo, profile, load_zero, capture_zero, mapping_identity, *,
+                       fixed_wrist=True, on_switch_task=None):
     zero = dict.fromkeys(axes, 0.) if demo else load_zero(zero_path, axes)
     def start(values, *, fresh_zero=False):
         loop.start([values[mid] for mid in axes] if values else [], fresh_zero=fresh_zero)
@@ -84,7 +85,9 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
 
     status = dict(device="演示" if demo else str(device.resolve()), zero_path=None if demo else str(zero_path.resolve()),
                   axes=mapping_identity(axes), zero_revision=0, zero_error=None,
-                  can_align=control.align is not None, fixed_wrist=fixed_wrist,
+                  task=control.current_task() or ("local_grasp" if fixed_wrist else "tabletop"),
+                  available_tasks=list(control.task_names),
+                  can_align=not fixed_wrist and control.align is not None, fixed_wrist=fixed_wrist,
                   demo=demo, can_zero=not demo, can_feedback=not demo, feedback_profile=profile,
                   feedback_source="joint_position_and_contact_force", feedback_gain=1., grasp_backend="cpp",
                   control_backend="cpp", active=False, requested=False)
@@ -94,6 +97,16 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
     start(zero)
     try:
         while renderer.is_alive():
+            next_task = control.pending_task()
+            if next_task and on_switch_task is not None and not control.zero.is_set():
+                status.update(requested=False, active=False, feedback_message="正在切换仿真任务…")
+                control.publish(status)
+                renderer, fixed_wrist = on_switch_task(renderer, next_task)
+                status.update(task=next_task, fixed_wrist=fixed_wrist,
+                              can_align=not fixed_wrist and control.align is not None)
+                settings = control.grasp_request()
+                control.publish(status)
+                continue
             if control.zero.is_set():
                 loop.stop()
                 status.update(calibrating=True, requested=False, active=False, feedback_message="标零中 · 真机出力关闭")
@@ -110,7 +123,7 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
                 status.update(calibrating=False, zero_revision=status["zero_revision"]+1)
                 control.zero.clear()
 
-            recording = recorder is not None and (recorder.active or control.record_requested.is_set())
+            recording = recorder is not None and control.is_local_grasp() and (recorder.active or control.record_requested.is_set())
             new_settings = control.grasp_request()
             samples = loop.samples(seq, not recording)
             for s in samples:

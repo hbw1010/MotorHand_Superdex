@@ -24,9 +24,19 @@ const demoGrip = document.querySelector('#demo-grip');
 const demoAuto = document.querySelector('#demo-auto');
 const record = document.querySelector('#grasp-record');
 const csvLink = document.querySelector('#grasp-csv');
+const offsetPanel = document.querySelector('#wrist-offset-cal');
+const offsetCurrent = document.querySelector('#offset-cal-current');
+const offsetStart = document.querySelector('#offset-cal-start');
+const offsetCancel = document.querySelector('#offset-cal-cancel');
+const offsetReset = document.querySelector('#offset-cal-reset');
+const offsetStatus = document.querySelector('#offset-cal-status');
+const taskTabs = document.querySelector('#task-tabs');
+const taskButtons = taskTabs ? Array.from(taskTabs.querySelectorAll('[data-task]')) : [];
+const taskSwitchStatus = document.querySelector('#task-switch-status');
 const buttons = Array.from(panel.querySelectorAll('[data-control]'));
 let busy = false, timer = 0;
 let sceneRevision;
+let loadedTask = null, switchingToTask = null;
 let switchingObject = false;
 let sizeCancelled = false;
 let sizeCommit = Promise.resolve();
@@ -90,7 +100,60 @@ function showGrasp(state) {
   else if (state.recording_dropped) graspMessage.textContent = `记录丢失 ${state.recording_dropped} 个采样周期`;
 }
 
+function fmtOffsetMm(vec) {
+  if (!Array.isArray(vec) || vec.length !== 3) return '—';
+  const f = v => `${v >= 0 ? '+' : ''}${(v * 1000).toFixed(1)}`;
+  return `(${f(vec[0])}, ${f(vec[1])}, ${f(vec[2])}) mm`;
+}
+
+function showWristOffset(state) {
+  if (!offsetPanel) return;
+  const cal = state.wrist_offset;
+  offsetPanel.hidden = Boolean(state.fixed_wrist || !cal);
+  if (offsetPanel.hidden) return;
+  const badge = cal.calibrated_6dof ? `6DoF 已标定 · 杆臂 ${fmtOffsetMm(cal.offset_m)}` : `未标定 · 偏移 ${fmtOffsetMm(cal.offset_m)}`;
+  offsetCurrent.textContent = `当前：${badge}`;
+  const active = Boolean(cal.overlay_active);
+  offsetStart.hidden = active;
+  offsetCancel.hidden = !active;
+  offsetStart.disabled = busy || state.calibrating;
+  offsetCancel.disabled = busy || !active;
+  offsetReset.disabled = busy || active;
+  if (active) {
+    offsetStatus.textContent = '虚实重合标定中：在头显里把真实右手手套伸进眼前虚拟手重合，按【左手扳机 / X 键】确认并自动保存（【左手侧握】重摆位置，【左手 Y】取消）。';
+  } else if (cal.message) {
+    offsetStatus.textContent = cal.message;
+  } else {
+    offsetStatus.textContent = '全程在头显内用左手柄完成：未标定时进入头显自动触发，或随时按【左手 X / 侧握】重标。';
+  }
+}
+
+function showTaskTabs(state) {
+  if (!taskTabs) return;
+  const tasks = state.available_tasks;
+  const current = state.task;
+  taskTabs.hidden = !Array.isArray(tasks) || tasks.length < 2;
+  if (taskTabs.hidden) return;
+  if (!loadedTask && current) loadedTask = current;
+  if (switchingToTask && current === switchingToTask) {
+    window.location.replace(`${window.location.pathname}?t=${Date.now()}`);
+    return;
+  }
+  if (!switchingToTask && loadedTask && current && current !== loadedTask) {
+    window.location.replace(`${window.location.pathname}?t=${Date.now()}`);
+    return;
+  }
+  for (const btn of taskButtons) {
+    const t = btn.dataset.task;
+    btn.hidden = !tasks.includes(t);
+    btn.setAttribute('aria-pressed', String(t === (switchingToTask ?? current)));
+    btn.disabled = busy || Boolean(switchingToTask) || state.calibrating;
+  }
+  if (!switchingToTask && taskSwitchStatus) taskSwitchStatus.textContent = '';
+}
+
 function show(state) {
+  showTaskTabs(state);
   const canReset = state.scene_revision !== undefined;
   cubeSettings.hidden = !state.cube_mode && !canReset;
   cubeModeControl.hidden = !state.cube_mode;
@@ -102,6 +165,7 @@ function show(state) {
   }
   sceneRevision = state.scene_revision;
   timing.textContent = tracks(state);
+  showWristOffset(state);
   showGrasp(state);
   const mode = state.diagnostic_stale ? '状态待更新' : state.feedback_rearm_required ? '保护停止'
     : state.active ? '输出中' : state.requested ? '待命' : '关闭';
@@ -147,15 +211,20 @@ async function poll() {
     if (!response.ok) throw Error(response.status);
     show(await response.json());
   } catch {
-    feedbackStatus.textContent = '网页控制连接中断';
-    feedbackStatus.dataset.active = 'no';
+    if (switchingToTask) {
+      if (taskSwitchStatus) taskSwitchStatus.textContent = '正在加载新场景，请稍候…';
+    } else {
+      feedbackStatus.textContent = '网页控制连接中断';
+      feedbackStatus.dataset.active = 'no';
+    }
     for (const button of buttons) button.disabled = true;
+    for (const btn of taskButtons) btn.disabled = true;
     cubeMode.disabled = resetScene.disabled = true;
     for (const input of graspInputs) input.disabled = true;
     graspHome.disabled = record.disabled = true;
   } finally {
     // 头显帧交换走独立请求，控制面板无需每帧重绘。
-    timer = setTimeout(poll, document.visibilityState === 'hidden' ? 650 : 220);
+    timer = setTimeout(poll, switchingToTask ? 220 : (document.visibilityState === 'hidden' ? 650 : 220));
   }
 }
 
@@ -246,6 +315,44 @@ demoGrip.addEventListener('change', () => submit({action: 'demo_grip', value: Nu
 demoAuto.addEventListener('click', () => submit({action: 'demo_grip', value: null}, graspMessage));
 record.addEventListener('click', () => submit({action: record.dataset.recording === 'yes'
   ? 'stop_recording' : 'start_recording'}, graspMessage));
+if (offsetPanel) {
+  offsetStart.addEventListener('click', () => submit({action: 'start_overlay_cal'}, offsetStatus));
+  offsetCancel.addEventListener('click', () => submit({action: 'cancel_overlay_cal'}, offsetStatus));
+  offsetReset.addEventListener('click', () => submit({action: 'reset_offset_cal', auto_save: true}, offsetStatus));
+}
+for (const btn of taskButtons) {
+  btn.addEventListener('click', async () => {
+    const target = btn.dataset.task;
+    if (!target || target === loadedTask || switchingToTask) return;
+    switchingToTask = target;
+    for (const b of taskButtons) {
+      b.disabled = true;
+      b.setAttribute('aria-pressed', String(b.dataset.task === target));
+    }
+    if (taskSwitchStatus) taskSwitchStatus.textContent = `正在切换到「${btn.textContent}」（手套保持在线与标零）…`;
+    const ok = await postCommand({action: 'switch_task', task: target}, taskSwitchStatus ?? commandMessage);
+    if (!ok) {
+      switchingToTask = null;
+      for (const b of taskButtons) b.disabled = false;
+    }
+  });
+}
+
+window.addEventListener('keydown', event => {
+  if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+  const tag = event.target?.tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (event.key === 'f' || event.key === 'F') {
+    event.preventDefault();
+    submit({action: 'toggle_feedback'}, commandMessage);
+  } else if (event.code === 'Space') {
+    event.preventDefault();
+    submit({action: 'disable'}, commandMessage);
+  } else if ((event.key === 'r' || event.key === 'R') && !resetScene.disabled) {
+    event.preventDefault();
+    submit({action: 'reset_scene'}, sceneMessage);
+  }
+});
 
 if (panel) poll();
 window.addEventListener('pagehide', () => {

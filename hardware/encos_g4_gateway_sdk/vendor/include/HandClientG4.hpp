@@ -21,13 +21,19 @@ struct JointKey {
 
 class HandClientG4 {
 public:
-    HandClientG4() = default;
+    HandClientG4() { ResetDefaultBuses(); }
     ~HandClientG4() { Disconnect(); }
+
+    uint8_t BusForId(uint16_t id) const {
+        if (id >= 1 && id <= 12) return bus_for_id_[id - 1].load(std::memory_order_relaxed);
+        return 1;
+    }
 
     bool Connect(const std::string& port = "/dev/ttyUSB0", int baud = 921600, unsigned hz = 200,
                  bool query_only = false, bool wait_for_first_packets = true) {
         Disconnect();
         if (!serial_.Open(port, baud)) return false;
+        ResetDefaultBuses();
         transport_lost_ = false;
         last_reply_us_ = 0;
         query_only_ = query_only;
@@ -110,17 +116,19 @@ private:
     std::mutex snapshot_mutex_;
     std::map<JointKey, HandSnapshot> latest_snapshots_;
     std::map<JointKey, TimedHandSnapshot> latest_timed_snapshots_;
+    std::array<std::atomic<uint8_t>, 12> bus_for_id_{};
+
+    void ResetDefaultBuses() {
+        for (uint16_t id = 1; id <= 12; ++id) {
+            bus_for_id_[id - 1].store(static_cast<uint8_t>(3 - (id - 1) / 4), std::memory_order_relaxed);
+        }
+    }
 
     void SendReleaseBatchAll() {
-        static const JointKey all_joints[] = {
-            {1, 9}, {1, 10}, {1, 11}, {1, 12},
-            {2, 5}, {2, 6},  {2, 7},  {2, 8},
-            {3, 1}, {3, 2},  {3, 3},  {3, 4}
-        };
-
         std::array<GatewayWireFrame, 12> rel_batch;
         for (size_t i = 0; i < 12; ++i) {
-            rel_batch[i] = gateway::Release(all_joints[i].bus, all_joints[i].id);
+            const uint16_t id = static_cast<uint16_t>(i + 1);
+            rel_batch[i] = gateway::Release(BusForId(id), id);
             gateway::Seal(rel_batch[i]);
         }
 
@@ -145,11 +153,14 @@ private:
 
         const auto cycle = std::chrono::microseconds(1000000 / target_hz_);
         uint16_t sequence = 0;
+        uint32_t tick_count = 0;
 
         auto publish_snapshots = [&]() {
             std::lock_guard<std::mutex> lock(snapshot_mutex_);
             // Read/Accept之后取时间，避免age_ms减去未来收包时间而无符号下溢。
             const auto snapshot_us = gateway::NowUs();
+            latest_snapshots_.clear();
+            latest_timed_snapshots_.clear();
             for (const auto& [k, route] : routes) {
                 auto timed = route.TimedSnapshot(snapshot_us);
                 latest_snapshots_[k] = timed.state;
@@ -163,10 +174,30 @@ private:
                 const int n = serial_.Read(rx, sizeof(rx));
                 if (n > 0) {
                     parser.Feed(rx, static_cast<size_t>(n), [&](const GatewayWireFrame& f) {
+                        if (f.kind != 0x90 || f.bus < 1 || f.bus > 3 || f.can_id < 1 || f.can_id > 12) return;
                         JointKey k{f.bus, f.can_id};
-                        const auto it = routes.find(k);
                         const auto now = gateway::NowUs();
-                        if (it != routes.end() && it->second.Accept(f, now)) {
+                        auto it = routes.find(k);
+                        if (it == routes.end()) {
+                            // 动态发现新接线：若同 ID 在旧总线离线则迁移路由，若双总线同时在线则保留以触发重号告警。
+                            for (auto old_it = routes.begin(); old_it != routes.end(); ) {
+                                if (old_it->first.id == f.can_id) {
+                                    const bool old_online = (old_it->second.feedback.valid & gateway::Position) &&
+                                        now >= old_it->second.feedback.position_time &&
+                                        now - old_it->second.feedback.position_time <= 100'000;
+                                    if (!old_online) {
+                                        std::lock_guard<std::mutex> lock(cmd_mutex_);
+                                        commands_.erase(old_it->first);
+                                        old_it = routes.erase(old_it);
+                                        continue;
+                                    }
+                                }
+                                ++old_it;
+                            }
+                            it = routes.emplace(k, gateway::RouteState(f.bus, f.can_id)).first;
+                            bus_for_id_[f.can_id - 1].store(f.bus, std::memory_order_relaxed);
+                        }
+                        if (it->second.Accept(f, now)) {
                             last_reply_us_.store(now, std::memory_order_relaxed);
                             got_frame = true;
                         }
@@ -209,14 +240,26 @@ private:
                 }
             }
             if (tail_len == 0) {
-                std::array<GatewayWireFrame, 12> tx_batch;
+                std::array<GatewayWireFrame, 16> tx_batch;
                 size_t tx_count = 0;
+                const auto now_us = gateway::NowUs();
+                const uint8_t probe_step = static_cast<uint8_t>((tick_count / 2) % 3);
+                ++tick_count;
                 {
                     std::lock_guard<std::mutex> lock(cmd_mutex_);
                     for (auto& [k, route] : routes) {
+                        if (tx_count >= tx_batch.size()) break;
                         MotorCommand c;
                         if (!query_only_ && commands_.count(k)) c = commands_[k];
-                        auto f = gateway::CommandFrame(k.bus, k.id, c);
+                        uint8_t tx_bus = k.bus;
+                        const bool online = (route.feedback.valid & gateway::Position) &&
+                            now_us >= route.feedback.position_time &&
+                            now_us - route.feedback.position_time <= 100'000;
+                        // 离线且无有效控制命令的轴按 10 ms 节拍轮询三路 CAN 总线，自动发现真实挂载总线。
+                        if (!c.enabled && !online && probe_step > 0) {
+                            tx_bus = static_cast<uint8_t>(((k.bus - 1 + probe_step) % 3) + 1);
+                        }
+                        auto f = gateway::CommandFrame(tx_bus, k.id, c);
                         f.sequence = ++sequence;
                         gateway::Seal(f);
                         tx_batch[tx_count++] = f;
