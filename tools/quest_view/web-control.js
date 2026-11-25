@@ -32,14 +32,33 @@ const offsetReset = document.querySelector('#offset-cal-reset');
 const offsetStatus = document.querySelector('#offset-cal-status');
 const taskTabs = document.querySelector('#task-tabs');
 const taskButtons = taskTabs ? Array.from(taskTabs.querySelectorAll('[data-task]')) : [];
+const handModelTabs = document.querySelector('#hand-model-tabs');
+const handModelButtons = handModelTabs ? Array.from(handModelTabs.querySelectorAll('[data-hand-model]')) : [];
 const taskSwitchStatus = document.querySelector('#task-switch-status');
+const demoAxesPanel = document.querySelector('#demo-axes-panel');
+const demoAxesTitle = document.querySelector('#demo-axes-title');
+const demoAxesMode = document.querySelector('#demo-axes-mode');
+const demoAxesGrid = document.querySelector('#demo-axes-grid');
+const demoPresetButtons = demoAxesPanel ? Array.from(demoAxesPanel.querySelectorAll('[data-demo-preset]')) : [];
 const buttons = Array.from(panel.querySelectorAll('[data-control]'));
 let busy = false, timer = 0;
 let sceneRevision;
 let loadedTask = null, switchingToTask = null;
+let loadedHandModel = null, switchingToHandModel = null;
+let demoAxesDof = 0;
+let demoAxisInputs = [];
+let demoAxesValues = [];
+let demoAxesSendTimer = 0;
 let switchingObject = false;
 let sizeCancelled = false;
 let sizeCommit = Promise.resolve();
+
+const JOINT_LABELS = {
+  thumb_cmc_flex: '拇指腕掌屈伸', thumb_cmc_abd: '拇指腕掌外展', thumb_mcp: '拇指掌指', thumb_ip: '拇指指间',
+  index_mcp_flex: '食指掌指屈伸', index_pip: '食指近端联动', middle_mcp_flex: '中指掌指屈伸', middle_pip: '中指近端联动',
+  ring_mcp_flex: '无名指掌指屈伸', ring_pip: '无名指近端联动', pinky_mcp_flex: '小指掌指屈伸', pinky_pip: '小指近端联动',
+  index_mcp_abd: '食指侧摆', middle_mcp_abd: '中指侧摆', ring_mcp_abd: '无名指侧摆', pinky_mcp_abd: '小指侧摆',
+};
 
 const rotation = new RotationControl((kind, angle) => postCommand(
   {action: 'configure_grasp', expected_kind: kind, values: {angle_deg: angle}}, graspMessage));
@@ -48,8 +67,11 @@ const number = (value, digits) => Number.isFinite(value) ? value.toFixed(digits)
 
 function tracks(state) {
   if (state.diagnostic_stale) return `等待新控制快照 · 上次采样 ${number(state.snapshot_age_ms, 0)} ms 前`;
+  const dof = state.dof ?? 12;
+  const modelLabel = state.hand_model === '16dof' ? '16-DOF' : '12-DOF (VE40)';
   return [
-    `${state.online ?? 0}/12 ${state.demo ? '轴演示' : '轴在线'}`,
+    `${modelLabel}`,
+    `${state.online ?? 0}/${dof} ${state.demo ? '轴演示' : '轴在线'}`,
     state.wrist ?? '等待定位',
     `采集 ${number(state.motor_ms, 0)} ms`,
     `仿真使用 ${number(state.applied_ms, 0)} ms`,
@@ -152,8 +174,151 @@ function showTaskTabs(state) {
   if (!switchingToTask && taskSwitchStatus) taskSwitchStatus.textContent = '';
 }
 
+function showHandModelTabs(state) {
+  if (!handModelTabs) return;
+  const current = state.hand_model || '12dof';
+  const rawModels = Array.isArray(state.available_hand_models) ? state.available_hand_models : ['12dof', '16dof'];
+  const models = rawModels.map(item => (typeof item === 'string' ? item : item?.id)).filter(Boolean);
+  handModelTabs.hidden = models.length < 2;
+  if (!loadedHandModel && current) loadedHandModel = current;
+  if (switchingToHandModel && current === switchingToHandModel) {
+    window.location.replace(`${window.location.pathname}?m=${current}&t=${Date.now()}`);
+    return;
+  }
+  if (!switchingToHandModel && loadedHandModel && current && current !== loadedHandModel) {
+    window.location.replace(`${window.location.pathname}?m=${current}&t=${Date.now()}`);
+    return;
+  }
+  for (const btn of handModelButtons) {
+    const m = btn.dataset.handModel;
+    btn.hidden = !models.includes(m);
+    btn.setAttribute('aria-pressed', String(m === (switchingToHandModel ?? current)));
+    btn.disabled = busy || Boolean(switchingToTask) || Boolean(switchingToHandModel) || state.calibrating;
+  }
+}
+
+async function sendDemoAxes(active, values) {
+  try {
+    await fetch('/api/v1/demo-axes', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(active ? {active: true, values} : {active: false}),
+      signal: AbortSignal.timeout(1200),
+    });
+  } catch {
+    // ignore transient poll overlap
+  }
+}
+
+function scheduleDemoAxesSend() {
+  clearTimeout(demoAxesSendTimer);
+  demoAxesSendTimer = setTimeout(() => sendDemoAxes(true, [...demoAxesValues]), 25);
+}
+
+function buildDemoPreset(name, dof) {
+  const v = new Array(dof).fill(0);
+  if (name === 'open') return v;
+  if (name === 'fist') {
+    const base = [0.65, 0.90, 0.65, 0.70, 1.05, 1.05, 1.05, 1.05, 1.05, 1.05, 1.05, 1.05];
+    for (let i = 0; i < 12; i++) v[i] = base[i];
+    return v;
+  }
+  if (name === 'spread_out' && dof === 16) {
+    v[12] = 0.30; v[13] = 0.10; v[14] = -0.10; v[15] = -0.30;
+    return v;
+  }
+  if (name === 'spread_in' && dof === 16) {
+    v[12] = -0.18; v[13] = -0.04; v[14] = 0.06; v[15] = 0.18;
+    return v;
+  }
+  if (name === 'pinch_index') {
+    v[0] = 0.75; v[1] = 0.95; v[2] = 0.55; v[3] = 0.45; v[4] = 0.95; v[5] = 0.85;
+    return v;
+  }
+  if (name === 'pinch_middle') {
+    v[0] = 0.90; v[1] = 1.15; v[2] = 0.65; v[3] = 0.55; v[6] = 1.00; v[7] = 0.90;
+    return v;
+  }
+  return v;
+}
+
+function showDemoAxes(state) {
+  if (!demoAxesPanel) return;
+  const dof = state.dof ?? 12;
+  const visible = Boolean(state.demo);
+  demoAxesPanel.hidden = !visible;
+  if (!visible) return;
+  if (demoAxesTitle) {
+    demoAxesTitle.textContent = dof === 16
+      ? '全 16 轴交互仿真控制（含 J13–J16 四指侧摆 · 无硬件测试）'
+      : '全 12 轴交互仿真控制（无硬件测试）';
+  }
+  for (const btn of demoPresetButtons) {
+    btn.hidden = btn.dataset['16Only'] === '1' && dof !== 16;
+    if (btn.dataset.demoPreset === 'auto') {
+      btn.classList.toggle('active', !state.demo_axes_active);
+    }
+  }
+  if (demoAxesMode) {
+    demoAxesMode.textContent = state.demo_axes_active ? '手动全轴控制中' : '自动演示波形中';
+    demoAxesMode.style.color = state.demo_axes_active ? '#8fe7cf' : '#a6bfce';
+  }
+  const limits = Array.isArray(state.demo_axes_limits) && state.demo_axes_limits.length === dof
+    ? state.demo_axes_limits
+    : Array.from({length: dof}, (_, i) => (i >= 12 ? [-0.61, 0.61] : [0, 1.57]));
+  const joints = Array.isArray(state.demo_axes_joints) && state.demo_axes_joints.length === dof
+    ? state.demo_axes_joints
+    : Array.from({length: dof}, (_, i) => `J${i + 1}`);
+  if (demoAxesDof !== dof) {
+    demoAxesDof = dof;
+    demoAxesValues = new Array(dof).fill(0);
+    demoAxisInputs = [];
+    demoAxesGrid.replaceChildren();
+    for (let i = 0; i < dof; i++) {
+      const [lo, hi] = limits[i];
+      const item = document.createElement('div');
+      item.className = `demo-axis-item${i >= 12 ? ' abd-axis' : ''}`;
+      const head = document.createElement('div');
+      head.className = 'demo-axis-head';
+      const title = document.createElement('strong');
+      title.textContent = `J${i + 1} · ${JOINT_LABELS[joints[i]] || joints[i]}`;
+      const out = document.createElement('output');
+      out.textContent = '0.0°';
+      head.append(title, out);
+      const input = document.createElement('input');
+      input.type = 'range';
+      input.min = String(lo);
+      input.max = String(hi);
+      input.step = '0.01';
+      input.value = '0';
+      input.addEventListener('input', () => {
+        const val = Number(input.value);
+        demoAxesValues[i] = val;
+        out.textContent = `${(val * 180 / Math.PI).toFixed(1)}°`;
+        scheduleDemoAxesSend();
+      });
+      item.append(head, input);
+      demoAxesGrid.append(item);
+      demoAxisInputs.push({input, out, lo, hi});
+    }
+  }
+  const srcVals = state.demo_axes_active && Array.isArray(state.demo_axes)
+    ? state.demo_axes
+    : (Array.isArray(state.rows) ? state.rows.map(r => r.input_rad) : []);
+  for (let i = 0; i < demoAxisInputs.length; i++) {
+    const {input, out} = demoAxisInputs[i];
+    if (input.matches(':active')) continue;
+    const val = Number.isFinite(srcVals[i]) ? srcVals[i] : 0;
+    demoAxesValues[i] = val;
+    input.value = String(val);
+    out.textContent = `${(val * 180 / Math.PI).toFixed(1)}°`;
+  }
+}
+
 function show(state) {
   showTaskTabs(state);
+  showHandModelTabs(state);
+  showDemoAxes(state);
   const canReset = state.scene_revision !== undefined;
   cubeSettings.hidden = !state.cube_mode && !canReset;
   cubeModeControl.hidden = !state.cube_mode;
@@ -212,20 +377,21 @@ async function poll() {
     if (!response.ok) throw Error(response.status);
     show(await response.json());
   } catch {
-    if (switchingToTask) {
-      if (taskSwitchStatus) taskSwitchStatus.textContent = '正在加载新场景，请稍候…';
+    if (switchingToTask || switchingToHandModel) {
+      if (taskSwitchStatus) taskSwitchStatus.textContent = switchingToHandModel ? '正在切换手部自由度模型并重建场景，请稍候…' : '正在加载新场景，请稍候…';
     } else {
       feedbackStatus.textContent = '网页控制连接中断';
       feedbackStatus.dataset.active = 'no';
     }
     for (const button of buttons) button.disabled = true;
     for (const btn of taskButtons) btn.disabled = true;
+    for (const btn of handModelButtons) btn.disabled = true;
     cubeMode.disabled = resetScene.disabled = true;
     for (const input of graspInputs) input.disabled = true;
     graspHome.disabled = record.disabled = true;
   } finally {
     // 头显帧交换走独立请求，控制面板无需每帧重绘。
-    timer = setTimeout(poll, switchingToTask ? 220 : (document.visibilityState === 'hidden' ? 650 : 220));
+    timer = setTimeout(poll, (switchingToTask || switchingToHandModel) ? 220 : (document.visibilityState === 'hidden' ? 650 : 220));
   }
 }
 
@@ -325,7 +491,7 @@ if (offsetPanel) {
 for (const btn of taskButtons) {
   btn.addEventListener('click', async () => {
     const target = btn.dataset.task;
-    if (!target || target === loadedTask || switchingToTask) return;
+    if (!target || target === loadedTask || switchingToTask || switchingToHandModel) return;
     switchingToTask = target;
     for (const b of taskButtons) {
       b.disabled = true;
@@ -337,6 +503,52 @@ for (const btn of taskButtons) {
       switchingToTask = null;
       for (const b of taskButtons) b.disabled = false;
     }
+  });
+}
+
+for (const btn of handModelButtons) {
+  btn.addEventListener('click', async () => {
+    const target = btn.dataset.handModel;
+    if (!target || target === loadedHandModel || switchingToHandModel || switchingToTask) return;
+    switchingToHandModel = target;
+    for (const b of handModelButtons) {
+      b.disabled = true;
+      b.setAttribute('aria-pressed', String(b.dataset.handModel === target));
+    }
+    if (taskSwitchStatus) taskSwitchStatus.textContent = `正在切换手部型号至 ${btn.textContent}（自动卸载旧闭链并加载新模型）…`;
+    try {
+      const reply = await fetch('/api/v1/hand-model', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({hand_model: target}),
+        signal: AbortSignal.timeout(4000),
+      });
+      if (!reply.ok) throw Error(reply.status);
+    } catch {
+      switchingToHandModel = null;
+      if (taskSwitchStatus) taskSwitchStatus.textContent = '手部型号切换失败，请重试。';
+      for (const b of handModelButtons) b.disabled = false;
+    }
+  });
+}
+
+for (const btn of demoPresetButtons) {
+  btn.addEventListener('click', async () => {
+    const preset = btn.dataset.demoPreset;
+    if (preset === 'auto') {
+      await sendDemoAxes(false, null);
+      return;
+    }
+    const dof = demoAxesDof || 12;
+    const vals = buildDemoPreset(preset, dof);
+    for (let i = 0; i < demoAxisInputs.length; i++) {
+      const {input, out, lo, hi} = demoAxisInputs[i];
+      const clamped = Math.max(lo, Math.min(hi, vals[i]));
+      demoAxesValues[i] = clamped;
+      input.value = String(clamped);
+      out.textContent = `${(clamped * 180 / Math.PI).toFixed(1)}°`;
+    }
+    await sendDemoAxes(true, [...demoAxesValues]);
   });
 }
 

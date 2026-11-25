@@ -1,0 +1,93 @@
+{
+  "reference": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\outputs\\hand_v14_J_named\\R\\hand_tree_only.urdf",
+  "motor_axes_local_z": true,
+  "mesh_pose_cases": 128,
+  "max_visual_transform_error": 1.3211653993039363e-14,
+  "max_closure_gap_m": 2.6976053721728264e-11,
+  "positive_directions": [
+    {
+      "motor": "thumb_cmc_flex_motor_joint",
+      "reference_joint": "J1",
+      "positive_output_rate": 1.0000000000000002
+    },
+    {
+      "motor": "thumb_cmc_abd_motor_joint",
+      "reference_joint": "J2",
+      "positive_output_rate": 0.9993213261503611
+    },
+    {
+      "motor": "thumb_mcp_motor_joint",
+      "reference_joint": "J3",
+      "positive_output_rate": 0.9517067066845364
+    },
+    {
+      "motor": "thumb_ip_motor_joint",
+      "reference_joint": "J4",
+      "positive_output_rate": 0.5327181412147509
+    },
+    {
+      "motor": "index_mcp_motor_joint",
+      "reference_joint": "J6",
+      "positive_output_rate": 0.9999999993658395
+    },
+    {
+      "motor": "index_pip_dip_motor_joint",
+      "reference_joint": "J7",
+      "positive_output_rate": 0.5499552934266747,
+      "positive_dip_relative_rate": 0.10980662020022251
+    },
+    {
+      "motor": "middle_mcp_motor_joint",
+      "reference_joint": "J10",
+      "positive_output_rate": 0.9999999993010042
+    },
+    {
+      "motor": "middle_pip_dip_motor_joint",
+      "reference_joint": "J11",
+      "positive_output_rate": 0.5471236276484301,
+      "positive_dip_relative_rate": 0.11509626213548793
+    },
+    {
+      "motor": "ring_mcp_motor_joint",
+      "reference_joint": "J14",
+      "positive_output_rate": 0.9999999993079812
+    },
+    {
+      "motor": "ring_pip_dip_motor_joint",
+      "reference_joint": "J15",
+      "positive_output_rate": 0.5471236276467676,
+      "positive_dip_relative_rate": 0.11169052173113285
+    },
+    {
+      "motor": "pinky_mcp_motor_joint",
+      "reference_joint": "J18",
+      "positive_output_rate": 0.9999999993313389
+    },
+    {
+      "motor": "pinky_pip_dip_motor_joint",
+      "reference_joint": "J19",
+      "positive_output_rate": 1.2497632779021266,
+      "positive_dip_relative_rate": 0.0006271017223387724
+    },
+    {
+      "motor": "index_mcp_abd_motor_joint",
+      "reference_joint": "J5",
+      "positive_output_rate": 1.1387179346624197
+    },
+    {
+      "motor": "middle_mcp_abd_motor_joint",
+      "reference_joint": "J9",
+      "positive_output_rate": 1.1387179346856735
+    },
+    {
+      "motor": "ring_mcp_abd_motor_joint",
+      "reference_joint": "J13",
+      "positive_output_rate": 1.1387179346684844
+    },
+    {
+      "motor": "pinky_mcp_abd_motor_joint",
+      "reference_joint": "J17",
+      "positive_output_rate": 1.138725868820735
+    }
+  ]
+}

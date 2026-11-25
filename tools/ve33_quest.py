@@ -608,6 +608,15 @@ def wrist_server(bridge, port, glb=None, control=None, *, scene_feedback=None, o
                 self.reply_scene(int(after))
             elif self.path == "/api/v1/recording.csv" and control is not None and control.record_ready is not None:
                 self.reply_recording()
+            elif path == "/api/v1/hand-model" and control is not None:
+                from motorhand.hand_profiles import AVAILABLE_HAND_MODELS, get_hand_profile
+                spec = get_hand_profile(control.current_hand_model())
+                self.reply(200, json.dumps({
+                    "hand_model": spec.model_id,
+                    "label": spec.label,
+                    "dof": spec.dof,
+                    "available_hand_models": list(AVAILABLE_HAND_MODELS),
+                }, ensure_ascii=False).encode(), "application/json")
             elif self.path == "/api/v1/control" and control is not None:
                 state = control.read()
                 if getattr(control, "is_local_grasp", lambda: control.grasp is not None)():
@@ -632,7 +641,9 @@ def wrist_server(bridge, port, glb=None, control=None, *, scene_feedback=None, o
                 self.send_error(404)
 
         def do_POST(self):
-            is_control = self.path == "/api/v1/control" and control is not None
+            is_hand_model = self.path == "/api/v1/hand-model" and control is not None
+            is_demo_axes = self.path == "/api/v1/demo-axes" and control is not None
+            is_control = (self.path == "/api/v1/control" or is_hand_model or is_demo_axes) and control is not None
             is_local = control is not None and getattr(control, "is_local_grasp", lambda: control.grasp is not None)()
             if self.path == "/api/v1/wrist" and is_local:
                 return self.send_error(404)
@@ -647,12 +658,19 @@ def wrist_server(bridge, port, glb=None, control=None, *, scene_feedback=None, o
             cal_reply = None
             try:
                 size = int(self.headers.get("Content-Length", "0"))
-                if not 0 < size <= 4096:
+                if not 0 < size <= 8192:
                     raise ValueError("包长无效")
                 message = json.loads(self.rfile.read(size))
                 if not isinstance(message, dict):
                     raise ValueError("请求必须是对象")
-                if is_control:
+                if is_hand_model:
+                    control.command({"action": "switch_hand_model",
+                                     "hand_model": message.get("hand_model") or message.get("model")})
+                    cal_reply = {"ok": True, "requested_hand_model": message.get("hand_model") or message.get("model")}
+                elif is_demo_axes:
+                    control.command({"action": "demo_axes", **message})
+                    cal_reply = {"ok": True}
+                elif is_control:
                     action = message.get("action")
                     if action == "start_overlay_cal":
                         cal_reply = bridge.start_overlay_calibration()
@@ -669,7 +687,8 @@ def wrist_server(bridge, port, glb=None, control=None, *, scene_feedback=None, o
                             control.command({"action": "enable"})
                             cal_reply = bridge.notify("力反馈已开启")
                         else:
-                            cal_reply = bridge.notify("暂不可开启力反馈：请先确认 12 轴在线且已标零")
+                            dof = current.get("dof", control.current_dof())
+                            cal_reply = bridge.notify(f"暂不可开启力反馈：请先确认 {dof} 轴在线且已标零")
                     elif action == "confirm_overlay_cal":
                         auto_save = offset_config_path if message.get("auto_save", True) is True else None
                         cal_reply = bridge.confirm_overlay_calibration(

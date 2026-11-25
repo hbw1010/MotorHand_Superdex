@@ -1,0 +1,498 @@
+closures:
+- link_a: middle_mcp_connecting_rod_1
+  link_b: middle_mcp_connecting_rod_3
+  point:
+  - 0.0890918830920243
+  - -0.009999999999999891
+  - 0.03059188309204932
+  axis:
+  - 7.265206739941496e-16
+  - 1.0
+  - 1.525430506291717e-16
+  cad_parts:
+  - 中指电机外骨骼-1/测试-关节1-1-1
+  - 中指电机外骨骼-1/测试-关节1-3-1
+- link_a: middle_mcp_connecting_rod_2
+  link_b: middle_mcp_connecting_rod_3
+  point:
+  - 0.08484924240490785
+  - 0.0015000000000000857
+  - 0.02634924240492715
+  axis:
+  - 4.92276668620602e-16
+  - 1.0
+  - -9.868438928375937e-17
+  cad_parts:
+  - 中指电机外骨骼-1/测试-关节1-2-1
+  - 中指电机外骨骼-1/测试-关节1-3-1
+- link_a: middle_mcp_connecting_rod_4
+  link_b: middle_mount_link
+  point:
+  - 0.07
+  - 0.0014999999999999992
+  - 0.0175
+  axis:
+  - 5.134781488891348e-16
+  - 1.0
+  - 4.92324661926222e-17
+  cad_parts:
+  - 中指电机外骨骼-1/测试-关节1-4-1
+  - 中指电机外骨骼-1/指根-1
+- link_a: middle_mcp_link
+  link_b: middle_pip_link
+  point:
+  - 0.11799999999998906
+  - 0.009899999999999978
+  - -0.009499999999999413
+  axis:
+  - 4.4408920984965123e-16
+  - 1.0
+  - 1.2266799705442775e-17
+  cad_parts:
+  - 中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第一指关节-1
+  - 中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: middle_dip_connecting_rod_1
+  link_b: middle_pip_link
+  point:
+  - 0.14738999999998856
+  - -0.01130000000000004
+  - 0.026000000000000998
+  axis:
+  - 6.059843638574388e-16
+  - 1.0
+  - 5.016540966867519e-17
+  cad_parts:
+  - 中指电机外骨骼-1/中指联动机构-1/第三指节联动连杆-1
+  - 中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: middle_pip_link
+  link_b: middle_dip_link
+  point:
+  - 0.14699999999998908
+  - 0.008999999999999961
+  - -0.009499999999998997
+  axis:
+  - 4.440891374085724e-16
+  - 1.0
+  - 1.2266799705442775e-17
+  cad_parts:
+  - 中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第二指关节-1
+  - 中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第三指关节-1
+- link_a: index_mcp_connecting_rod_1
+  link_b: index_mcp_connecting_rod_3
+  point:
+  - 0.08409188309203686
+  - 0.013999999999999981
+  - 0.030591883092036722
+  axis:
+  - -3.8370235063100695e-16
+  - 1.0
+  - 3.7458765555420286e-16
+  cad_parts:
+  - 食指电机外骨骼-1/测试-关节1-1-1
+  - 食指电机外骨骼-1/测试-关节1-3-1
+- link_a: index_mcp_connecting_rod_2
+  link_b: index_mcp_connecting_rod_3
+  point:
+  - 0.07984924240491764
+  - 0.025499999999999908
+  - 0.026349242404917372
+  axis:
+  - -4.708906778903155e-16
+  - 1.0
+  - -9.868438928375937e-17
+  cad_parts:
+  - 食指电机外骨骼-1/测试-关节1-2-1
+  - 食指电机外骨骼-1/测试-关节1-3-1
+- link_a: index_mcp_connecting_rod_4
+  link_b: index_mount_link
+  point:
+  - 0.065
+  - 0.0255
+  - 0.0175
+  axis:
+  - -6.036837696399289e-16
+  - 1.0
+  - 6.648765584870612e-17
+  cad_parts:
+  - 食指电机外骨骼-1/测试-关节1-4-1
+  - 食指电机外骨骼-1/指根-1
+- link_a: index_mcp_link
+  link_b: index_pip_link
+  point:
+  - 0.10899999999999999
+  - 0.03340000000000003
+  - -0.009500000000000007
+  axis:
+  - -6.661338147750939e-16
+  - 1.0
+  - -8.99335387805968e-17
+  cad_parts:
+  - 食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第一指关节-1
+  - 食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: index_dip_connecting_rod_1
+  link_b: index_pip_link
+  point:
+  - 0.13806000000000002
+  - 0.013200000000000045
+  - 0.026623999999999995
+  axis:
+  - -5.672115573317493e-16
+  - 1.0
+  - -8.503143253755567e-17
+  cad_parts:
+  - 食指电机外骨骼-1/食指联动机构-1/第三指节联动连杆-1
+  - 食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: index_pip_link
+  link_b: index_dip_link
+  point:
+  - 0.134
+  - 0.03250000000000005
+  - -0.009500000000000007
+  axis:
+  - -5.479334170848384e-16
+  - 1.0
+  - 4.091926669565258e-17
+  cad_parts:
+  - 食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第二指关节-1
+  - 食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第三指关节-1
+- link_a: ring_mcp_connecting_rod_1
+  link_b: ring_mcp_connecting_rod_3
+  point:
+  - 0.08409188309201093
+  - -0.0339999999999999
+  - 0.030591883092062636
+  axis:
+  - 7.265206739941496e-16
+  - 1.0
+  - 1.5254305062917172e-16
+  cad_parts:
+  - 无名指电机外骨骼-1/测试-关节1-1-1
+  - 无名指电机外骨骼-1/测试-关节1-3-1
+- link_a: ring_mcp_connecting_rod_2
+  link_b: ring_mcp_connecting_rod_3
+  point:
+  - 0.07984924240489749
+  - -0.022500000000000245
+  - 0.02634924240493748
+  axis:
+  - 5.493988079542453e-16
+  - 1.0
+  - -9.868438928375936e-17
+  cad_parts:
+  - 无名指电机外骨骼-1/测试-关节1-2-1
+  - 无名指电机外骨骼-1/测试-关节1-3-1
+- link_a: ring_mcp_connecting_rod_4
+  link_b: ring_mount_link
+  point:
+  - 0.06499999999999999
+  - -0.022499999999999985
+  - 0.0175
+  axis:
+  - 5.134781488891348e-16
+  - 1.0
+  - 8.365345993426268e-34
+  cad_parts:
+  - 无名指电机外骨骼-1/测试-关节1-4-1
+  - 无名指电机外骨骼-1/指根-1
+- link_a: ring_mcp_link
+  link_b: ring_pip_link
+  point:
+  - 0.10899999999999607
+  - -0.014600000000000007
+  - -0.00949999999995067
+  axis:
+  - 4.4408920677303177e-16
+  - 1.0
+  - 2.0816681714548963e-17
+  cad_parts:
+  - 无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第一指关节-1
+  - 无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: ring_dip_connecting_rod_1
+  link_b: ring_pip_link
+  point:
+  - 0.13842999999995578
+  - -0.034800000000000025
+  - 0.026240000000082517
+  axis:
+  - 4.568566767754001e-16
+  - 1.0
+  - 2.923427816567413e-17
+  cad_parts:
+  - 无名指电机外骨骼-1/无名指联动机构-1/第三指节联动连杆-1
+  - 无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: ring_pip_link
+  link_b: ring_dip_link
+  point:
+  - 0.1359999999999961
+  - -0.015500000000000022
+  - -0.009499999999920225
+  axis:
+  - 1.9677123530656248e-16
+  - 1.0
+  - 2.3048225185348585e-17
+  cad_parts:
+  - 无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第二指关节-1
+  - 无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第三指关节-1
+- link_a: pinky_mcp_connecting_rod_1
+  link_b: pinky_mcp_connecting_rod_3
+  point:
+  - 0.07879188309202217
+  - -0.056340000000000064
+  - 0.025031883092051392
+  axis:
+  - 7.265206739941496e-16
+  - 1.0
+  - 4.152074816665606e-17
+  cad_parts:
+  - 小拇指电机外骨骼-2/测试-关节1-1-1
+  - 小拇指电机外骨骼-2/测试-关节1-3-1
+- link_a: pinky_mcp_connecting_rod_2
+  link_b: pinky_mcp_connecting_rod_3
+  point:
+  - 0.07454924240490621
+  - -0.04484000000000006
+  - 0.020789242404928774
+  axis:
+  - 6.558761191356806e-16
+  - 1.0
+  - -3.207289942087907e-16
+  cad_parts:
+  - 小拇指电机外骨骼-2/测试-关节1-2-1
+  - 小拇指电机外骨骼-2/测试-关节1-3-1
+- link_a: pinky_mcp_connecting_rod_4
+  link_b: pinky_mount_link
+  point:
+  - 0.0597
+  - -0.044840000000000026
+  - 0.011940000000000001
+  axis:
+  - 5.134781488891347e-16
+  - 1.0
+  - -4.051911207570906e-17
+  cad_parts:
+  - 小拇指电机外骨骼-2/测试-关节1-4-1
+  - 小拇指电机外骨骼-2/指根-1
+- link_a: pinky_mcp_link
+  link_b: pinky_pip_link
+  point:
+  - 0.09169999999998718
+  - -0.03794000000000004
+  - -0.015059999999999688
+  axis:
+  - 4.440892098500682e-16
+  - 1.0
+  - 1.0200158264736376e-17
+  cad_parts:
+  - 小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第一指关节-1
+  - 小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: pinky_dip_connecting_rod_1
+  link_b: pinky_pip_link
+  point:
+  - 0.12142999999998674
+  - -0.056140000000000065
+  - 0.014500000000000748
+  axis:
+  - 6.276485881622257e-16
+  - 1.0
+  - -1.99052041981674e-17
+  cad_parts:
+  - 小拇指电机外骨骼-2/小拇指联动机构-1/第三指节联动连杆-1
+  - 小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第二指关节-1
+- link_a: pinky_pip_link
+  link_b: pinky_dip_link
+  point:
+  - 0.1106999999999872
+  - -0.038840000000000055
+  - -0.015059999999999416
+  axis:
+  - 1.6030222097965035e-16
+  - 1.0
+  - 4.03089242674864e-17
+  cad_parts:
+  - 小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第二指关节-1
+  - 小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第三指关节-1
+- link_a: thumb_mcp_connecting_rod_1
+  link_b: thumb_mcp_connecting_rod_3
+  point:
+  - -0.006818040225673928
+  - 0.09584627643698437
+  - -0.020695449326940916
+  axis:
+  - 0.017316450156582085
+  - 0.032739619216744516
+  - 0.9993138935727439
+  cad_parts:
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-1-1
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-3-1
+- link_a: thumb_mcp_connecting_rod_2
+  link_b: thumb_mcp_connecting_rod_3
+  point:
+  - -0.005249074383140186
+  - 0.08973835621900277
+  - -0.03203042426276381
+  axis:
+  - 0.017316450156581665
+  - 0.03273961921674447
+  - 0.9993138935727439
+  cad_parts:
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-2-1
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-3-1
+- link_a: thumb_mcp_connecting_rod_4
+  link_b: thumb_cmc_abd_link
+  point:
+  - -0.004364525128584484
+  - 0.0724836700549062
+  - -0.03148045232184094
+  axis:
+  - 0.017316450156581654
+  - 0.0327396192167444
+  - 0.9993138935727439
+  cad_parts:
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-4-1
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指根-1
+- link_a: thumb_mcp_link
+  link_b: thumb_ip_link
+  point:
+  - 0.036063272603547906
+  - 0.09117056607548799
+  - -0.020784981895264308
+  axis:
+  - 0.017316450156581856
+  - 0.032739619216744086
+  - 0.999313893572744
+  cad_parts:
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第一指关节-1
+  - 大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第三指关节-1
+independent:
+- middle_mcp_motor_joint
+- middle_pip_dip_motor_joint
+- index_mcp_motor_joint
+- index_pip_dip_motor_joint
+- ring_mcp_motor_joint
+- ring_pip_dip_motor_joint
+- pinky_mcp_motor_joint
+- pinky_pip_dip_motor_joint
+- thumb_cmc_flex_motor_joint
+- thumb_cmc_abd_motor_joint
+- thumb_mcp_motor_joint
+- thumb_ip_motor_joint
+dependent:
+- thumb_mcp_connecting_rod_joint_3
+- thumb_mcp_connecting_rod_joint_6
+- thumb_mcp_connecting_rod_joint_1
+- thumb_mcp_output_joint
+- thumb_mcp_connecting_rod_joint_2
+- thumb_mcp_connecting_rod_joint_4
+- thumb_ip_connecting_rod_joint_1
+- thumb_ip_output_joint
+- index_mcp_connecting_rod_joint_3
+- index_mcp_connecting_rod_joint_6
+- index_mcp_connecting_rod_joint_1
+- index_mcp_output_joint
+- index_mcp_connecting_rod_joint_2
+- index_mcp_connecting_rod_joint_4
+- index_pip_connecting_rod_joint_1
+- index_pip_connecting_rod_joint_2
+- index_dip_connecting_rod_joint_1
+- index_dip_connecting_rod_joint_2
+- index_pip_output_joint
+- index_dip_output_joint
+- middle_mcp_connecting_rod_joint_3
+- middle_mcp_connecting_rod_joint_6
+- middle_mcp_connecting_rod_joint_1
+- middle_mcp_output_joint
+- middle_mcp_connecting_rod_joint_2
+- middle_mcp_connecting_rod_joint_4
+- middle_pip_connecting_rod_joint_1
+- middle_pip_connecting_rod_joint_2
+- middle_dip_connecting_rod_joint_1
+- middle_dip_connecting_rod_joint_2
+- middle_pip_output_joint
+- middle_dip_output_joint
+- ring_mcp_connecting_rod_joint_3
+- ring_mcp_connecting_rod_joint_6
+- ring_mcp_connecting_rod_joint_1
+- ring_mcp_output_joint
+- ring_mcp_connecting_rod_joint_2
+- ring_mcp_connecting_rod_joint_4
+- ring_pip_connecting_rod_joint_1
+- ring_pip_connecting_rod_joint_2
+- ring_dip_connecting_rod_joint_1
+- ring_dip_connecting_rod_joint_2
+- ring_pip_output_joint
+- ring_dip_output_joint
+- pinky_mcp_connecting_rod_joint_3
+- pinky_mcp_connecting_rod_joint_6
+- pinky_mcp_connecting_rod_joint_1
+- pinky_mcp_output_joint
+- pinky_mcp_connecting_rod_joint_2
+- pinky_mcp_connecting_rod_joint_4
+- pinky_pip_connecting_rod_joint_1
+- pinky_pip_connecting_rod_joint_2
+- pinky_dip_connecting_rod_joint_1
+- pinky_dip_connecting_rod_joint_2
+- pinky_pip_output_joint
+- pinky_dip_output_joint
+groups:
+  thumb:
+  - thumb_mcp_connecting_rod_joint_3
+  - thumb_mcp_connecting_rod_joint_6
+  - thumb_mcp_connecting_rod_joint_1
+  - thumb_mcp_output_joint
+  - thumb_mcp_connecting_rod_joint_2
+  - thumb_mcp_connecting_rod_joint_4
+  - thumb_ip_connecting_rod_joint_1
+  - thumb_ip_output_joint
+  index:
+  - index_mcp_connecting_rod_joint_3
+  - index_mcp_connecting_rod_joint_6
+  - index_mcp_connecting_rod_joint_1
+  - index_mcp_output_joint
+  - index_mcp_connecting_rod_joint_2
+  - index_mcp_connecting_rod_joint_4
+  - index_pip_connecting_rod_joint_1
+  - index_pip_connecting_rod_joint_2
+  - index_dip_connecting_rod_joint_1
+  - index_dip_connecting_rod_joint_2
+  - index_pip_output_joint
+  - index_dip_output_joint
+  middle:
+  - middle_mcp_connecting_rod_joint_3
+  - middle_mcp_connecting_rod_joint_6
+  - middle_mcp_connecting_rod_joint_1
+  - middle_mcp_output_joint
+  - middle_mcp_connecting_rod_joint_2
+  - middle_mcp_connecting_rod_joint_4
+  - middle_pip_connecting_rod_joint_1
+  - middle_pip_connecting_rod_joint_2
+  - middle_dip_connecting_rod_joint_1
+  - middle_dip_connecting_rod_joint_2
+  - middle_pip_output_joint
+  - middle_dip_output_joint
+  ring:
+  - ring_mcp_connecting_rod_joint_3
+  - ring_mcp_connecting_rod_joint_6
+  - ring_mcp_connecting_rod_joint_1
+  - ring_mcp_output_joint
+  - ring_mcp_connecting_rod_joint_2
+  - ring_mcp_connecting_rod_joint_4
+  - ring_pip_connecting_rod_joint_1
+  - ring_pip_connecting_rod_joint_2
+  - ring_dip_connecting_rod_joint_1
+  - ring_dip_connecting_rod_joint_2
+  - ring_pip_output_joint
+  - ring_dip_output_joint
+  pinky:
+  - pinky_mcp_connecting_rod_joint_3
+  - pinky_mcp_connecting_rod_joint_6
+  - pinky_mcp_connecting_rod_joint_1
+  - pinky_mcp_output_joint
+  - pinky_mcp_connecting_rod_joint_2
+  - pinky_mcp_connecting_rod_joint_4
+  - pinky_pip_connecting_rod_joint_1
+  - pinky_pip_connecting_rod_joint_2
+  - pinky_dip_connecting_rod_joint_1
+  - pinky_dip_connecting_rod_joint_2
+  - pinky_pip_output_joint
+  - pinky_dip_output_joint
+closure_tolerance_m: 1.0e-07

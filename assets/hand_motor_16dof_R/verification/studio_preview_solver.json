@@ -1,0 +1,164 @@
+{
+  "engine": {
+    "repository": "https://github.com/OpenLegged/URDF-Studio",
+    "commit": "23b96e2f3d5b1b68ad9629925d4479e9847d35a5",
+    "three": "0.181.2"
+  },
+  "compatible": true,
+  "pinky_mcp_preview_range": [
+    -0.45,
+    0.6
+  ],
+  "steps": 832,
+  "maxResidual": 0.000009647956605134418,
+  "maxJointStepRad": 0.10822248321965355,
+  "notConverged": 0,
+  "flips": 0,
+  "clamped": 0,
+  "details": [
+    {
+      "joint": "thumb_cmc_flex_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0
+    },
+    {
+      "joint": "thumb_cmc_abd_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0
+    },
+    {
+      "joint": "thumb_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.0016729140895952958
+    },
+    {
+      "joint": "thumb_ip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000005727025929888087
+    },
+    {
+      "joint": "index_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.0016729140896847225
+    },
+    {
+      "joint": "index_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.00004342645970725062
+    },
+    {
+      "joint": "middle_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.0016729140897210597
+    },
+    {
+      "joint": "middle_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.00004410925246627192
+    },
+    {
+      "joint": "ring_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.0016729140895133804
+    },
+    {
+      "joint": "ring_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000042773266320276886
+    },
+    {
+      "joint": "pinky_mcp_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.45,
+        0.6
+      ],
+      "return_drift_rad": 0.001029977304391548
+    },
+    {
+      "joint": "pinky_pip_dip_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.15,
+        0.6
+      ],
+      "return_drift_rad": 0.0017388410043162987
+    },
+    {
+      "joint": "index_mcp_abd_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000010217113849140484
+    },
+    {
+      "joint": "middle_mcp_abd_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.00001021711384914352
+    },
+    {
+      "joint": "ring_mcp_abd_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000010217113849631844
+    },
+    {
+      "joint": "pinky_mcp_abd_motor_joint",
+      "steps": 52,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "return_drift_rad": 0.000010217509737788302
+    }
+  ]
+}

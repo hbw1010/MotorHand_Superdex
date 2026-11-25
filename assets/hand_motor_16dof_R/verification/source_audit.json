@@ -1,0 +1,361 @@
+{
+  "source": "C:\\Users\\current robotics\\Desktop\\新建文件夹 (2)\\手部电机外骨骼.SLDASM",
+  "source_sha256": {
+    "meta quest3.SLDPRT": "c65b0d4c97e62d0a6b6fd0e9d0b4c9b738935deddabc040b8d13c1a21da01f3e",
+    "PCB.SLDPRT": "342fed46eaa14f8c1d793656714ab0135a83fe0f1816cb1297be9ce6bd7f5020",
+    "中指电机外骨骼.SLDASM": "475aeea0fd41ba1f69b4f3d05749c0b36e9e5542fbd6c3607b96fe9fadb422f5",
+    "中指联动机构.SLDASM": "85f1177ffdbb863ab008e5cd7a3ff39af0f099fcde3e1cf75e84ecaaaeeb7ccf",
+    "侧摆主动连杆.SLDPRT": "67cfb058649c7f3cf3d58e67b9cc3ad5e979dec3ddbd5f604555f73b2a49df36",
+    "侧摆从动连杆.SLDPRT": "b476b8f40457adf3320e54f25f9a7f606fb4e30d3727e7e97ba6f23ba61a9afb",
+    "侧摆连杆.SLDPRT": "2a9b4d4d17c2aa2518607a70058bd820a51335f1669e7ed4d17a430bca5a2bc7",
+    "右手.SLDPRT": "bfa7f7ae329c3bd30ee48c97672b12cfa84e9ff00b8578f862940afd99cea8da",
+    "大拇指CMC轴侧摆动子.SLDPRT": "0dca2440751167310f07325401dbc49762b1b87b24f8a1c00c546c45513781ae",
+    "大拇指CMC轴定子.SLDPRT": "b480613557e2a36ef279ca8ee51da30886cdfcfde3f69c737d8c88685de781ba",
+    "大拇指CMC轴屈伸动子.SLDPRT": "08082e0f9e532e3b572eb1aa924a321d0381344a410f00a87857bd537f4c2df6",
+    "大拇指电机外骨骼.SLDASM": "e3f131332d8763df868079e50238f234c6bf64b5089d5c1b70ff0d69b063ebcd",
+    "大拇指电机外骨骼前端.SLDASM": "05a79ac7b71e7e3c3f930ba95d28ec55ea36aa07a19ea251e997b1cedbe21c2f",
+    "大拇指联动机构.SLDASM": "26829f1683a6d95c439b10bd58c066a25c3337a5be50a92f2545a4a8fa55125e",
+    "大线夹.SLDPRT": "a10e70a708cc3c66217d39ca76aa7d67397341d0a66d6a8066490223e3c11ba4",
+    "小拇指电机外骨骼.SLDASM": "8b93b879a8dae79d7c9465e9aeae891bf5c0890eaff8e50e738dff101c511479",
+    "小拇指联动机构.SLDASM": "49cc6e405cce521062a644382fc45080c6b53bac457bb554705d7e4543edd786",
+    "小线夹.SLDPRT": "5edf547514bc2758f8d32b759f4915ee79bcf5606252c636cfd2d1aca4fb2c0f",
+    "左手.SLDPRT": "35564cd0ee928739a69ecefe954fc58a052180790c3aaeadbd8ebf5bc7afcd5d",
+    "手背底板.SLDPRT": "ef4d324cbdf406f361d8c59127fa8c3bd36ca6ed58eb5f3ff5650a2e82d3b504",
+    "手背顶板.SLDPRT": "76777f8453deb6bde690719f35202ac5c2a69d30be107a518e9c219b40373c02",
+    "手部外骨骼支架.SLDPRT": "83cdcc719c7481b2eb7cfb15fbbbb829f1516b9c71b0d91436ef766002a5b01f",
+    "手部电机外骨骼.SLDASM": "d23f7a20dfcde7503d4c6c5d1354e13ed030349e570b2fe5f69ec4e586e8ad45",
+    "指根.SLDPRT": "857e5d84b1cfb6fa50268d1e8d0e8f2ccbbb8f2cf26cb51a15794ac6580096c6",
+    "指节3-模型.SLDPRT": "1a6201adcfd8609605526fb2b0cea689cd46a82cee23cc27afd1960b2ddfdf31",
+    "指间电机.SLDASM": "433e253c8f2f3e3f7fbf148a6015e5ada10f80affb69232b265ea8f026a1294f",
+    "指间电机动子.SLDPRT": "fa11e5cb85411e4c765cd1fb7ecf3a8312664a493a64140d9e0b71a5d631a338",
+    "指间电机定子.SLDPRT": "c3ff2d86c22a1ef68a9ee0e9ca46bfbfbcd47d412ed4878691c676d0ce4a520f",
+    "无名指电机外骨骼.SLDASM": "b4ee555b714f7ba0b2f0ff310180deffbe4d60c5ada09e939fdb936f40a942c3",
+    "无名指联动机构.SLDASM": "b2f2e36042b979c1e14c0e124a9c4de446352d7e0651f8f88062c6dd4ce9f03f",
+    "测试-F68811.SLDPRT": "0d1b24661f5da852e5a2271082cb8fe794a7da0d75f46cde7e8ff8e747324e6d",
+    "测试-关节1-1.SLDPRT": "97cde1f4c5be3ce8cbd201500bd5c5d2bc56dba33c61f13f5927ec190f7b9d61",
+    "测试-关节1-2.SLDPRT": "a8b5f1f712b48c09ed8364e08476af488e7e3c2475a16be50340dacfab31b2f3",
+    "测试-关节1-3.SLDPRT": "6853a5361f653c55f71c11e329e59412a703ad9c08c1734d762724f82beb8c29",
+    "测试-关节1-4.SLDPRT": "87e453e3cc9956847c4f0ef8ea8779de5e50d3495d02fb02b8ce7482c3d2b469",
+    "第一指节主动连杆.SLDPRT": "acd7de7d8290d9fdc9efff1b5f4681c6649442326a87f1f1ba0bb6987d11775b",
+    "第一指节从动连杆.SLDPRT": "d0e4b57230c525df4e05317636ecd3b33fbd5c296a343487b1ff4962b78662c8",
+    "第三指节从动连杆.SLDPRT": "5f427217d8c0eeb2d646c7df5ad6834e0fcc404475e129dc63d0d975b80374da",
+    "第三指节联动连杆.SLDPRT": "28b521a04df5964fd1b3b482d90294e8259763fadf841ac16ca8f40604f5d241",
+    "第二三指节主动连杆.SLDPRT": "23a71aeba88c4194ba87d35b73653eadb69a44545ba4932f37d1fbaccc430175",
+    "第二指节从动连杆.SLDPRT": "2b19aa67838a3f61db6896fd219a68526fce73991bb8f6925ab9659b5d760a8e",
+    "第二指节联动连杆.SLDPRT": "54c8522d535d5bed9647592f899e5707f6ce02e787fa1030d4b2fe0152b42736",
+    "联动机构-外骨骼第一指关节.SLDPRT": "bbdaf57e6bfa268a8a99f6253be33c0ea10d66a11aeef553e6df6f0f785c5368",
+    "联动机构-外骨骼第三指关节.SLDPRT": "f16e2fecc59ba777c3992c77e4a7b6ebabbaa0400e5b89705a9767104ae122bd",
+    "联动机构-外骨骼第二指关节.SLDPRT": "1715ea9ccb63d58d2e6dd8302fe78fb9c4f910d9c33bdcefea390e6a83c8ce0e",
+    "装配体1.SLDASM": "20795cd42a1c9a6457defa6960e83cee4ffceb7f3da95fbed041ac9cb3f6a160",
+    "轴承盖.SLDPRT": "19e4e5b4299c151513644b901b6e875afa2fbd7b516d67ac94f4401f97e9f200",
+    "零件1.SLDPRT": "89d84f55bdb6226778c1365f7ca3f5ae2e4b80cc31be352c4911d508c6702869",
+    "食指电机外骨骼.SLDASM": "d49356e180eb584b49e6507b94018c6f3cfc5436519ddacf982f1379dbf715c7",
+    "食指联动机构.SLDASM": "32d027815079ecb2a949c42d3c38dc63d30d7a5c93419844892326c2355007d1"
+  },
+  "source_files": [
+    {
+      "name": "meta quest3.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\meta quest3.SLDPRT",
+      "sha256": "c65b0d4c97e62d0a6b6fd0e9d0b4c9b738935deddabc040b8d13c1a21da01f3e",
+      "mtime": 1795428580.0
+    },
+    {
+      "name": "PCB.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\PCB.SLDPRT",
+      "sha256": "342fed46eaa14f8c1d793656714ab0135a83fe0f1816cb1297be9ce6bd7f5020",
+      "mtime": 1795159895.0
+    },
+    {
+      "name": "中指电机外骨骼.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\中指电机外骨骼.SLDASM",
+      "sha256": "475aeea0fd41ba1f69b4f3d05749c0b36e9e5542fbd6c3607b96fe9fadb422f5",
+      "mtime": 1795577222.5964873
+    },
+    {
+      "name": "中指联动机构.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\中指联动机构.SLDASM",
+      "sha256": "85f1177ffdbb863ab008e5cd7a3ff39af0f099fcde3e1cf75e84ecaaaeeb7ccf",
+      "mtime": 1795577222.8608768
+    },
+    {
+      "name": "侧摆主动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆主动连杆.SLDPRT",
+      "sha256": "67cfb058649c7f3cf3d58e67b9cc3ad5e979dec3ddbd5f604555f73b2a49df36",
+      "mtime": 1795518832.0
+    },
+    {
+      "name": "侧摆从动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆从动连杆.SLDPRT",
+      "sha256": "b476b8f40457adf3320e54f25f9a7f606fb4e30d3727e7e97ba6f23ba61a9afb",
+      "mtime": 1795596285.0
+    },
+    {
+      "name": "侧摆连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆连杆.SLDPRT",
+      "sha256": "2a9b4d4d17c2aa2518607a70058bd820a51335f1669e7ed4d17a430bca5a2bc7",
+      "mtime": 1795519636.0
+    },
+    {
+      "name": "右手.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\右手.SLDPRT",
+      "sha256": "bfa7f7ae329c3bd30ee48c97672b12cfa84e9ff00b8578f862940afd99cea8da",
+      "mtime": 1795577222.9369187
+    },
+    {
+      "name": "大拇指CMC轴侧摆动子.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指CMC轴侧摆动子.SLDPRT",
+      "sha256": "0dca2440751167310f07325401dbc49762b1b87b24f8a1c00c546c45513781ae",
+      "mtime": 1795579692.0
+    },
+    {
+      "name": "大拇指CMC轴定子.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指CMC轴定子.SLDPRT",
+      "sha256": "b480613557e2a36ef279ca8ee51da30886cdfcfde3f69c737d8c88685de781ba",
+      "mtime": 1795521494.0
+    },
+    {
+      "name": "大拇指CMC轴屈伸动子.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指CMC轴屈伸动子.SLDPRT",
+      "sha256": "08082e0f9e532e3b572eb1aa924a321d0381344a410f00a87857bd537f4c2df6",
+      "mtime": 1795578006.0
+    },
+    {
+      "name": "大拇指电机外骨骼.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指电机外骨骼.SLDASM",
+      "sha256": "e3f131332d8763df868079e50238f234c6bf64b5089d5c1b70ff0d69b063ebcd",
+      "mtime": 1795578056.1626697
+    },
+    {
+      "name": "大拇指电机外骨骼前端.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指电机外骨骼前端.SLDASM",
+      "sha256": "05a79ac7b71e7e3c3f930ba95d28ec55ea36aa07a19ea251e997b1cedbe21c2f",
+      "mtime": 1795578007.2985754
+    },
+    {
+      "name": "大拇指联动机构.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指联动机构.SLDASM",
+      "sha256": "26829f1683a6d95c439b10bd58c066a25c3337a5be50a92f2545a4a8fa55125e",
+      "mtime": 1795577998.5827727
+    },
+    {
+      "name": "大线夹.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大线夹.SLDPRT",
+      "sha256": "a10e70a708cc3c66217d39ca76aa7d67397341d0a66d6a8066490223e3c11ba4",
+      "mtime": 1795418347.0
+    },
+    {
+      "name": "小拇指电机外骨骼.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\小拇指电机外骨骼.SLDASM",
+      "sha256": "8b93b879a8dae79d7c9465e9aeae891bf5c0890eaff8e50e738dff101c511479",
+      "mtime": 1795577223.708879
+    },
+    {
+      "name": "小拇指联动机构.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\小拇指联动机构.SLDASM",
+      "sha256": "49cc6e405cce521062a644382fc45080c6b53bac457bb554705d7e4543edd786",
+      "mtime": 1795577223.9179702
+    },
+    {
+      "name": "小线夹.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\小线夹.SLDPRT",
+      "sha256": "5edf547514bc2758f8d32b759f4915ee79bcf5606252c636cfd2d1aca4fb2c0f",
+      "mtime": 1795418305.0
+    },
+    {
+      "name": "左手.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\左手.SLDPRT",
+      "sha256": "35564cd0ee928739a69ecefe954fc58a052180790c3aaeadbd8ebf5bc7afcd5d",
+      "mtime": 1790238646.0
+    },
+    {
+      "name": "手背底板.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\手背底板.SLDPRT",
+      "sha256": "ef4d324cbdf406f361d8c59127fa8c3bd36ca6ed58eb5f3ff5650a2e82d3b504",
+      "mtime": 1795596694.0
+    },
+    {
+      "name": "手背顶板.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\手背顶板.SLDPRT",
+      "sha256": "76777f8453deb6bde690719f35202ac5c2a69d30be107a518e9c219b40373c02",
+      "mtime": 1795501381.0
+    },
+    {
+      "name": "手部外骨骼支架.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\手部外骨骼支架.SLDPRT",
+      "sha256": "83cdcc719c7481b2eb7cfb15fbbbb829f1516b9c71b0d91436ef766002a5b01f",
+      "mtime": 1795591894.0
+    },
+    {
+      "name": "手部电机外骨骼.SLDASM",
+      "path": "C:\\Users\\current robotics\\Desktop\\新建文件夹 (2)\\手部电机外骨骼.SLDASM",
+      "sha256": "d23f7a20dfcde7503d4c6c5d1354e13ed030349e570b2fe5f69ec4e586e8ad45",
+      "mtime": 1795578056.6473606
+    },
+    {
+      "name": "指根.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指根.SLDPRT",
+      "sha256": "857e5d84b1cfb6fa50268d1e8d0e8f2ccbbb8f2cf26cb51a15794ac6580096c6",
+      "mtime": 1795513226.0
+    },
+    {
+      "name": "指节3-模型.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+      "sha256": "1a6201adcfd8609605526fb2b0cea689cd46a82cee23cc27afd1960b2ddfdf31",
+      "mtime": 1794466603.0
+    },
+    {
+      "name": "指间电机.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机.SLDASM",
+      "sha256": "433e253c8f2f3e3f7fbf148a6015e5ada10f80affb69232b265ea8f026a1294f",
+      "mtime": 1795578007.0286913
+    },
+    {
+      "name": "指间电机动子.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+      "sha256": "fa11e5cb85411e4c765cd1fb7ecf3a8312664a493a64140d9e0b71a5d631a338",
+      "mtime": 1794466344.0
+    },
+    {
+      "name": "指间电机定子.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+      "sha256": "c3ff2d86c22a1ef68a9ee0e9ca46bfbfbcd47d412ed4878691c676d0ce4a520f",
+      "mtime": 1794466246.0
+    },
+    {
+      "name": "无名指电机外骨骼.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\无名指电机外骨骼.SLDASM",
+      "sha256": "b4ee555b714f7ba0b2f0ff310180deffbe4d60c5ada09e939fdb936f40a942c3",
+      "mtime": 1795577224.7022648
+    },
+    {
+      "name": "无名指联动机构.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\无名指联动机构.SLDASM",
+      "sha256": "b2f2e36042b979c1e14c0e124a9c4de446352d7e0651f8f88062c6dd4ce9f03f",
+      "mtime": 1795577224.9290836
+    },
+    {
+      "name": "测试-F68811.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-F68811.SLDPRT",
+      "sha256": "0d1b24661f5da852e5a2271082cb8fe794a7da0d75f46cde7e8ff8e747324e6d",
+      "mtime": 1790238632.0
+    },
+    {
+      "name": "测试-关节1-1.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-1.SLDPRT",
+      "sha256": "97cde1f4c5be3ce8cbd201500bd5c5d2bc56dba33c61f13f5927ec190f7b9d61",
+      "mtime": 1795513829.0
+    },
+    {
+      "name": "测试-关节1-2.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-2.SLDPRT",
+      "sha256": "a8b5f1f712b48c09ed8364e08476af488e7e3c2475a16be50340dacfab31b2f3",
+      "mtime": 1795513882.0
+    },
+    {
+      "name": "测试-关节1-3.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-3.SLDPRT",
+      "sha256": "6853a5361f653c55f71c11e329e59412a703ad9c08c1734d762724f82beb8c29",
+      "mtime": 1795513529.0
+    },
+    {
+      "name": "测试-关节1-4.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-4.SLDPRT",
+      "sha256": "87e453e3cc9956847c4f0ef8ea8779de5e50d3495d02fb02b8ce7482c3d2b469",
+      "mtime": 1795513736.0
+    },
+    {
+      "name": "第一指节主动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节主动连杆.SLDPRT",
+      "sha256": "acd7de7d8290d9fdc9efff1b5f4681c6649442326a87f1f1ba0bb6987d11775b",
+      "mtime": 1794982448.0
+    },
+    {
+      "name": "第一指节从动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节从动连杆.SLDPRT",
+      "sha256": "d0e4b57230c525df4e05317636ecd3b33fbd5c296a343487b1ff4962b78662c8",
+      "mtime": 1795516460.0
+    },
+    {
+      "name": "第三指节从动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节从动连杆.SLDPRT",
+      "sha256": "5f427217d8c0eeb2d646c7df5ad6834e0fcc404475e129dc63d0d975b80374da",
+      "mtime": 1795516685.0
+    },
+    {
+      "name": "第三指节联动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节联动连杆.SLDPRT",
+      "sha256": "28b521a04df5964fd1b3b482d90294e8259763fadf841ac16ca8f40604f5d241",
+      "mtime": 1795087829.0
+    },
+    {
+      "name": "第二三指节主动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二三指节主动连杆.SLDPRT",
+      "sha256": "23a71aeba88c4194ba87d35b73653eadb69a44545ba4932f37d1fbaccc430175",
+      "mtime": 1794982139.0
+    },
+    {
+      "name": "第二指节从动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节从动连杆.SLDPRT",
+      "sha256": "2b19aa67838a3f61db6896fd219a68526fce73991bb8f6925ab9659b5d760a8e",
+      "mtime": 1795516967.0
+    },
+    {
+      "name": "第二指节联动连杆.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节联动连杆.SLDPRT",
+      "sha256": "54c8522d535d5bed9647592f899e5707f6ce02e787fa1030d4b2fe0152b42736",
+      "mtime": 1795516774.0
+    },
+    {
+      "name": "联动机构-外骨骼第一指关节.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第一指关节.SLDPRT",
+      "sha256": "bbdaf57e6bfa268a8a99f6253be33c0ea10d66a11aeef553e6df6f0f785c5368",
+      "mtime": 1795587445.0
+    },
+    {
+      "name": "联动机构-外骨骼第三指关节.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第三指关节.SLDPRT",
+      "sha256": "f16e2fecc59ba777c3992c77e4a7b6ebabbaa0400e5b89705a9767104ae122bd",
+      "mtime": 1795074415.0
+    },
+    {
+      "name": "联动机构-外骨骼第二指关节.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第二指关节.SLDPRT",
+      "sha256": "1715ea9ccb63d58d2e6dd8302fe78fb9c4f910d9c33bdcefea390e6a83c8ce0e",
+      "mtime": 1794991496.0
+    },
+    {
+      "name": "装配体1.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\装配体1.SLDASM",
+      "sha256": "20795cd42a1c9a6457defa6960e83cee4ffceb7f3da95fbed041ac9cb3f6a160",
+      "mtime": 1795577225.0619767
+    },
+    {
+      "name": "轴承盖.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\轴承盖.SLDPRT",
+      "sha256": "19e4e5b4299c151513644b901b6e875afa2fbd7b516d67ac94f4401f97e9f200",
+      "mtime": 1794897299.0
+    },
+    {
+      "name": "零件1.SLDPRT",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\零件1.SLDPRT",
+      "sha256": "89d84f55bdb6226778c1365f7ca3f5ae2e4b80cc31be352c4911d508c6702869",
+      "mtime": 1795500193.0
+    },
+    {
+      "name": "食指电机外骨骼.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\食指电机外骨骼.SLDASM",
+      "sha256": "d49356e180eb584b49e6507b94018c6f3cfc5436519ddacf982f1379dbf715c7",
+      "mtime": 1795577225.4393332
+    },
+    {
+      "name": "食指联动机构.SLDASM",
+      "path": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\食指联动机构.SLDASM",
+      "sha256": "32d027815079ecb2a949c42d3c38dc63d30d7a5c93419844892326c2355007d1",
+      "mtime": 1795577225.6679232
+    }
+  ],
+  "originals_unchanged": true,
+  "snapshot": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero4_snapshot",
+  "output": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero4_extract\\hand_motor_16dof",
+  "capture": "Saved live SolidWorks 16自由度 assembly, with the actual currently referenced child files"
+}

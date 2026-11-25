@@ -1,0 +1,27 @@
+{
+  "configuration": "16自由度",
+  "visible_instances": 115,
+  "unique_mesh_configurations": 41,
+  "hidden_excluded": [
+    "手背顶板-1",
+    "装配体1-1"
+  ],
+  "max_cad_visual_transform_error": 6.551050809286904e-15,
+  "source_files_unchanged": true,
+  "zero_source_saved_at": "2026-11-25T11:40:56.647361+08:00",
+  "zero_closure_gap_m": 2.8185920280518337e-17,
+  "closure_jacobian_rank": 64,
+  "mobility": 16,
+  "bounds_m": [
+    [
+      -0.04028129740677676,
+      -0.06559000164270402,
+      -0.044161180501019366
+    ],
+    [
+      0.17550000089403178,
+      0.13098820394486446,
+      0.052701841145017955
+    ]
+  ]
+}

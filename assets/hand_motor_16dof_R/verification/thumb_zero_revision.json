@@ -1,0 +1,107 @@
+{
+  "changed_thumb_components": 16,
+  "changed_thumb_component_names": [
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/指间电机-1/指间电机动子-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/指间电机-1/指间电机定子-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/第二三指节主动连杆-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/第二指节从动连杆-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第一指关节-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第三指关节-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指间电机-1/指间电机动子-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指间电机-1/指间电机定子-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-1-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-2-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-3-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-4-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/第一指节主动连杆-1",
+    "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/第一指节从动连杆-1",
+    "大拇指电机外骨骼-2/指间电机-1/指间电机动子-1",
+    "大拇指电机外骨骼-2/指间电机-1/指间电机定子-1"
+  ],
+  "max_non_thumb_visual_transform_difference": 1.908195823574488e-15,
+  "active_order_unchanged": true,
+  "positive_input_directions": [
+    {
+      "joint": "thumb_cmc_flex_motor_joint",
+      "parent_material_component": "大拇指CMC轴屈伸动子-1",
+      "positive_axis_dot": 1.0
+    },
+    {
+      "joint": "thumb_cmc_abd_motor_joint",
+      "parent_material_component": "大拇指电机外骨骼-2/大拇指CMC轴定子-1",
+      "positive_axis_dot": 1.0000000000000002
+    },
+    {
+      "joint": "thumb_mcp_motor_joint",
+      "parent_material_component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指间电机-1/指间电机定子-1",
+      "positive_axis_dot": 0.9999999999999998
+    },
+    {
+      "joint": "thumb_ip_motor_joint",
+      "parent_material_component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/指间电机-1/指间电机定子-1",
+      "positive_axis_dot": 1.0000000000000002
+    },
+    {
+      "joint": "index_mcp_motor_joint",
+      "parent_material_component": "食指电机外骨骼-1/指节3-模型-1",
+      "positive_axis_dot": 1.0000000000000004
+    },
+    {
+      "joint": "index_pip_dip_motor_joint",
+      "parent_material_component": "食指电机外骨骼-1/食指联动机构-1/指节3-模型-1",
+      "positive_axis_dot": 1.0000000000000004
+    },
+    {
+      "joint": "middle_mcp_motor_joint",
+      "parent_material_component": "中指电机外骨骼-1/指节3-模型-1",
+      "positive_axis_dot": 1.0000000000000004
+    },
+    {
+      "joint": "middle_pip_dip_motor_joint",
+      "parent_material_component": "中指电机外骨骼-1/中指联动机构-1/指节3-模型-1",
+      "positive_axis_dot": 1.0000000000000004
+    },
+    {
+      "joint": "ring_mcp_motor_joint",
+      "parent_material_component": "无名指电机外骨骼-1/指节3-模型-1",
+      "positive_axis_dot": 1.0
+    },
+    {
+      "joint": "ring_pip_dip_motor_joint",
+      "parent_material_component": "无名指电机外骨骼-1/无名指联动机构-1/指节3-模型-1",
+      "positive_axis_dot": 0.9999999999999998
+    },
+    {
+      "joint": "pinky_mcp_motor_joint",
+      "parent_material_component": "小拇指电机外骨骼-2/指节3-模型-1",
+      "positive_axis_dot": 0.9999999999999998
+    },
+    {
+      "joint": "pinky_pip_dip_motor_joint",
+      "parent_material_component": "小拇指电机外骨骼-2/小拇指联动机构-1/指节3-模型-1",
+      "positive_axis_dot": 1.0
+    },
+    {
+      "joint": "index_mcp_abd_motor_joint",
+      "parent_material_component": "大拇指CMC轴屈伸动子-1",
+      "positive_axis_dot": 1.0
+    },
+    {
+      "joint": "middle_mcp_abd_motor_joint",
+      "parent_material_component": "大拇指CMC轴屈伸动子-1",
+      "positive_axis_dot": 1.0
+    },
+    {
+      "joint": "ring_mcp_abd_motor_joint",
+      "parent_material_component": "大拇指CMC轴屈伸动子-1",
+      "positive_axis_dot": 1.0
+    },
+    {
+      "joint": "pinky_mcp_abd_motor_joint",
+      "parent_material_component": "大拇指CMC轴屈伸动子-1",
+      "positive_axis_dot": 1.0
+    }
+  ],
+  "live_cad_components_checked": 115,
+  "max_live_cad_transform_difference": 4.973656039735837e-16
+}

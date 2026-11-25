@@ -9,53 +9,67 @@
 
 namespace ve33 {
 
-inline void bind_feedback(nanobind::module_& module) {
+template <size_t Dof>
+inline void bind_feedback_for(nanobind::module_& module, const char* cf_name,
+                              const char* state_name, const char* ctrl_name) {
     namespace nb = nanobind;
-    nb::class_<ContactFeedback>(module, "ContactFeedback")
-        .def(nb::init<Axes, Axes, Axes, double, double, double, double, double, double>())
-        .def(nb::init<Axes, Axes, Axes, double, double, double, double, double, double,
+    using CF = ContactFeedbackT<Dof>;
+    using CS = ControlStateT<Dof>;
+    using FC = FeedbackControlT<Dof>;
+    using Ax = AxesT<Dof>;
+    nb::class_<CF>(module, cf_name)
+        .def(nb::init<Ax, Ax, Ax, double, double, double, double, double, double>())
+        .def(nb::init<Ax, Ax, Ax, double, double, double, double, double, double,
                       std::vector<std::array<double, 2>>>())
-        .def("set_axis_curve", &ContactFeedback::set_axis_curve)
-        .def("set_friction", &ContactFeedback::set_friction)
-        .def("damping", &ContactFeedback::damping)
-        .def("friction", &ContactFeedback::friction)
-        .def("plan", &ContactFeedback::plan);
-    nb::class_<ControlState>(module, "ControlState")
-        .def_ro("active", &ControlState::active)
-        .def_ro("rearm_required", &ControlState::rearm_required)
-        .def_ro("output_error", &ControlState::output_error)
-        .def_ro("valid_nominal", &ControlState::valid_nominal)
-        .def_ro("valid_sent", &ControlState::valid_sent)
-        .def_ro("need_send", &ControlState::need_send)
-        .def_ro("need_release", &ControlState::need_release)
-        .def_ro("deadline", &ControlState::deadline)
-        .def_ro("submitted_until", &ControlState::submitted_until)
-        .def_ro("interruption_count", &ControlState::interruption_count)
-        .def_ro("last_interruption", &ControlState::last_interruption)
-        .def_ro("handoff_count", &ControlState::handoff_count)
-        .def_ro("last_handoff_gap_ms", &ControlState::last_handoff_gap_ms)
-        .def_ro("loaded_count", &ControlState::loaded_count)
-        .def_ro("position_count", &ControlState::position_count)
-        .def_ro("message", &ControlState::message)
-        .def_ro("nominal", &ControlState::nominal)
-        .def_ro("motor", &ControlState::motor)
-        .def_ro("motor_kd", &ControlState::motor_kd)
-        .def_ro("friction", &ControlState::friction)
-        .def_ro("sent", &ControlState::sent)
-        .def_ro("position", &ControlState::position)
-        .def_ro("mapped_contact", &ControlState::mapped_contact)
-        .def_ro("frame_weight", &ControlState::frame_weight)
-        .def_ro("gate", &ControlState::gate)
-        .def_ro("dq", &ControlState::dq);
-    nb::class_<FeedbackControl>(module, "FeedbackControl")
-        .def(nb::init<ContactFeedback, Axes, double, int64_t, int64_t, double, double, double, double>())
-        .def("step", &FeedbackControl::step, nb::rv_policy::copy)
-        .def("missing", &FeedbackControl::missing, nb::rv_policy::copy)
-        .def("stop", &FeedbackControl::stop, nb::arg("reason") = "力反馈关闭", nb::rv_policy::copy)
-        .def("accepted", &FeedbackControl::accepted)
-        .def("failed", &FeedbackControl::failed)
-        .def("released", &FeedbackControl::released)
-        .def("state", &FeedbackControl::state, nb::rv_policy::copy);
+        .def("set_axis_curve", &CF::set_axis_curve)
+        .def("set_friction", &CF::set_friction)
+        .def("damping", &CF::damping)
+        .def("friction", &CF::friction)
+        .def("plan", &CF::plan);
+    nb::class_<CS>(module, state_name)
+        .def_ro("active", &CS::active)
+        .def_ro("rearm_required", &CS::rearm_required)
+        .def_ro("output_error", &CS::output_error)
+        .def_ro("valid_nominal", &CS::valid_nominal)
+        .def_ro("valid_sent", &CS::valid_sent)
+        .def_ro("need_send", &CS::need_send)
+        .def_ro("need_release", &CS::need_release)
+        .def_ro("deadline", &CS::deadline)
+        .def_ro("submitted_until", &CS::submitted_until)
+        .def_ro("interruption_count", &CS::interruption_count)
+        .def_ro("last_interruption", &CS::last_interruption)
+        .def_ro("handoff_count", &CS::handoff_count)
+        .def_ro("last_handoff_gap_ms", &CS::last_handoff_gap_ms)
+        .def_ro("loaded_count", &CS::loaded_count)
+        .def_ro("position_count", &CS::position_count)
+        .def_ro("message", &CS::message)
+        .def_ro("nominal", &CS::nominal)
+        .def_ro("motor", &CS::motor)
+        .def_ro("motor_kd", &CS::motor_kd)
+        .def_ro("friction", &CS::friction)
+        .def_ro("sent", &CS::sent)
+        .def_ro("position", &CS::position)
+        .def_ro("mapped_contact", &CS::mapped_contact)
+        .def_ro("frame_weight", &CS::frame_weight)
+        .def_ro("gate", &CS::gate)
+        .def_ro("dq", &CS::dq);
+    nb::class_<FC>(module, ctrl_name)
+        .def(nb::init<CF, Ax, double, int64_t, int64_t, double, double, double, double>())
+        .def("step", &FC::step, nb::rv_policy::copy)
+        .def("missing", &FC::missing, nb::rv_policy::copy)
+        .def("stop", &FC::stop, nb::arg("reason") = "力反馈关闭", nb::rv_policy::copy)
+        .def("accepted", &FC::accepted)
+        .def("failed", &FC::failed)
+        .def("released", &FC::released)
+        .def("state", &FC::state, nb::rv_policy::copy);
+}
+
+inline void bind_feedback(nanobind::module_& module) {
+    bind_feedback_for<12>(module, "ContactFeedback", "ControlState", "FeedbackControl");
+    module.attr("ContactFeedback12") = module.attr("ContactFeedback");
+    module.attr("ControlState12") = module.attr("ControlState");
+    module.attr("FeedbackControl12") = module.attr("FeedbackControl");
+    bind_feedback_for<16>(module, "ContactFeedback16", "ControlState16", "FeedbackControl16");
 }
 
 } // namespace ve33

@@ -399,8 +399,11 @@ async function prepare() {
   const tabletop = groups.objects.has('table') && groups.objects.has('test_box');
   const palmTest = groups.objects.has('palm_ball');
   const localGrasp = groups.objects.has('table') && !tabletop && !groups.puzzle_cube.size;
-  if (groups.right_hand.size !== 73 || (!tabletop && !palmTest && !localGrasp && groups.puzzle_cube.size !== 16)) throw Error('模型链接不完整');
-  document.querySelector('h1').textContent = palmTest ? 'MotorHand 掌心测试' : tabletop ? 'MotorHand 桌面测试' : '右手与二阶魔方';
+  const handLinkCount = groups.right_hand.size;
+  const is16Dof = handLinkCount === 81;
+  if ((handLinkCount !== 73 && handLinkCount !== 81) || (!tabletop && !palmTest && !localGrasp && groups.puzzle_cube.size !== 16)) throw Error('模型链接不完整');
+  const modelTag = is16Dof ? '16-DOF' : '12-DOF';
+  document.querySelector('h1').textContent = palmTest ? `MotorHand ${modelTag} 掌心测试` : tabletop ? `MotorHand ${modelTag} 桌面测试` : `右手与二阶魔方 (${modelTag})`;
   diagnostics = new ForceDiagnostics(scene, groups.right_hand, {localGrasp});
   if (!localGrasp) {
     calibrationGuide = new CalibrationGuide(scene, world);
@@ -408,7 +411,7 @@ async function prepare() {
   }
   if (localGrasp) {
     button.hidden = sourceSelect.closest('label').hidden = document.querySelector('#xr-hint').hidden = true;
-    document.querySelector('h1').textContent = 'MotorHand 本地抓握';
+    document.querySelector('h1').textContent = `MotorHand ${modelTag} 本地抓握`;
     camera.position.set(.43, .22, .24);
     controls.target.set(.014, .098, .055);
     controls.update();

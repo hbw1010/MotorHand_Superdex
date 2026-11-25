@@ -1,0 +1,4027 @@
+[
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/指节3-模型-1",
+    "link": "middle_mcp_link",
+    "mesh": "middle_mcp_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9848077530122104,
+        -0.17364817766691779,
+        6.197357739316234e-17,
+        0.14504470831586566
+      ],
+      [
+        2.220446049250313e-16,
+        8.05094560450161e-16,
+        1.0000000000000002,
+        -0.02109896179155999
+      ],
+      [
+        -0.1736481776669178,
+        -0.9848077530122104,
+        8.821326636587111e-16,
+        0.0033058431115155357
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/第三指节从动连杆-1",
+    "link": "middle_dip_connecting_rod_2",
+    "mesh": "middle_dip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_3cec0af6f6e6a07a.3dxml",
+    "world": [
+      [
+        0.07494337422499019,
+        -0.9971877910703545,
+        -5.551115123125783e-16,
+        0.1568464109009577
+      ],
+      [
+        1.3322676295501878e-15,
+        -3.567501234945717e-16,
+        1.0,
+        4.034184153425938e-19
+      ],
+      [
+        -0.9971877910703547,
+        -0.07494337422499017,
+        1.1102230246251565e-15,
+        0.02433472921830281
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1024
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/第三指节联动连杆-1",
+    "link": "middle_dip_connecting_rod_1",
+    "mesh": "middle_dip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_467d3e5d9840df4b.3dxml",
+    "world": [
+      [
+        -0.9996124015619964,
+        0.027839659542782825,
+        0.0,
+        0.1514634205363505
+      ],
+      [
+        2.3288838441456355e-35,
+        -1.0609901452199789e-15,
+        1.0,
+        -5.9510057399815744e-18
+      ],
+      [
+        0.02783965954278282,
+        0.9996124015619965,
+        1.0651202142497596e-15,
+        0.02588655338736429
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1314
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/第二三指节主动连杆-1",
+    "link": "middle_pip_dip_drive_link",
+    "mesh": "middle_pip_dip_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二三指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f1c98ec441a4ebbf.3dxml",
+    "world": [
+      [
+        -0.507102048257532,
+        0.8618860206854594,
+        5.551115123125783e-16,
+        0.13185773477478632
+      ],
+      [
+        -2.220446049250313e-16,
+        8.047225928080891e-16,
+        -1.0000000000000002,
+        7.547401567217427e-17
+      ],
+      [
+        -0.8618860206854593,
+        -0.5071020482575321,
+        -3.3306690738754696e-16,
+        0.02574201047495484
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2494
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/第二指节从动连杆-1",
+    "link": "middle_pip_connecting_rod_1",
+    "mesh": "middle_pip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_88feecb56890df2b.3dxml",
+    "world": [
+      [
+        -0.07584848984402326,
+        0.9971193542341764,
+        2.7755575615628914e-17,
+        0.1396099999999857
+      ],
+      [
+        -1.1102230246251565e-15,
+        -2.0319403597433366e-16,
+        1.0,
+        9.522483938761232e-17
+      ],
+      [
+        0.9971193542341766,
+        0.07584848984402325,
+        8.881784197001252e-16,
+        0.005700000000001038
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1690
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/第二指节联动连杆-1",
+    "link": "middle_pip_connecting_rod_2",
+    "mesh": "middle_pip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f40daf712a8c24ba.3dxml",
+    "world": [
+      [
+        0.7475893260763548,
+        0.6641612752462324,
+        1.1102230246251565e-16,
+        0.1495374367309529
+      ],
+      [
+        -1.5543122344752192e-15,
+        1.47807762386397e-15,
+        1.0,
+        2.2780291404761987e-17
+      ],
+      [
+        0.6641612752462324,
+        -0.7475893260763548,
+        2.1094237467877974e-15,
+        0.020443212540876436
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1002
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第一指关节-1",
+    "link": "middle_mcp_link",
+    "mesh": "middle_mcp_link.stl",
+    "configuration": "中指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第一指关节.SLDPRT",
+    "source_mesh": "meshes/part_a64a856f56a8659f.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.436233158859197e-14,
+        0.09399999999998587
+      ],
+      [
+        -1.2014587301088425e-47,
+        1.0,
+        9.587461512351889e-16,
+        1.953042735548953e-17
+      ],
+      [
+        -1.436233158859197e-14,
+        9.587461512351889e-16,
+        -1.0,
+        -0.00949999999999963
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3654
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第三指关节-1",
+    "link": "middle_dip_link",
+    "mesh": "middle_dip_link.stl",
+    "configuration": "中指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第三指关节.SLDPRT",
+    "source_mesh": "meshes/part_7b975c70f873e3a7.3dxml",
+    "world": [
+      [
+        0.9999999999991651,
+        6.88042804728288e-17,
+        1.2922376525405234e-06,
+        0.15299999999998087
+      ],
+      [
+        1.0810015069234153e-39,
+        -1.0,
+        6.763283589998847e-16,
+        1.7511947616843998e-17
+      ],
+      [
+        1.2922376525405236e-06,
+        -7.873504916307497e-16,
+        -0.9999999999991651,
+        -0.009499992246572957
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 7074
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/中指联动机构-1/联动机构-外骨骼第二指关节-1",
+    "link": "middle_pip_link",
+    "mesh": "middle_pip_link.stl",
+    "configuration": "中指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第二指关节.SLDPRT",
+    "source_mesh": "meshes/part_16d47564308b77f6.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.436233158859197e-14,
+        0.13249999999998588
+      ],
+      [
+        -1.2014587301088425e-47,
+        1.0,
+        9.587461512351889e-16,
+        1.8260209754856998e-17
+      ],
+      [
+        -1.436233158859197e-14,
+        9.587461512351889e-16,
+        -1.0,
+        -0.009499999999999082
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 4284
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/侧摆从动连杆-1",
+    "link": "middle_mount_link",
+    "mesh": "middle_mount_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_a398c2c10f1dad40.3dxml",
+    "world": [
+      [
+        -1.0,
+        5.562903048085677e-16,
+        0.0,
+        0.07
+      ],
+      [
+        4.653560872512108e-49,
+        -1.0656683258078097e-15,
+        1.0,
+        -5.0681647660893596e-05
+      ],
+      [
+        5.562903048085677e-16,
+        1.0,
+        1.0656683258078097e-15,
+        0.012499999999999999
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1088
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/指根-1",
+    "link": "middle_mount_link",
+    "mesh": "middle_mount_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指根.SLDPRT",
+    "source_mesh": "meshes/part_20311a98c5b0a33a.3dxml",
+    "world": [
+      [
+        2.7755575615628914e-17,
+        2.2204460492503128e-16,
+        1.0,
+        0.07
+      ],
+      [
+        1.0,
+        -1.0656683258078097e-15,
+        -2.7755575615628676e-17,
+        -8.673617379884035e-19
+      ],
+      [
+        1.0656683258078097e-15,
+        1.0,
+        -2.220446049250313e-16,
+        0.008
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1580
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/指节3-模型-1",
+    "link": "middle_mcp_connecting_rod_3",
+    "mesh": "middle_mcp_connecting_rod_3_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9396926207857661,
+        0.3420201433260601,
+        -3.3306690738754696e-16,
+        0.09536035267809459
+      ],
+      [
+        -4.440892098500626e-16,
+        9.809671112677444e-16,
+        1.0000000000000002,
+        -0.021098961791560046
+      ],
+      [
+        0.3420201433260603,
+        -0.9396926207857658,
+        8.881784197001252e-16,
+        0.039991606172553526
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/测试-关节1-1-1",
+    "link": "middle_mcp_connecting_rod_1",
+    "mesh": "middle_mcp_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-1.SLDPRT",
+    "source_mesh": "meshes/part_8a7052b7eb720b08.3dxml",
+    "world": [
+      [
+        -3.061608834556989e-16,
+        1.0,
+        -1.3792832639436407e-16,
+        0.0890918830920212
+      ],
+      [
+        1.1102230246251565e-15,
+        -1.3792832639436373e-16,
+        -1.0,
+        1.0184648712555919e-16
+      ],
+      [
+        -1.0,
+        -3.0616088345569904e-16,
+        -1.1102230246251565e-15,
+        0.02009188309205243
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1832
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/测试-关节1-2-1",
+    "link": "middle_mcp_connecting_rod_2",
+    "mesh": "middle_mcp_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-2.SLDPRT",
+    "source_mesh": "meshes/part_fd5c84f32c0043e1.3dxml",
+    "world": [
+      [
+        -2.9371047905290364e-15,
+        1.0,
+        -1.7151967842140466e-16,
+        0.08484924240490535
+      ],
+      [
+        8.881784197001252e-16,
+        -1.7151967842140204e-16,
+        -1.0,
+        1.3767684115379186e-16
+      ],
+      [
+        -1.0,
+        -2.9371047905290364e-15,
+        -8.881784197001245e-16,
+        0.00534924240492959
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1004
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/测试-关节1-3-1",
+    "link": "middle_mcp_connecting_rod_3",
+    "mesh": "middle_mcp_connecting_rod_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-3.SLDPRT",
+    "source_mesh": "meshes/part_59af9dbd31ec8d74.3dxml",
+    "world": [
+      [
+        -0.7071067811862509,
+        -0.7071067811868443,
+        1.1102230246251565e-16,
+        0.0700000000000014
+      ],
+      [
+        8.881784197001252e-16,
+        -5.271612174565993e-16,
+        1.0,
+        -4.831069441133807e-18
+      ],
+      [
+        -0.7071067811868444,
+        0.7071067811862507,
+        8.881784197001252e-16,
+        0.0115
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2236
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/测试-关节1-4-1",
+    "link": "middle_mcp_connecting_rod_4",
+    "mesh": "middle_mcp_connecting_rod_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-4.SLDPRT",
+    "source_mesh": "meshes/part_3607f4eb65ae693c.3dxml",
+    "world": [
+      [
+        -0.707106781185825,
+        -0.70710678118727,
+        -2.693581956711322e-16,
+        0.06999999999999806
+      ],
+      [
+        6.661338147750939e-16,
+        -9.275452680948685e-16,
+        1.0,
+        -1.1032035417991935e-17
+      ],
+      [
+        -0.70710678118727,
+        0.707106781185825,
+        1.074585143033741e-15,
+        0.017500000000000005
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2392
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/第一指节主动连杆-1",
+    "link": "middle_mcp_drive_link",
+    "mesh": "middle_mcp_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_19bda216a4ec1915.3dxml",
+    "world": [
+      [
+        1.0,
+        -4.149612788566067e-14,
+        -2.220446049250313e-16,
+        0.08013261973811903
+      ],
+      [
+        -2.220446049250313e-16,
+        -9.926507013109323e-16,
+        -1.0,
+        -3.570215851606646e-17
+      ],
+      [
+        4.149612788566067e-14,
+        1.0,
+        -9.926507013109385e-16,
+        0.04195377773365535
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2794
+  },
+  {
+    "cad_name": "中指电机外骨骼-1/第一指节从动连杆-1",
+    "link": "middle_mcp_connecting_rod_6",
+    "mesh": "middle_mcp_connecting_rod_6.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_34ed9039b06a66a1.3dxml",
+    "world": [
+      [
+        0.8229631676951096,
+        0.5680947320801619,
+        8.881784197001252e-16,
+        0.09586225141507013
+      ],
+      [
+        1.7763568394002505e-15,
+        -5.124995475044732e-16,
+        -1.0000000000000002,
+        -3.2444472309900304e-17
+      ],
+      [
+        -0.5680947320801621,
+        0.8229631676951094,
+        -1.1102230246251565e-15,
+        0.03627283041285404
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 836
+  },
+  {
+    "cad_name": "侧摆主动连杆-1",
+    "link": "index_mcp_abd_connecting_rod_1",
+    "mesh": "index_mcp_abd_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_e969b3ea99d90f7d.3dxml",
+    "world": [
+      [
+        0.4752023037770425,
+        -0.879876565482336,
+        -1.8887725764122547e-15,
+        0.043564017278327975
+      ],
+      [
+        -0.879876565482336,
+        -0.4752023037770425,
+        5.51235744081249e-18,
+        0.01740092575888285
+      ],
+      [
+        -9.023992737547365e-16,
+        1.6592672425557207e-15,
+        -1.0,
+        0.012500000000000034
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3022
+  },
+  {
+    "cad_name": "侧摆主动连杆-2",
+    "link": "middle_mcp_abd_connecting_rod_1",
+    "mesh": "middle_mcp_abd_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_e969b3ea99d90f7d.3dxml",
+    "world": [
+      [
+        0.4752023037770367,
+        -0.8798765654823391,
+        -2.576670400431991e-16,
+        0.04856401727832803
+      ],
+      [
+        -0.8798765654823391,
+        -0.4752023037770367,
+        1.0193179334872921e-15,
+        -0.006599074241117243
+      ],
+      [
+        -1.0193179334872921e-15,
+        -2.5766704004319915e-16,
+        -1.0,
+        0.012499999999999983
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3022
+  },
+  {
+    "cad_name": "侧摆主动连杆-3",
+    "link": "ring_mcp_abd_connecting_rod_1",
+    "mesh": "ring_mcp_abd_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_e969b3ea99d90f7d.3dxml",
+    "world": [
+      [
+        0.4752023037770362,
+        -0.8798765654823394,
+        -2.2095859734669425e-16,
+        0.043564017278328045
+      ],
+      [
+        -0.8798765654823395,
+        -0.4752023037770362,
+        -8.826935520994688e-16,
+        -0.03059907424111726
+      ],
+      [
+        6.716613364961954e-16,
+        6.138743012340073e-16,
+        -1.0,
+        0.012500000000000011
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3022
+  },
+  {
+    "cad_name": "侧摆主动连杆-4",
+    "link": "pinky_mcp_abd_connecting_rod_1",
+    "mesh": "pinky_mcp_abd_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_e969b3ea99d90f7d.3dxml",
+    "world": [
+      [
+        0.4752078582139583,
+        -0.8798735656284388,
+        -2.41217169867459e-16,
+        0.03826401313517427
+      ],
+      [
+        -0.8798735656284387,
+        -0.4752078582139583,
+        -3.633481445843065e-16,
+        -0.05293965960497389
+      ],
+      [
+        2.050721328827235e-16,
+        4.959288073785215e-16,
+        -1.0,
+        0.00694000000000074
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3022
+  },
+  {
+    "cad_name": "侧摆连杆-1",
+    "link": "index_mcp_abd_connecting_rod_2",
+    "mesh": "index_mcp_abd_connecting_rod_2.stl",
+    "configuration": "食指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆连杆.SLDPRT",
+    "source_mesh": "meshes/part_93711166c91bf748.3dxml",
+    "world": [
+      [
+        0.9977871787673663,
+        -1.0732211119287105e-16,
+        0.0664886899213667,
+        0.057105906344328786
+      ],
+      [
+        0.06648868992136658,
+        9.058851860033116e-17,
+        -0.9977871787673663,
+        0.011466738416978739
+      ],
+      [
+        1.0106151462283901e-16,
+        1.0,
+        9.752376897574877e-17,
+        0.012500000000001956
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 856
+  },
+  {
+    "cad_name": "侧摆连杆-2",
+    "link": "middle_mcp_abd_connecting_rod_2",
+    "mesh": "middle_mcp_abd_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆连杆.SLDPRT",
+    "source_mesh": "meshes/part_27ec20e76b07ae82.3dxml",
+    "world": [
+      [
+        0.997787178767366,
+        4.190535038990699e-17,
+        0.06648868992137003,
+        0.06210590634432947
+      ],
+      [
+        0.06648868992136969,
+        1.683686838724044e-17,
+        -0.997787178767366,
+        -0.012533261583021094
+      ],
+      [
+        -4.293208266224938e-17,
+        1.0,
+        1.4013379559261203e-17,
+        0.01249999999999997
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 856
+  },
+  {
+    "cad_name": "侧摆连杆-3",
+    "link": "ring_mcp_abd_connecting_rod_2",
+    "mesh": "ring_mcp_abd_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆连杆.SLDPRT",
+    "source_mesh": "meshes/part_27ec20e76b07ae82.3dxml",
+    "world": [
+      [
+        0.9977871787673661,
+        1.1096249133760347e-16,
+        0.06648868992137036,
+        0.05710590634432948
+      ],
+      [
+        0.06648868992137036,
+        8.032753938458173e-16,
+        -0.9977871787673661,
+        -0.036533261583021094
+      ],
+      [
+        -1.6412567976362686e-16,
+        1.0,
+        7.9412013831921425e-16,
+        0.012500000000000022
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 856
+  },
+  {
+    "cad_name": "侧摆连杆-4",
+    "link": "pinky_mcp_abd_connecting_rod_2",
+    "mesh": "pinky_mcp_abd_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆连杆.SLDPRT",
+    "source_mesh": "meshes/part_27ec20e76b07ae82.3dxml",
+    "world": [
+      [
+        0.9977853030112084,
+        1.163690979234425e-16,
+        0.06651683316899004,
+        0.05180592510189104
+      ],
+      [
+        0.06651683316899026,
+        9.64506710130651e-16,
+        -0.9977853030112084,
+        -0.058873543015497264
+      ],
+      [
+        -1.8026730756081488e-16,
+        1.0,
+        9.546301161514554e-16,
+        0.006940000000000739
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 856
+  },
+  {
+    "cad_name": "大拇指CMC轴屈伸动子-1",
+    "link": "base_link",
+    "mesh": "base_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指CMC轴屈伸动子.SLDPRT",
+    "source_mesh": "meshes/part_b031fc6e6a4d086d.3dxml",
+    "world": [
+      [
+        -1.0,
+        -7.914950232418087e-17,
+        -4.440892098500626e-16,
+        0.003999999999999997
+      ],
+      [
+        -4.440892098500626e-16,
+        -9.345027612827813e-17,
+        1.0,
+        0.025249999999999998
+      ],
+      [
+        -7.914950232418092e-17,
+        1.0,
+        9.34502761282781e-17,
+        0.014999999999999998
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 536
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指CMC轴侧摆动子-2",
+    "link": "thumb_cmc_abd_link",
+    "mesh": "thumb_cmc_abd_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指CMC轴侧摆动子.SLDPRT",
+    "source_mesh": "meshes/part_5a7e0f1645f2d5d7.3dxml",
+    "world": [
+      [
+        -0.4674388629088307,
+        -0.8838556292342638,
+        -0.01732443688560794,
+        0.0019232834171810653
+      ],
+      [
+        -0.883249210206279,
+        0.4677597959112178,
+        -0.032735393675355176,
+        0.04661094033678653
+      ],
+      [
+        0.03703703703705111,
+        1.231653667943533e-15,
+        -0.9993138935727436,
+        -0.029240740740740664
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 4072
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指CMC轴定子-1",
+    "link": "thumb_cmc_flex_link",
+    "mesh": "thumb_cmc_flex_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大拇指CMC轴定子.SLDPRT",
+    "source_mesh": "meshes/part_97617099ef61f571.3dxml",
+    "world": [
+      [
+        -0.8838556292342642,
+        2.296869230146265e-16,
+        0.46775979591121664,
+        -0.008
+      ],
+      [
+        0.46775979591121675,
+        -1.2691085363331106e-17,
+        0.8838556292342642,
+        0.02925
+      ],
+      [
+        2.0894645936741833e-16,
+        1.0,
+        -9.622122099332418e-17,
+        0.0085
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1884
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/指间电机-1/指间电机动子-1",
+    "link": "thumb_ip_drive_link",
+    "mesh": "thumb_ip_drive_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        -0.13715357105509177,
+        0.9903982844459258,
+        -0.017324436885610275,
+        0.024117641200768716
+      ],
+      [
+        0.9900937115393205,
+        0.13653877240993617,
+        -0.03273539367535718,
+        0.13270021545374636
+      ],
+      [
+        -0.03005562039168111,
+        -0.021642592158871973,
+        -0.9993138935727431,
+        -0.011332162821585827
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/指间电机-1/指间电机定子-1",
+    "link": "thumb_mcp_link",
+    "mesh": "thumb_mcp_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        0.6138173355890093,
+        0.7892579694985702,
+        -0.017324436885609737,
+        0.03771780816847428
+      ],
+      [
+        0.788605033907219,
+        -0.6140280893388456,
+        -0.03273539367535742,
+        0.12131388747793492
+      ],
+      [
+        -0.03647436122269129,
+        0.0064314139876652365,
+        -0.9993138935727433,
+        -0.011194947983063839
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/第二三指节主动连杆-1",
+    "link": "thumb_ip_drive_link",
+    "mesh": "thumb_ip_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二三指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f1c98ec441a4ebbf.3dxml",
+    "world": [
+      [
+        0.5134534605091422,
+        0.8579425434012367,
+        0.017324436885609466,
+        0.011480624132442226
+      ],
+      [
+        -0.8579025819423933,
+        0.512768518824522,
+        0.032735393675357306,
+        0.11954504573677527
+      ],
+      [
+        0.01920166106777393,
+        -0.03167078029860392,
+        0.999313893572743,
+        -0.031795595841890796
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2494
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/第二指节从动连杆-1",
+    "link": "thumb_ip_connecting_rod_1",
+    "mesh": "thumb_ip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_88feecb56890df2b.3dxml",
+    "world": [
+      [
+        -0.9047665521375408,
+        0.42555534307507314,
+        -0.01732443688560981,
+        0.03258743103746275
+      ],
+      [
+        0.4259043093364394,
+        0.9041758198987462,
+        -0.03273539367535772,
+        0.11631055918997385
+      ],
+      [
+        0.0017336152391158898,
+        -0.03699644159492663,
+        -0.999313893572743,
+        -0.03205555555555677
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1690
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第一指关节-1",
+    "link": "thumb_mcp_link",
+    "mesh": "thumb_mcp_link.stl",
+    "configuration": "大拇指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第一指关节.SLDPRT",
+    "source_mesh": "meshes/part_3ca0130fbd59c589.3dxml",
+    "world": [
+      [
+        -0.4674388629088232,
+        -0.01732443688561007,
+        0.8838556292342675,
+        0.027848869253987062
+      ],
+      [
+        -0.8832492102062828,
+        -0.03273539367535719,
+        -0.4677597959112103,
+        0.0752890676583638
+      ],
+      [
+        0.037037037037053896,
+        -0.9993138935727433,
+        -2.0383000842727483e-15,
+        -0.030629629629630218
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 4174
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第三指关节-1",
+    "link": "thumb_ip_link",
+    "mesh": "thumb_ip_link.stl",
+    "configuration": "大拇指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第三指关节.SLDPRT",
+    "source_mesh": "meshes/part_acc1d02c8e4292e5.3dxml",
+    "world": [
+      [
+        0.4674388629088233,
+        0.017324436885609997,
+        0.8838556292342674,
+        0.04070343798397971
+      ],
+      [
+        0.8832492102062828,
+        0.03273539367535723,
+        -0.4677597959112104,
+        0.09957842093903657
+      ],
+      [
+        -0.037037037037053896,
+        0.9993138935727434,
+        -1.9532986339498848e-15,
+        -0.0316481481481492
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 8092
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指根-1",
+    "link": "thumb_cmc_abd_link",
+    "mesh": "thumb_cmc_abd_link_part_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指根.SLDPRT",
+    "source_mesh": "meshes/part_20311a98c5b0a33a.3dxml",
+    "world": [
+      [
+        -0.017324436885610004,
+        -0.8838556292342639,
+        0.46743886290882974,
+        0.004201215641482965
+      ],
+      [
+        -0.03273539367535738,
+        0.4677597959112167,
+        0.8832492102062793,
+        0.06801800290820004
+      ],
+      [
+        -0.9993138935727434,
+        1.7836351778511157e-15,
+        -0.03703703703705373,
+        -0.02998148148148174
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1580
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指间电机-1/指间电机动子-1",
+    "link": "thumb_mcp_drive_link",
+    "mesh": "thumb_mcp_drive_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        0.9447365380111198,
+        0.3273724753753138,
+        -0.017324436885611798,
+        -0.0015217034871554888
+      ],
+      [
+        0.3267101394051981,
+        -0.9445575042371722,
+        -0.032735393675358423,
+        0.08459049670614799
+      ],
+      [
+        -0.027080593726875362,
+        0.02526625330127444,
+        -0.9993138935727433,
+        -0.009311698776568816
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指间电机-1/指间电机定子-1",
+    "link": "thumb_mcp_connecting_rod_3",
+    "mesh": "thumb_mcp_connecting_rod_3_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        0.13695242115408085,
+        0.9904261195195895,
+        -0.017324436885610056,
+        -0.011854803511634877
+      ],
+      [
+        0.9899660375853623,
+        -0.13746140705105742,
+        -0.03273539367535719,
+        0.106072584376217
+      ],
+      [
+        -0.034803430399493324,
+        -0.012667412715772989,
+        -0.9993138935727431,
+        -0.009836268144627024
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-1-1",
+    "link": "thumb_mcp_connecting_rod_1",
+    "mesh": "thumb_mcp_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-1.SLDPRT",
+    "source_mesh": "meshes/part_8a7052b7eb720b08.3dxml",
+    "world": [
+      [
+        0.8838556292342546,
+        0.4674388629088471,
+        0.0173244368856098,
+        0.0024380248258742063
+      ],
+      [
+        -0.46775979591123407,
+        0.8832492102062698,
+        0.03273539367535684,
+        0.09053699033790565
+      ],
+      [
+        -9.573193126648e-16,
+        -0.0370370370370538,
+        0.999313893572743,
+        -0.030688588262668612
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1832
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-2-1",
+    "link": "thumb_mcp_connecting_rod_2",
+    "mesh": "thumb_mcp_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-2.SLDPRT",
+    "source_mesh": "meshes/part_fd5c84f32c0043e1.3dxml",
+    "world": [
+      [
+        0.8838556292342455,
+        0.4674388629088646,
+        0.017324436885610126,
+        0.01348521564844491
+      ],
+      [
+        -0.4677597959112516,
+        0.8832492102062607,
+        0.03273539367535746,
+        0.07989366670281878
+      ],
+      [
+        -2.234634088636639e-16,
+        -0.037037037037053945,
+        0.999313893572743,
+        -0.030531453422404865
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1004
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-3-1",
+    "link": "thumb_mcp_connecting_rod_3",
+    "mesh": "thumb_mcp_connecting_rod_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-3.SLDPRT",
+    "source_mesh": "meshes/part_59af9dbd31ec8d74.3dxml",
+    "world": [
+      [
+        0.2944511192684905,
+        -0.9555094987744129,
+        -0.01732443688560997,
+        0.0011077209391630247
+      ],
+      [
+        -0.9553076296697787,
+        -0.29379538235926744,
+        -0.032735393675357216,
+        0.06965516219388927
+      ],
+      [
+        0.026189140043956886,
+        0.02618914004395939,
+        -0.9993138935727431,
+        -0.029981481481481734
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2236
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-4-1",
+    "link": "thumb_mcp_connecting_rod_4",
+    "mesh": "thumb_mcp_connecting_rod_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-4.SLDPRT",
+    "source_mesh": "meshes/part_3607f4eb65ae693c.3dxml",
+    "world": [
+      [
+        0.2944511192684895,
+        -0.9555094987744134,
+        -0.017324436885609668,
+        -0.004195412836242578
+      ],
+      [
+        -0.9553076296697789,
+        -0.29379538235926655,
+        -0.03273539367535714,
+        0.07246172096935653
+      ],
+      [
+        0.02618914004395691,
+        0.026189140043959447,
+        -0.9993138935727435,
+        -0.029981481481481723
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2392
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/第一指节主动连杆-1",
+    "link": "thumb_mcp_drive_link",
+    "mesh": "thumb_mcp_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_19bda216a4ec1915.3dxml",
+    "world": [
+      [
+        0.4674388629088441,
+        -0.8838556292342565,
+        0.017324436885611527,
+        -0.02107264169348968
+      ],
+      [
+        0.8832492102062717,
+        0.46775979591123135,
+        0.032735393675358285,
+        0.09284984343234368
+      ],
+      [
+        -0.03703703703705554,
+        2.2724877535296173e-15,
+        0.9993138935727433,
+        -0.030356763694005674
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2794
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/第一指节从动连杆-1",
+    "link": "thumb_mcp_connecting_rod_6",
+    "mesh": "thumb_mcp_connecting_rod_6.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_34ed9039b06a66a1.3dxml",
+    "world": [
+      [
+        0.886798694210979,
+        -0.4618310728310724,
+        0.017324436885611565,
+        -0.008698863279563665
+      ],
+      [
+        0.4611496919588449,
+        0.8867183067960096,
+        0.03273539367535832,
+        0.10408570942847908
+      ],
+      [
+        -0.030480117322042054,
+        -0.021040545632629984,
+        0.9993138935727433,
+        -0.030939342645003975
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 836
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/大线夹-1",
+    "link": "thumb_cmc_flex_link",
+    "mesh": "thumb_cmc_flex_link_part_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\大线夹.SLDPRT",
+    "source_mesh": "meshes/part_17ae63e559d01f3b.3dxml",
+    "world": [
+      [
+        -3.034052553694209e-16,
+        0.4677597959112166,
+        0.8838556292342642,
+        -0.032625933279684306
+      ],
+      [
+        -8.36534599342605e-34,
+        0.8838556292342642,
+        -0.4677597959112169,
+        0.03509537249567852
+      ],
+      [
+        -1.0,
+        -1.1102230246251565e-16,
+        -2.7755575615628914e-16,
+        0.016450000000000006
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 440
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/指间电机-1/指间电机动子-1",
+    "link": "base_link",
+    "mesh": "base_link_part_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        -0.5863914570149925,
+        -0.8100278138063126,
+        5.344489826560582e-17,
+        -0.027920266169274545
+      ],
+      [
+        -0.8100278138063128,
+        0.5863914570149925,
+        1.6496957997858748e-16,
+        0.018133212804045166
+      ],
+      [
+        -1.649695799785875e-16,
+        5.344489826560582e-17,
+        -1.0,
+        0.04209896179159358
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/指间电机-1/指间电机定子-1",
+    "link": "thumb_cmc_flex_link",
+    "mesh": "thumb_cmc_flex_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        0.8838556292342643,
+        -0.4677597959112163,
+        -2.550589803108545e-16,
+        0.0057848900751078305
+      ],
+      [
+        -0.4677597959112165,
+        -0.8838556292342643,
+        -2.5835931647672853e-17,
+        0.011073730651131975
+      ],
+      [
+        -2.133503054198087e-16,
+        1.4214157019883524e-16,
+        -1.0,
+        0.04209896179155999
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/指间电机-2/指间电机动子-1",
+    "link": "thumb_cmc_abd_link",
+    "mesh": "thumb_cmc_abd_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        0.26737585452910795,
+        -0.38380903986973963,
+        -0.8838556292342648,
+        -0.008768520815362633
+      ],
+      [
+        0.5052201070134914,
+        -0.7252264589756596,
+        0.4677597959112156,
+        0.034106716587137584
+      ],
+      [
+        -0.8205259263936183,
+        -0.5716093107323346,
+        -7.771561172376096e-16,
+        -0.05097065348586148
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "大拇指电机外骨骼-2/指间电机-2/指间电机定子-1",
+    "link": "thumb_cmc_flex_link",
+    "mesh": "thumb_cmc_flex_link_part_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        -9.149251048406784e-16,
+        -0.4677597959112166,
+        -0.8838556292342641,
+        -0.0151068221739942
+      ],
+      [
+        -1.3322676295501878e-15,
+        -0.8838556292342642,
+        0.4677597959112165,
+        0.022130177806807965
+      ],
+      [
+        -1.0,
+        1.5543122344752192e-15,
+        1.6653345369377348e-16,
+        -0.049185980732314234
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/侧摆从动连杆-1",
+    "link": "pinky_mount_link",
+    "mesh": "pinky_mount_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_a398c2c10f1dad40.3dxml",
+    "world": [
+      [
+        -1.0,
+        3.5714840011671225e-16,
+        0.0,
+        0.05969999999999999
+      ],
+      [
+        2.9876699379748625e-49,
+        -2.3719933489520526e-17,
+        1.0,
+        -0.046390681647660865
+      ],
+      [
+        3.5714840011671225e-16,
+        1.0,
+        2.3719933489520526e-17,
+        0.00694
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1088
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/指节3-模型-1",
+    "link": "pinky_mcp_link",
+    "mesh": "pinky_mcp_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9848077530122104,
+        -0.1736481776669176,
+        0.0,
+        0.12190170831587535
+      ],
+      [
+        -1.452627087311684e-34,
+        1.4246185902515373e-18,
+        1.0,
+        -0.06743896179155998
+      ],
+      [
+        -0.1736481776669176,
+        -0.9848077530122104,
+        8.365345993426268e-34,
+        -0.0027231568884849306
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/第三指节从动连杆-1",
+    "link": "pinky_dip_connecting_rod_2",
+    "mesh": "pinky_dip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_3cec0af6f6e6a07a.3dxml",
+    "world": [
+      [
+        0.09553551689649092,
+        -0.9954260218676829,
+        -6.522560269672795e-16,
+        0.135285628507371
+      ],
+      [
+        6.661338147750939e-16,
+        -1.045961604018226e-15,
+        1.0000000000000002,
+        -0.046339999999999895
+      ],
+      [
+        -0.9954260218676827,
+        -0.09553551689649094,
+        5.551115123125783e-16,
+        0.008819291229750056
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1024
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/第三指节联动连杆-1",
+    "link": "pinky_dip_connecting_rod_1",
+    "mesh": "pinky_dip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_467d3e5d9840df4b.3dxml",
+    "world": [
+      [
+        -0.9169870718465214,
+        0.3989169212584781,
+        3.3306690738754696e-16,
+        0.1251667223177703
+      ],
+      [
+        8.881784197001252e-16,
+        3.706141010765112e-16,
+        1.0000000000000002,
+        -0.046339999999999985
+      ],
+      [
+        0.3989169212584782,
+        0.9169870718465211,
+        -4.440892098500626e-16,
+        0.012874413545871613
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1314
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/第二三指节主动连杆-1",
+    "link": "pinky_pip_dip_drive_link",
+    "mesh": "pinky_pip_dip_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二三指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f1c98ec441a4ebbf.3dxml",
+    "world": [
+      [
+        -0.8346168799526401,
+        0.5508308848440875,
+        -9.992007221626409e-16,
+        0.11227645856947954
+      ],
+      [
+        8.881784197001252e-16,
+        -3.8072602004357377e-16,
+        -1.0,
+        -0.04633999999999998
+      ],
+      [
+        -0.5508308848440874,
+        -0.8346168799526401,
+        -2.220446049250313e-16,
+        0.016330285872680306
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2494
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/第二指节从动连杆-1",
+    "link": "pinky_pip_connecting_rod_1",
+    "mesh": "pinky_pip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_88feecb56890df2b.3dxml",
+    "world": [
+      [
+        0.4780649877616468,
+        0.8783244659443665,
+        -5.551115123125783e-17,
+        0.10724999999999488
+      ],
+      [
+        7.347488052115781e-34,
+        -1.0828664791322259e-16,
+        1.0,
+        -0.04633999999999999
+      ],
+      [
+        0.8783244659443664,
+        -0.47806498776164685,
+        1.1102230246251565e-16,
+        -0.0035899999999978
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1690
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/第二指节联动连杆-1",
+    "link": "pinky_pip_connecting_rod_2",
+    "mesh": "pinky_pip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f40daf712a8c24ba.3dxml",
+    "world": [
+      [
+        0.825009518703703,
+        0.5651188317940611,
+        -8.881784197001252e-16,
+        0.12228274324794675
+      ],
+      [
+        2.220446049250313e-16,
+        9.417278931717661e-16,
+        0.9999999999999999,
+        -0.04633999999999998
+      ],
+      [
+        0.5651188317940611,
+        -0.8250095187037029,
+        5.551115123125783e-16,
+        0.006713748466597794
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1002
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第一指关节-1",
+    "link": "pinky_mcp_link",
+    "mesh": "pinky_mcp_link.stl",
+    "configuration": "小拇指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第一指关节.SLDPRT",
+    "source_mesh": "meshes/part_55b03eeb5f0c9343.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.4429634509109587e-14,
+        0.07569999999999555
+      ],
+      [
+        -1.2070888522738214e-47,
+        1.0,
+        3.264811017448241e-18,
+        -0.04633999999999998
+      ],
+      [
+        -1.4429634509109587e-14,
+        3.2648110174482425e-18,
+        -1.0,
+        -0.015060000000000063
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3850
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第三指关节-1",
+    "link": "pinky_dip_link",
+    "mesh": "pinky_dip_link.stl",
+    "configuration": "小拇指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第三指关节.SLDPRT",
+    "source_mesh": "meshes/part_c7e4325fb9b4312a.3dxml",
+    "world": [
+      [
+        0.9985564212685809,
+        0.0,
+        -0.053712880608702454,
+        0.11519350389570435
+      ],
+      [
+        -2.220446049250313e-16,
+        -1.0,
+        -2.7128144713172558e-17,
+        -0.04633999999999998
+      ],
+      [
+        -0.05371288060870247,
+        2.7755575615628914e-17,
+        -0.9985564212685807,
+        -0.015301707962738297
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 8352
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/小拇指联动机构-1/联动机构-外骨骼第二指关节-1",
+    "link": "pinky_pip_link",
+    "mesh": "pinky_pip_link.stl",
+    "configuration": "小拇指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第二指关节.SLDPRT",
+    "source_mesh": "meshes/part_4039303e5c62f406.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.4429634509109587e-14,
+        0.10119999999999572
+      ],
+      [
+        -1.2070888522738214e-47,
+        1.0,
+        3.264811017448241e-18,
+        -0.04633999999999998
+      ],
+      [
+        -1.4429634509109587e-14,
+        3.2648110174482425e-18,
+        -1.0,
+        -0.015059999999999733
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 4020
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/指根-1",
+    "link": "pinky_mount_link",
+    "mesh": "pinky_mount_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指根.SLDPRT",
+    "source_mesh": "meshes/part_20311a98c5b0a33a.3dxml",
+    "world": [
+      [
+        2.081668171172168e-17,
+        -8.694080973335009e-17,
+        1.0,
+        0.05969999999999999
+      ],
+      [
+        1.0,
+        -2.3719933489520486e-17,
+        -2.0816681711721682e-17,
+        -0.04633999999999998
+      ],
+      [
+        2.371993348952049e-17,
+        1.0,
+        8.694080973335009e-17,
+        0.0024400000000000008
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1580
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/指节3-模型-1",
+    "link": "pinky_mcp_connecting_rod_3",
+    "mesh": "pinky_mcp_connecting_rod_3_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9396926207859106,
+        0.3420201433256624,
+        1.1102230246251565e-16,
+        0.0850603526781065
+      ],
+      [
+        2.861116835640333e-34,
+        -8.633901529885772e-18,
+        0.9999999999999999,
+        -0.06743896179155998
+      ],
+      [
+        0.3420201433256624,
+        -0.9396926207859106,
+        5.551115123125783e-17,
+        0.034431606172542505
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/测试-关节1-1-1",
+    "link": "pinky_mcp_connecting_rod_1",
+    "mesh": "pinky_mcp_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-1.SLDPRT",
+    "source_mesh": "meshes/part_8a7052b7eb720b08.3dxml",
+    "world": [
+      [
+        -1.0701897876384364e-16,
+        1.0,
+        -1.150256261611877e-16,
+        0.07879188309203175
+      ],
+      [
+        -8.36534599342605e-34,
+        -1.150256261611877e-16,
+        -1.0,
+        -0.046339999999999985
+      ],
+      [
+        -1.0,
+        -1.0701897876384362e-16,
+        -4.836250831753857e-32,
+        0.014531883092041816
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1832
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/测试-关节1-2-1",
+    "link": "pinky_mcp_connecting_rod_2",
+    "mesh": "pinky_mcp_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-2.SLDPRT",
+    "source_mesh": "meshes/part_fd5c84f32c0043e1.3dxml",
+    "world": [
+      [
+        -2.7379628858371817e-15,
+        1.0,
+        -7.342762673680599e-17,
+        0.07454924240491362
+      ],
+      [
+        -8.36534599342605e-34,
+        -7.342762673680599e-17,
+        -1.0,
+        -0.046339999999999944
+      ],
+      [
+        -1.0,
+        -2.7379628858371817e-15,
+        -8.365345993426268e-34,
+        -0.0002107575950787209
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1004
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/测试-关节1-3-1",
+    "link": "pinky_mcp_connecting_rod_3",
+    "mesh": "pinky_mcp_connecting_rod_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-3.SLDPRT",
+    "source_mesh": "meshes/part_59af9dbd31ec8d74.3dxml",
+    "world": [
+      [
+        -0.7071067811865498,
+        -0.7071067811865451,
+        1.1102230246251565e-16,
+        0.059700000000001224
+      ],
+      [
+        -5.915192878923256e-34,
+        2.237114317075245e-17,
+        1.0,
+        -0.04633999999999998
+      ],
+      [
+        -0.7071067811865452,
+        0.7071067811865497,
+        -1.1102230246251565e-16,
+        0.0059399999999997025
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2236
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/测试-关节1-4-1",
+    "link": "pinky_mcp_connecting_rod_4",
+    "mesh": "pinky_mcp_connecting_rod_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-4.SLDPRT",
+    "source_mesh": "meshes/part_3607f4eb65ae693c.3dxml",
+    "world": [
+      [
+        -0.707106781186555,
+        -0.70710678118654,
+        1.1102230246251565e-16,
+        0.059700000000002536
+      ],
+      [
+        -5.9151928789232125e-34,
+        1.0087576610488997e-16,
+        1.0,
+        -0.04633999999999998
+      ],
+      [
+        -0.70710678118654,
+        0.7071067811865549,
+        -1.1102230246251565e-16,
+        0.011939999999999985
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2392
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/第一指节主动连杆-1",
+    "link": "pinky_mcp_drive_link",
+    "mesh": "pinky_mcp_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_19bda216a4ec1915.3dxml",
+    "world": [
+      [
+        1.0,
+        -4.121822083447121e-14,
+        -2.220446049250313e-16,
+        0.06983261973813579
+      ],
+      [
+        -2.220446049250313e-16,
+        4.929769100735868e-17,
+        -1.0,
+        -0.04633999999999998
+      ],
+      [
+        4.121822083447121e-14,
+        1.0,
+        4.9297691007352355e-17,
+        0.036393777733653605
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2794
+  },
+  {
+    "cad_name": "小拇指电机外骨骼-2/第一指节从动连杆-1",
+    "link": "pinky_mcp_connecting_rod_6",
+    "mesh": "pinky_mcp_connecting_rod_6.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_34ed9039b06a66a1.3dxml",
+    "world": [
+      [
+        0.8229631676946481,
+        0.5680947320808305,
+        -5.459866562876037e-16,
+        0.0855622514150914
+      ],
+      [
+        -2.220446049250313e-16,
+        -5.846295091178846e-16,
+        -1.0,
+        -0.04633999999999998
+      ],
+      [
+        -0.5680947320808305,
+        0.8229631676946481,
+        -3.9128185803373494e-16,
+        0.03071283041284088
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 836
+  },
+  {
+    "cad_name": "手背底板-1",
+    "link": "base_link",
+    "mesh": "base_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\手背底板.SLDPRT",
+    "source_mesh": "meshes/part_230dad694eddef52.3dxml",
+    "world": [
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.04
+      ],
+      [
+        -1.0,
+        8.36534599342605e-34,
+        0.0,
+        0.0
+      ],
+      [
+        -8.365345993426268e-34,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 8480
+  },
+  {
+    "cad_name": "指间电机-1/指间电机动子-1",
+    "link": "index_mcp_abd_connecting_rod_1",
+    "mesh": "index_mcp_abd_connecting_rod_1_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        0.8778780785665079,
+        0.47888420225809925,
+        1.643446413793795e-15,
+        0.06276528488499124
+      ],
+      [
+        -0.47888420225809925,
+        0.8778780785665079,
+        3.6873001302766583e-17,
+        0.022536522657974428
+      ],
+      [
+        -1.4250876821545776e-15,
+        -8.193905243582287e-16,
+        1.0,
+        -0.008598961791559955
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "指间电机-1/指间电机定子-1",
+    "link": "base_link",
+    "mesh": "base_link_part_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        1.0,
+        -7.771561172376096e-16,
+        4.840591035945997e-16,
+        0.060685980732314196
+      ],
+      [
+        8.881784197001252e-16,
+        1.0,
+        7.061037085196316e-16,
+        0.03361718061428432
+      ],
+      [
+        -4.840591035946002e-16,
+        -7.061037085196312e-16,
+        1.0,
+        -0.00859896179156002
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "指间电机-2/指间电机动子-1",
+    "link": "middle_mcp_abd_connecting_rod_1",
+    "mesh": "middle_mcp_abd_connecting_rod_1_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        0.8778780785665047,
+        0.47888420225810524,
+        4.221107428980264e-16,
+        0.06776528488499128
+      ],
+      [
+        -0.47888420225810546,
+        0.8778780785665047,
+        -7.110929461807186e-16,
+        -0.0014634773420257405
+      ],
+      [
+        -7.11092946180717e-16,
+        4.221107428980256e-16,
+        1.0,
+        -0.008598961791560018
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "指间电机-2/指间电机定子-1",
+    "link": "base_link",
+    "mesh": "base_link_part_5.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        1.0,
+        -2.220446049250313e-16,
+        5.851112650562092e-16,
+        0.06568598073231421
+      ],
+      [
+        2.220446049250313e-16,
+        1.0,
+        -6.361340620314633e-16,
+        0.00961718061428432
+      ],
+      [
+        -5.851112650562091e-16,
+        6.361340620314634e-16,
+        1.0,
+        -0.008598961791560016
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "指间电机-3/指间电机动子-1",
+    "link": "pinky_mcp_abd_connecting_rod_1",
+    "mesh": "pinky_mcp_abd_connecting_rod_1_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        0.8778811016283088,
+        0.4788786604181343,
+        4.303141540450331e-16,
+        0.057465248321682885
+      ],
+      [
+        -0.4788786604181341,
+        0.8778811016283088,
+        3.972618425363824e-16,
+        -0.0478039414930604
+      ],
+      [
+        -1.8752444461024513e-16,
+        -5.54816929608779e-16,
+        1.0,
+        -0.014158961791559265
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "指间电机-3/指间电机定子-1",
+    "link": "base_link",
+    "mesh": "base_link_part_6.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        1.0,
+        1.887379141862768e-15,
+        3.378062434739137e-16,
+        0.05538593493088321
+      ],
+      [
+        -1.9984014443252818e-15,
+        1.0,
+        7.724167811512445e-16,
+        -0.03672342724847636
+      ],
+      [
+        -3.3780624347391313e-16,
+        -7.724167811512445e-16,
+        1.0,
+        -0.014158961791559774
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "指间电机-4/指间电机动子-1",
+    "link": "ring_mcp_abd_connecting_rod_1",
+    "mesh": "ring_mcp_abd_connecting_rod_1_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机动子.SLDPRT",
+    "source_mesh": "meshes/part_f7e6e52547ab2345.3dxml",
+    "world": [
+      [
+        0.8778780785665041,
+        0.47888420225810624,
+        2.423557411160255e-16,
+        0.06276528488499128
+      ],
+      [
+        -0.47888420225810613,
+        0.8778780785665041,
+        9.009312875193164e-16,
+        -0.025463477342025788
+      ],
+      [
+        2.1868296857255872e-16,
+        -9.069681633549242e-16,
+        1.0,
+        -0.00859896179155999
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 708
+  },
+  {
+    "cad_name": "指间电机-4/指间电机定子-1",
+    "link": "base_link",
+    "mesh": "base_link_part_7.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指间电机定子.SLDPRT",
+    "source_mesh": "meshes/part_518ac631b70e2334.3dxml",
+    "world": [
+      [
+        1.0,
+        -2.220446049250313e-16,
+        2.3800525409369877e-16,
+        0.060685980732313946
+      ],
+      [
+        2.220446049250313e-16,
+        1.0,
+        7.931167664062772e-16,
+        -0.014382819385715468
+      ],
+      [
+        -2.380052540936989e-16,
+        -7.931167664062771e-16,
+        1.0,
+        -0.008598961791559773
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 12630
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/侧摆从动连杆-1",
+    "link": "ring_mount_link",
+    "mesh": "ring_mount_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_a398c2c10f1dad40.3dxml",
+    "world": [
+      [
+        -1.0,
+        7.01861903635661e-16,
+        0.0,
+        0.065
+      ],
+      [
+        5.871317663516957e-49,
+        2.2546272898335425e-16,
+        1.0,
+        -0.024050681647660884
+      ],
+      [
+        7.01861903635661e-16,
+        1.0,
+        -2.2546272898335425e-16,
+        0.012499999999999997
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1088
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/指根-1",
+    "link": "ring_mount_link",
+    "mesh": "ring_mount_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指根.SLDPRT",
+    "source_mesh": "meshes/part_20311a98c5b0a33a.3dxml",
+    "world": [
+      [
+        2.9490299091605714e-17,
+        4.141118148985177e-17,
+        1.0,
+        0.065
+      ],
+      [
+        1.0,
+        2.2546272898335405e-16,
+        -2.949029909160572e-17,
+        -0.023999999999999997
+      ],
+      [
+        -2.2546272898335405e-16,
+        1.0,
+        -4.1835231443445335e-17,
+        0.008
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1580
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/指节3-模型-1",
+    "link": "ring_mcp_connecting_rod_3",
+    "mesh": "ring_mcp_connecting_rod_3_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9396926207855407,
+        0.3420201433266789,
+        1.1102230246251565e-16,
+        0.09036035267807616
+      ],
+      [
+        2.8611168356488372e-34,
+        -2.6888584176224616e-16,
+        1.0,
+        -0.04509896179155999
+      ],
+      [
+        0.34202014332667896,
+        -0.9396926207855406,
+        -2.220446049250313e-16,
+        0.03999160617256999
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/指节3-模型-1",
+    "link": "ring_mcp_link",
+    "mesh": "ring_mcp_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9848077530124035,
+        -0.17364817766582186,
+        -1.2835708627479874e-16,
+        0.13604470831585952
+      ],
+      [
+        -1.4526270873025179e-34,
+        -1.0711176723393882e-16,
+        0.9999999999999999,
+        -0.04509896179155999
+      ],
+      [
+        -0.17364817766582188,
+        -0.9848077530124033,
+        -6.647294279361863e-16,
+        0.0033058431115943303
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/第三指节从动连杆-1",
+    "link": "ring_dip_connecting_rod_2",
+    "mesh": "ring_dip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_3cec0af6f6e6a07a.3dxml",
+    "world": [
+      [
+        0.01571743672315176,
+        -0.9998764734620241,
+        -1.942890293094024e-16,
+        0.14745407872819924
+      ],
+      [
+        -8.364312651196512e-34,
+        -3.105061529477525e-16,
+        1.0000000000000002,
+        -0.023999999999999973
+      ],
+      [
+        -0.9998764734620242,
+        -0.01571743672315176,
+        -3.3306690738754696e-16,
+        0.024249708882580236
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1024
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/第三指节联动连杆-1",
+    "link": "ring_dip_connecting_rod_1",
+    "mesh": "ring_dip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_467d3e5d9840df4b.3dxml",
+    "world": [
+      [
+        -0.9981284737496751,
+        0.061151859253374456,
+        -3.3306690738754696e-16,
+        0.14249737353048408
+      ],
+      [
+        5.115564607957698e-35,
+        2.2279492810532277e-16,
+        1.0000000000000002,
+        -0.023999999999999997
+      ],
+      [
+        0.06115185925337446,
+        0.998128473749675,
+        -2.0122792321330962e-16,
+        0.02599080617362502
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1314
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/第二三指节主动连杆-1",
+    "link": "ring_pip_dip_drive_link",
+    "mesh": "ring_pip_dip_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二三指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f1c98ec441a4ebbf.3dxml",
+    "world": [
+      [
+        -0.5071020482561058,
+        0.8618860206862982,
+        -2.723993849320145e-16,
+        0.12285773477473597
+      ],
+      [
+        -4.440892098500626e-16,
+        -4.949001974443133e-16,
+        -1.0000000000000002,
+        -0.023999999999999976
+      ],
+      [
+        -0.8618860206862983,
+        -0.5071020482561057,
+        5.663382210409405e-16,
+        0.02574201047503853
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2494
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/第二指节从动连杆-1",
+    "link": "ring_pip_connecting_rod_1",
+    "mesh": "ring_pip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_88feecb56890df2b.3dxml",
+    "world": [
+      [
+        -0.07584848984514686,
+        0.997119354234091,
+        -1.5265566588595902e-16,
+        0.13060999999997736
+      ],
+      [
+        2.220446049250313e-16,
+        5.390170120446986e-17,
+        1.0,
+        -0.024
+      ],
+      [
+        0.997119354234091,
+        0.07584848984514686,
+        -2.220446049250313e-16,
+        0.005700000000073712
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1690
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/第二指节联动连杆-1",
+    "link": "ring_pip_connecting_rod_2",
+    "mesh": "ring_pip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f40daf712a8c24ba.3dxml",
+    "world": [
+      [
+        0.7493280169372466,
+        0.6621990056115257,
+        0.0,
+        0.14055138972509262
+      ],
+      [
+        2.220446049250313e-16,
+        -2.550037031700261e-16,
+        1.0,
+        -0.023999999999999976
+      ],
+      [
+        0.6621990056115257,
+        -0.7493280169372467,
+        -3.3306690738754696e-16,
+        0.020427465327135026
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1002
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第一指关节-1",
+    "link": "ring_mcp_link",
+    "mesh": "ring_mcp_link.stl",
+    "configuration": "无名指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第一指关节.SLDPRT",
+    "source_mesh": "meshes/part_90d33e81f9b429be.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.1277080036436614e-12,
+        0.08699999999999397
+      ],
+      [
+        -9.433667630034993e-46,
+        1.0,
+        -2.76522136814969e-16,
+        -0.023999999999999997
+      ],
+      [
+        -1.1277080036436614e-12,
+        -2.76522136814969e-16,
+        -1.0,
+        -0.009499999999975427
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3814
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第三指关节-1",
+    "link": "ring_dip_link",
+    "mesh": "ring_dip_link.stl",
+    "configuration": "无名指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第三指关节.SLDPRT",
+    "source_mesh": "meshes/part_3ea7ee8c4262d55f.3dxml",
+    "world": [
+      [
+        0.9999998462990115,
+        3.3306690738754696e-16,
+        0.0005544384127943095,
+        0.14199999907778854
+      ],
+      [
+        4.638069155070375e-37,
+        -1.0000000000000002,
+        -5.197915195929503e-16,
+        -0.024
+      ],
+      [
+        0.0005544384127943095,
+        5.198749417067994e-16,
+        -0.9999998462990116,
+        -0.009496673369443443
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 7126
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/无名指联动机构-1/联动机构-外骨骼第二指关节-1",
+    "link": "ring_pip_link",
+    "mesh": "ring_pip_link.stl",
+    "configuration": "无名指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第二指关节.SLDPRT",
+    "source_mesh": "meshes/part_2ca526d31db22db8.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.1277080036436614e-12,
+        0.12249999999999447
+      ],
+      [
+        -9.433667630034993e-46,
+        1.0,
+        -2.76522136814969e-16,
+        -0.023999999999999997
+      ],
+      [
+        -1.1277080036436614e-12,
+        -2.76522136814969e-16,
+        -1.0,
+        -0.009499999999935435
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 4426
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/测试-关节1-1-1",
+    "link": "ring_mcp_connecting_rod_1",
+    "mesh": "ring_mcp_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-1.SLDPRT",
+    "source_mesh": "meshes/part_8a7052b7eb720b08.3dxml",
+    "world": [
+      [
+        -2.2968787735776136e-16,
+        1.0,
+        -2.296878773577613e-16,
+        0.08409188309200874
+      ],
+      [
+        -2.220446049250313e-16,
+        -2.2968787735776136e-16,
+        -1.0,
+        -0.0239999999999999
+      ],
+      [
+        -1.0,
+        -2.296878773577613e-16,
+        2.220446049250313e-16,
+        0.020091883092064916
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1832
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/测试-关节1-2-1",
+    "link": "ring_mcp_connecting_rod_2",
+    "mesh": "ring_mcp_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-2.SLDPRT",
+    "source_mesh": "meshes/part_fd5c84f32c0043e1.3dxml",
+    "world": [
+      [
+        -2.8606317844310993e-15,
+        1.0,
+        -8.507422286820699e-17,
+        0.07984924240489572
+      ],
+      [
+        -2.220446049250313e-16,
+        -8.507422286820758e-17,
+        -1.0,
+        -0.02400000000000022
+      ],
+      [
+        -1.0,
+        -2.860631784431099e-15,
+        2.2204460492502687e-16,
+        0.005349242404939244
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1004
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/测试-关节1-3-1",
+    "link": "ring_mcp_connecting_rod_3",
+    "mesh": "ring_mcp_connecting_rod_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-3.SLDPRT",
+    "source_mesh": "meshes/part_59af9dbd31ec8d74.3dxml",
+    "world": [
+      [
+        -0.7071067811857846,
+        -0.7071067811873105,
+        1.1102230246251565e-16,
+        0.0650000000000017
+      ],
+      [
+        -2.220446049250313e-16,
+        1.9967346233635945e-16,
+        1.0000000000000002,
+        -0.023999999999999997
+      ],
+      [
+        -0.7071067811873105,
+        0.7071067811857846,
+        -1.1102230246251565e-16,
+        0.01149999999999974
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2236
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/测试-关节1-4-1",
+    "link": "ring_mcp_connecting_rod_4",
+    "mesh": "ring_mcp_connecting_rod_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-4.SLDPRT",
+    "source_mesh": "meshes/part_3607f4eb65ae693c.3dxml",
+    "world": [
+      [
+        -0.7071067811857211,
+        -0.7071067811873739,
+        0.0,
+        0.06500000000000285
+      ],
+      [
+        -2.220446049250313e-16,
+        8.865115997477793e-17,
+        1.0,
+        -0.023999999999999994
+      ],
+      [
+        -0.707106781187374,
+        0.7071067811857211,
+        -1.1102230246251565e-16,
+        0.017500000000000016
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2392
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/第一指节主动连杆-1",
+    "link": "ring_mcp_drive_link",
+    "mesh": "ring_mcp_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_19bda216a4ec1915.3dxml",
+    "world": [
+      [
+        1.0,
+        -4.045948666135275e-14,
+        -2.220446049250313e-16,
+        0.07513261973809898
+      ],
+      [
+        -2.220446049250313e-16,
+        2.984803534802335e-16,
+        -1.0,
+        -0.023999999999999987
+      ],
+      [
+        4.045948666135275e-14,
+        1.0,
+        2.9848035348022713e-16,
+        0.04195377773365684
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2794
+  },
+  {
+    "cad_name": "无名指电机外骨骼-1/第一指节从动连杆-1",
+    "link": "ring_mcp_connecting_rod_6",
+    "mesh": "ring_mcp_connecting_rod_6.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_34ed9039b06a66a1.3dxml",
+    "world": [
+      [
+        0.8229631676954894,
+        0.5680947320796119,
+        9.992007221626409e-16,
+        0.09086225141505386
+      ],
+      [
+        8.881784197001252e-16,
+        5.908510090175677e-16,
+        -1.0,
+        -0.023999999999999994
+      ],
+      [
+        -0.568094732079612,
+        0.8229631676954893,
+        -8.365345993426268e-34,
+        0.03627283041286103
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 836
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/侧摆从动连杆-1",
+    "link": "index_mount_link",
+    "mesh": "index_mount_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\侧摆从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_a398c2c10f1dad40.3dxml",
+    "world": [
+      [
+        -1.0,
+        1.5918721317894288e-15,
+        -6.661338147750911e-16,
+        0.065
+      ],
+      [
+        -6.661338147750939e-16,
+        3.70626804701757e-16,
+        1.0,
+        0.023949318352339117
+      ],
+      [
+        1.5918721317894288e-15,
+        1.0,
+        -4.816491071642711e-16,
+        0.012500000000000051
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1088
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/小线夹-1",
+    "link": "index_mount_link",
+    "mesh": "index_mount_link_part_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\小线夹.SLDPRT",
+    "source_mesh": "meshes/part_87a0e57c7c788bea.3dxml",
+    "world": [
+      [
+        -0.3766285016932612,
+        -7.216449660063518e-16,
+        -0.9263643838750976,
+        0.06226748652303167
+      ],
+      [
+        1.1102230246251565e-15,
+        1.0000000000000002,
+        -1.1357595082036993e-15,
+        0.03150000000000001
+      ],
+      [
+        0.9263643838750978,
+        -9.992007221626409e-16,
+        -0.37662850169326106,
+        0.02411990763700305
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 480
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/指根-1",
+    "link": "index_mount_link",
+    "mesh": "index_mount_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指根.SLDPRT",
+    "source_mesh": "meshes/part_20311a98c5b0a33a.3dxml",
+    "world": [
+      [
+        0.0,
+        -3.768180676544835e-16,
+        1.0,
+        0.065
+      ],
+      [
+        1.0,
+        5.663741132717936e-16,
+        1.566409173870487e-31,
+        0.024
+      ],
+      [
+        -5.663741132717936e-16,
+        1.0,
+        3.0100797752156435e-16,
+        0.008000000000000057
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1580
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/指节3-模型-1",
+    "link": "index_mcp_connecting_rod_3",
+    "mesh": "index_mcp_connecting_rod_3_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9396926207858898,
+        0.3420201433257203,
+        3.3306690738754696e-16,
+        0.09036035267810408
+      ],
+      [
+        2.220446049250313e-16,
+        -6.468386416493723e-16,
+        1.0000000000000002,
+        0.0029010382084400134
+      ],
+      [
+        0.3420201433257203,
+        -0.9396926207858898,
+        -6.106226635438361e-16,
+        0.039991606172544436
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/测试-F68811-1",
+    "link": "index_mount_link",
+    "mesh": "index_mount_link_part_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-F68811.SLDPRT",
+    "source_mesh": "meshes/part_b80acdad8adc1580.3dxml",
+    "world": [
+      [
+        0.0,
+        1.0,
+        3.9977385389138594e-16,
+        0.065
+      ],
+      [
+        1.0,
+        2.0490737338742316e-31,
+        -5.663741132717937e-16,
+        0.024
+      ],
+      [
+        -5.663741132717936e-16,
+        3.8907449374717756e-16,
+        -1.0,
+        0.007000000000000057
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 660
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/测试-关节1-1-1",
+    "link": "index_mcp_connecting_rod_1",
+    "mesh": "index_mcp_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-1.SLDPRT",
+    "source_mesh": "meshes/part_8a7052b7eb720b08.3dxml",
+    "world": [
+      [
+        7.379717521936639e-17,
+        1.0,
+        -1.482474297056654e-16,
+        0.08409188309203253
+      ],
+      [
+        -4.440892098500626e-16,
+        -1.482474297056654e-16,
+        -1.0,
+        0.02400000000000001
+      ],
+      [
+        -1.0,
+        7.379717521936639e-17,
+        4.440892098500627e-16,
+        0.0200918830920411
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1832
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/测试-关节1-2-1",
+    "link": "index_mcp_connecting_rod_2",
+    "mesh": "index_mcp_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-2.SLDPRT",
+    "source_mesh": "meshes/part_fd5c84f32c0043e1.3dxml",
+    "world": [
+      [
+        -2.557146731853971e-15,
+        1.0,
+        -1.1465607767862502e-16,
+        0.07984924240491417
+      ],
+      [
+        -6.661338147750939e-16,
+        -1.1465607767862672e-16,
+        -1.0,
+        0.023999999999999886
+      ],
+      [
+        -1.0,
+        -2.557146731853971e-15,
+        6.661338147750939e-16,
+        0.005349242404920799
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1004
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/测试-关节1-3-1",
+    "link": "index_mcp_connecting_rod_3",
+    "mesh": "index_mcp_connecting_rod_3.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-3.SLDPRT",
+    "source_mesh": "meshes/part_59af9dbd31ec8d74.3dxml",
+    "world": [
+      [
+        -0.7071067811865085,
+        -0.7071067811865864,
+        -2.220446049250313e-16,
+        0.06500000000000059
+      ],
+      [
+        -4.440892098500626e-16,
+        3.146408202704515e-16,
+        1.0,
+        0.024000000000000004
+      ],
+      [
+        -0.7071067811865865,
+        0.7071067811865084,
+        -4.440892098500626e-16,
+        0.011500000000000057
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2236
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/测试-关节1-4-1",
+    "link": "index_mcp_connecting_rod_4",
+    "mesh": "index_mcp_connecting_rod_4.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\测试-关节1-4.SLDPRT",
+    "source_mesh": "meshes/part_3607f4eb65ae693c.3dxml",
+    "world": [
+      [
+        -0.7071067811862577,
+        -0.7071067811868373,
+        1.1102230246251565e-16,
+        0.0649999999999982
+      ],
+      [
+        -4.440892098500626e-16,
+        5.9219657650928e-16,
+        1.0,
+        0.024000000000000007
+      ],
+      [
+        -0.7071067811868375,
+        0.7071067811862577,
+        -6.661338147750939e-16,
+        0.017500000000000033
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2392
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/第一指节主动连杆-1",
+    "link": "index_mcp_drive_link",
+    "mesh": "index_mcp_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_19bda216a4ec1915.3dxml",
+    "world": [
+      [
+        1.0,
+        -3.079669622385195e-14,
+        -2.220446049250313e-16,
+        0.07513261973813756
+      ],
+      [
+        -2.220446049250313e-16,
+        6.393917377686692e-16,
+        -1.0,
+        0.02400000000000002
+      ],
+      [
+        3.079669622385195e-14,
+        1.0,
+        6.393917377686628e-16,
+        0.04195377773365371
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2794
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/第一指节从动连杆-1",
+    "link": "index_mcp_connecting_rod_6",
+    "mesh": "index_mcp_connecting_rod_6.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第一指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_34ed9039b06a66a1.3dxml",
+    "world": [
+      [
+        0.8229631676946334,
+        0.5680947320808518,
+        5.665784712879703e-16,
+        0.09086225141509162
+      ],
+      [
+        2.220446049250313e-16,
+        7.039156205043172e-16,
+        -0.9999999999999999,
+        0.024000000000000014
+      ],
+      [
+        -0.5680947320808518,
+        0.8229631676946333,
+        5.401021537213122e-16,
+        0.036272830412841434
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 836
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/轴承盖-1",
+    "link": "index_mount_link",
+    "mesh": "index_mount_link_part_5.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\轴承盖.SLDPRT",
+    "source_mesh": "meshes/part_ad04e5d684a997b8.3dxml",
+    "world": [
+      [
+        0.0,
+        -3.768180676544835e-16,
+        1.0,
+        0.065
+      ],
+      [
+        1.0,
+        5.663741132717936e-16,
+        1.566409173870487e-31,
+        0.024
+      ],
+      [
+        -5.663741132717936e-16,
+        1.0,
+        3.0100797752156435e-16,
+        0.0070000000000000565
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 876
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/指节3-模型-1",
+    "link": "index_mcp_link",
+    "mesh": "index_mcp_link_part_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\指节3-模型.SLDPRT",
+    "source_mesh": "meshes/part_7291975734cd5343.3dxml",
+    "world": [
+      [
+        0.9848077530122102,
+        -0.17364817766691798,
+        -8.912690669970254e-17,
+        0.13604470831587603
+      ],
+      [
+        -1.4526270873116872e-34,
+        -1.734503298189733e-16,
+        1.0000000000000002,
+        0.002901038208440003
+      ],
+      [
+        -0.17364817766691798,
+        -0.9848077530122102,
+        -3.9978848957356084e-16,
+        0.0033058431115155374
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 13338
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/第三指节从动连杆-1",
+    "link": "index_dip_connecting_rod_2",
+    "mesh": "index_dip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_3cec0af6f6e6a07a.3dxml",
+    "world": [
+      [
+        -0.04902654784807635,
+        -0.9987974757707893,
+        -9.645062526431047e-16,
+        0.146730387849609
+      ],
+      [
+        4.440892098500626e-16,
+        -9.83416525786152e-16,
+        1.0,
+        0.02399999999999998
+      ],
+      [
+        -0.9987974757707893,
+        0.04902654784807635,
+        4.440892098500626e-16,
+        0.024218962112387332
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1024
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/第三指节联动连杆-1",
+    "link": "index_dip_connecting_rod_1",
+    "mesh": "index_dip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第三指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_467d3e5d9840df4b.3dxml",
+    "world": [
+      [
+        -0.9941163841882495,
+        0.10831719479602951,
+        6.710852725172634e-16,
+        0.14211102426556288
+      ],
+      [
+        1.1102230246251565e-15,
+        -3.484480132824477e-16,
+        1.0000000000000002,
+        0.02399999999999995
+      ],
+      [
+        0.10831719479602955,
+        0.9941163841882493,
+        5.763092715557981e-17,
+        0.026182607431207268
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1314
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/第二三指节主动连杆-1",
+    "link": "index_pip_dip_drive_link",
+    "mesh": "index_pip_dip_drive_link.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二三指节主动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f1c98ec441a4ebbf.3dxml",
+    "world": [
+      [
+        -0.5047437574939441,
+        0.8632692159870494,
+        -6.661338147750939e-16,
+        0.12283208836273807
+      ],
+      [
+        -6.661338147750939e-16,
+        -9.888932965780742e-16,
+        -1.0,
+        0.023999999999999973
+      ],
+      [
+        -0.8632692159870492,
+        -0.5047437574939442,
+        1.2212453270876722e-15,
+        0.02575705272386504
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 2494
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/第二指节从动连杆-1",
+    "link": "index_pip_connecting_rod_1",
+    "mesh": "index_pip_connecting_rod_1.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节从动连杆.SLDPRT",
+    "source_mesh": "meshes/part_88feecb56890df2b.3dxml",
+    "world": [
+      [
+        -0.06097706015265648,
+        0.9981391677191809,
+        2.5673907444456745e-16,
+        0.13011999999999604
+      ],
+      [
+        6.661338147750939e-16,
+        -4.6693603468935514e-18,
+        1.0,
+        0.02399999999999993
+      ],
+      [
+        0.9981391677191811,
+        0.06097706015265646,
+        -4.440892098500626e-16,
+        0.0057000000000009664
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1690
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/第二指节联动连杆-1",
+    "link": "index_pip_connecting_rod_2",
+    "mesh": "index_pip_connecting_rod_2.stl",
+    "configuration": "默认",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\第二指节联动连杆.SLDPRT",
+    "source_mesh": "meshes/part_f40daf712a8c24ba.3dxml",
+    "world": [
+      [
+        0.7460522225233506,
+        0.6658874388873611,
+        1.1102230246251565e-16,
+        0.1401749794453801
+      ],
+      [
+        4.440892098500626e-16,
+        -3.8467691084294046e-16,
+        1.0,
+        0.02399999999999997
+      ],
+      [
+        0.6658874388873613,
+        -0.7460522225233504,
+        -4.440892098500626e-16,
+        0.02039746816534236
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 1002
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第一指关节-1",
+    "link": "index_mcp_link",
+    "mesh": "index_mcp_link.stl",
+    "configuration": "食指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第一指关节.SLDPRT",
+    "source_mesh": "meshes/part_ed4b78bcefb4cf02.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.40414613629724e-14,
+        0.08699999999999625
+      ],
+      [
+        -1.1746168255458783e-47,
+        1.0,
+        -6.134825620796671e-16,
+        0.023999999999999994
+      ],
+      [
+        -1.40414613629724e-14,
+        -6.134825620796671e-16,
+        -1.0,
+        -0.009499999999999635
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 3538
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第三指关节-1",
+    "link": "index_dip_link",
+    "mesh": "index_dip_link.stl",
+    "configuration": "食指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第三指关节.SLDPRT",
+    "source_mesh": "meshes/part_7248d7355a83d1a6.3dxml",
+    "world": [
+      [
+        0.9999999951209007,
+        1.1102230246251565e-16,
+        9.878359681996805e-05,
+        0.13999999997072166
+      ],
+      [
+        -2.220446049250313e-16,
+        -1.0000000000000002,
+        7.271234776108062e-16,
+        0.023999999999999994
+      ],
+      [
+        9.878359681996807e-05,
+        -7.270930819230914e-16,
+        -0.9999999951209004,
+        -0.009499407298418073
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 6854
+  },
+  {
+    "cad_name": "食指电机外骨骼-1/食指联动机构-1/联动机构-外骨骼第二指关节-1",
+    "link": "index_pip_link",
+    "mesh": "index_pip_link.stl",
+    "configuration": "食指",
+    "source_part": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\work\\hand16_zero3_snapshot\\联动机构-外骨骼第二指关节.SLDPRT",
+    "source_mesh": "meshes/part_4746fc19e8f47b46.3dxml",
+    "world": [
+      [
+        -1.0,
+        0.0,
+        1.40414613629724e-14,
+        0.12149999999999625
+      ],
+      [
+        -1.1746168255458783e-47,
+        1.0,
+        -6.134825620796671e-16,
+        0.023999999999999994
+      ],
+      [
+        -1.40414613629724e-14,
+        -6.134825620796671e-16,
+        -1.0,
+        -0.009499999999999155
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangles": 4166
+  }
+]

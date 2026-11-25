@@ -1,0 +1,200 @@
+{
+  "cases": [
+    {
+      "joint": "thumb_cmc_flex_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 5.645893676834353e-17,
+      "max_passive_step_rad": 0.0,
+      "min_signed_branch_sine": 0.42305560546355286,
+      "return_drift_rad": 0.0
+    },
+    {
+      "joint": "thumb_cmc_abd_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 4.450039104512744e-17,
+      "max_passive_step_rad": 0.0,
+      "min_signed_branch_sine": 0.42305560546355286,
+      "return_drift_rad": 0.0
+    },
+    {
+      "joint": "thumb_mcp_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 1.1244553162197839e-10,
+      "max_passive_step_rad": 0.020001322989195325,
+      "min_signed_branch_sine": 0.004189303927133257,
+      "return_drift_rad": 4.346835398324724e-11
+    },
+    {
+      "joint": "thumb_ip_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 4.478553188601581e-11,
+      "max_passive_step_rad": 0.016709576546552973,
+      "min_signed_branch_sine": 0.42305560546355286,
+      "return_drift_rad": 1.3548609282251279e-09
+    },
+    {
+      "joint": "index_mcp_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 1.1244552317095642e-10,
+      "max_passive_step_rad": 0.020001322996115567,
+      "min_signed_branch_sine": 0.004189303929524656,
+      "return_drift_rad": 4.3467846449575574e-11
+    },
+    {
+      "joint": "index_pip_dip_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 5.284842750819928e-11,
+      "max_passive_step_rad": 0.021222683427434108,
+      "min_signed_branch_sine": 0.42305560546355286,
+      "return_drift_rad": 1.115529747825676e-09
+    },
+    {
+      "joint": "middle_mcp_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 1.1244555103348259e-10,
+      "max_passive_step_rad": 0.020001322986264336,
+      "min_signed_branch_sine": 0.004189303925216584,
+      "return_drift_rad": 4.3468187406594866e-11
+    },
+    {
+      "joint": "middle_pip_dip_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 5.989115090725776e-11,
+      "max_passive_step_rad": 0.021530879396076508,
+      "min_signed_branch_sine": 0.42305560546355286,
+      "return_drift_rad": 9.77623666482269e-10
+    },
+    {
+      "joint": "ring_mcp_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 1.1244553671558372e-10,
+      "max_passive_step_rad": 0.020001322986299752,
+      "min_signed_branch_sine": 0.004189303924562669,
+      "return_drift_rad": 4.346979441867822e-11
+    },
+    {
+      "joint": "ring_pip_dip_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 5.989117188328742e-11,
+      "max_passive_step_rad": 0.02122939747459074,
+      "min_signed_branch_sine": 0.42305560546355286,
+      "return_drift_rad": 9.77626919922267e-10
+    },
+    {
+      "joint": "pinky_mcp_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 1.1244553693651775e-10,
+      "max_passive_step_rad": 0.020001322996771154,
+      "min_signed_branch_sine": 0.004189303929687413,
+      "return_drift_rad": 4.3467553109360446e-11
+    },
+    {
+      "joint": "pinky_pip_dip_motor_joint",
+      "steps": 62,
+      "range_rad": [
+        0,
+        0.6
+      ],
+      "max_gap_m": 2.4872730674776045e-11,
+      "max_passive_step_rad": 0.04355886146908592,
+      "min_signed_branch_sine": 0.42305560546355286,
+      "return_drift_rad": 7.502490923506325e-11
+    },
+    {
+      "joint": "index_mcp_abd_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 2.02483348733859e-11,
+      "max_passive_step_rad": 0.037254846909736794,
+      "min_signed_branch_sine": 0.3703423247129968,
+      "return_drift_rad": 5.8091444333550155e-15
+    },
+    {
+      "joint": "middle_mcp_abd_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 2.0248334873382332e-11,
+      "max_passive_step_rad": 0.037254846909733796,
+      "min_signed_branch_sine": 0.37034232471305206,
+      "return_drift_rad": 3.1035364381980455e-15
+    },
+    {
+      "joint": "ring_mcp_abd_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 2.024832905948694e-11,
+      "max_passive_step_rad": 0.03725484690973402,
+      "min_signed_branch_sine": 0.3703423247130537,
+      "return_drift_rad": 6.2273682815620175e-15
+    },
+    {
+      "joint": "pinky_mcp_abd_motor_joint",
+      "steps": 124,
+      "range_rad": [
+        -0.6,
+        0.6
+      ],
+      "max_gap_m": 2.023759239113622e-11,
+      "max_passive_step_rad": 0.0372568558501809,
+      "min_signed_branch_sine": 0.3703632098677577,
+      "return_drift_rad": 2.228012305762986e-15
+    }
+  ],
+  "max_gap_m": 1.1244555103348259e-10,
+  "max_passive_step_rad": 0.04355886146908592,
+  "max_return_drift_rad": 1.3548609282251279e-09,
+  "combined_16_motor_steps": 42
+}

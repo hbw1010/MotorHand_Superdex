@@ -1,0 +1,13 @@
+{
+  "default_mode": "force-contact",
+  "default_hand": "right",
+  "default_serial": "CC549038CC57",
+  "approved_firmware": "3.0.10",
+  "expected_pn_right": "WaveSE-R-01",
+  "expected_pn_left": "WaveSE-L-01",
+  "default_hardness": 0.3,
+  "default_rate_hz": 50,
+  "skip_glove_home_default": true,
+  "sim_with_object_default": false,
+  "glove_driver": 2
+}

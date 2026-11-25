@@ -1,0 +1,370 @@
+[
+  {
+    "index": 1,
+    "joint": "thumb_cmc_flex_motor_joint",
+    "label": "拇指 CMC 屈伸电机",
+    "parent": "base_link",
+    "child": "thumb_cmc_flex_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      1.0877048587575128e-31,
+      1.2246467991473532e-16,
+      -1.0
+    ],
+    "origin_base_zero_m": [
+      -0.007999999999899948,
+      0.02925000000029467,
+      0.01826273086614101
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 2,
+    "joint": "thumb_cmc_abd_motor_joint",
+    "label": "拇指 CMC 侧摆电机",
+    "parent": "thumb_cmc_flex_link",
+    "child": "thumb_cmc_abd_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -0.8838556292342649,
+      0.46775979591121525,
+      -6.700821010492128e-16
+    ],
+    "origin_base_zero_m": [
+      -0.031676078615804654,
+      0.041780007543087715,
+      -0.028499999999999748
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 3,
+    "joint": "thumb_mcp_motor_joint",
+    "label": "拇指 MCP 屈伸电机",
+    "parent": "thumb_mcp_connecting_rod_3",
+    "child": "thumb_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      0.017324436885611427,
+      0.03273539367535772,
+      0.9993138935727431
+    ],
+    "origin_base_zero_m": [
+      -0.02448314876243518,
+      0.0864055190210111,
+      -0.02458275950157764
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 4,
+    "joint": "thumb_ip_motor_joint",
+    "label": "拇指 IP 屈伸电机",
+    "parent": "thumb_mcp_link",
+    "child": "thumb_ip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -0.017324436885610257,
+      -0.03273539367535651,
+      -0.9993138935727433
+    ],
+    "origin_base_zero_m": [
+      0.017017008869130018,
+      0.1101257495754583,
+      -0.03432216885372562
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 5,
+    "joint": "index_mcp_motor_joint",
+    "label": "食指 MCP 屈伸电机",
+    "parent": "index_mcp_connecting_rod_3",
+    "child": "index_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -2.220446049250313e-16,
+      -1.0,
+      5.053215498074303e-16
+    ],
+    "origin_base_zero_m": [
+      0.06763261973813757,
+      0.024000000000000018,
+      0.04195377773365348
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 6,
+    "joint": "index_pip_dip_motor_joint",
+    "label": "食指 PIP/DIP 联动电机",
+    "parent": "index_mcp_link",
+    "child": "index_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      8.971395661714106e-16,
+      1.0,
+      -1.2156899582201565e-15
+    ],
+    "origin_base_zero_m": [
+      0.11734299999999143,
+      0.023999999999999952,
+      0.016369000000005875
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 7,
+    "joint": "middle_mcp_motor_joint",
+    "label": "中指 MCP 屈伸电机",
+    "parent": "middle_mcp_connecting_rod_3",
+    "child": "middle_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -4.440892098500634e-16,
+      -1.0,
+      -5.603467760003796e-16
+    ],
+    "origin_base_zero_m": [
+      0.07263261973811902,
+      -2.3418766925686896e-17,
+      0.04195377773365504
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 8,
+    "joint": "middle_pip_dip_motor_joint",
+    "label": "中指 PIP/DIP 联动电机",
+    "parent": "middle_mcp_link",
+    "child": "middle_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -2.2204460492503022e-16,
+      1.0,
+      -2.6297361988925685e-16
+    ],
+    "origin_base_zero_m": [
+      0.12634299999998566,
+      4.336808689942018e-17,
+      0.016369000000000463
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 9,
+    "joint": "ring_mcp_motor_joint",
+    "label": "无名指 MCP 屈伸电机",
+    "parent": "ring_mcp_connecting_rod_3",
+    "child": "ring_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -4.4408920985006045e-16,
+      -1.0,
+      5.053215498074303e-16
+    ],
+    "origin_base_zero_m": [
+      0.06763261973809899,
+      -0.023999999999999987,
+      0.041953777733656536
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 10,
+    "joint": "ring_pip_dip_motor_joint",
+    "label": "无名指 PIP/DIP 联动电机",
+    "parent": "ring_mcp_link",
+    "child": "ring_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      4.440892098500605e-16,
+      1.0,
+      -9.388890755189055e-16
+    ],
+    "origin_base_zero_m": [
+      0.11734299999995083,
+      -0.02400000000000001,
+      0.01636900000007504
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 11,
+    "joint": "pinky_mcp_motor_joint",
+    "label": "小指 MCP 屈伸电机",
+    "parent": "pinky_mcp_connecting_rod_3",
+    "child": "pinky_mcp_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      -9.957992501029591e-17,
+      -1.0,
+      4.816016163179099e-16
+    ],
+    "origin_base_zero_m": [
+      0.06233261973813579,
+      -0.046339999999999965,
+      0.0363937777336533
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 12,
+    "joint": "pinky_pip_dip_motor_joint",
+    "label": "小指 PIP/DIP 联动电机",
+    "parent": "pinky_mcp_link",
+    "child": "pinky_pip_dip_drive_link",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      9.87758344710421e-16,
+      1.0,
+      -5.381587136982966e-16
+    ],
+    "origin_base_zero_m": [
+      0.10319999999999459,
+      -0.046339999999999965,
+      0.010340000000000842
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 13,
+    "joint": "index_mcp_abd_motor_joint",
+    "label": "食指 侧摆电机",
+    "parent": "base_link",
+    "child": "index_mcp_abd_connecting_rod_1",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      1.77635683940025e-15,
+      3.687300130276658e-17,
+      1.0
+    ],
+    "origin_base_zero_m": [
+      0.0400000000000002,
+      0.02400000000000033,
+      0.01523726913389265
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 14,
+    "joint": "middle_mcp_abd_motor_joint",
+    "label": "中指 侧摆电机",
+    "parent": "base_link",
+    "child": "middle_mcp_abd_connecting_rod_1",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      4.440892098500631e-16,
+      -7.110929461807187e-16,
+      1.0
+    ],
+    "origin_base_zero_m": [
+      0.04500000000000021,
+      3.05311331771918e-16,
+      0.01523726913389256
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 15,
+    "joint": "ring_mcp_abd_motor_joint",
+    "label": "无名指 侧摆电机",
+    "parent": "base_link",
+    "child": "ring_mcp_abd_connecting_rod_1",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      4.4408920985006124e-16,
+      9.009312875193168e-16,
+      1.0
+    ],
+    "origin_base_zero_m": [
+      0.04000000000000022,
+      -0.02399999999999968,
+      0.01523726913389259
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  },
+  {
+    "index": 16,
+    "joint": "pinky_mcp_abd_motor_joint",
+    "label": "小指 侧摆电机",
+    "parent": "base_link",
+    "child": "pinky_mcp_abd_connecting_rod_1",
+    "axis_local": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "axis_base_zero": [
+      4.4408920985006257e-16,
+      3.9726184253638245e-16,
+      1.0
+    ],
+    "origin_base_zero_m": [
+      0.03469995419856953,
+      -0.04634060786276057,
+      0.009677269133893315
+    ],
+    "positive": "Anatomical output follows V1.4; motor axis uses local +Z"
+  }
+]

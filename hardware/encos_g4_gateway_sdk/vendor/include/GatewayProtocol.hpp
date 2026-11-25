@@ -111,7 +111,7 @@ public:
                 std::memcpy(&frame, bytes, sizeof(frame));
                 begin_ += sizeof(frame);
                 if (frame.len > 8 || (frame.kind == 0x90 &&
-                    (frame.bus < 1 || frame.bus > 3 || frame.can_id > 0x7FF))) {
+                    (frame.bus < 1 || frame.bus > 4 || frame.can_id > 0x7FF))) {
                     ++invalid_frames;
                     continue;
                 }

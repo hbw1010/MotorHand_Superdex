@@ -1,0 +1,118 @@
+[
+  {
+    "component": "侧摆连杆-4",
+    "type": 11,
+    "entities": [
+      {
+        "reference_component": "侧摆连杆-4",
+        "actual_component": "侧摆连杆-4",
+        "reference_type": 3
+      },
+      {
+        "reference_component": "侧摆连杆-4",
+        "actual_component": "侧摆连杆-4",
+        "reference_type": 3
+      },
+      {
+        "reference_component": "侧摆主动连杆-4",
+        "actual_component": "侧摆主动连杆-4",
+        "reference_type": 3
+      },
+      {
+        "reference_component": "侧摆主动连杆-4",
+        "actual_component": "侧摆主动连杆-4",
+        "reference_type": 3
+      }
+    ]
+  },
+  {
+    "component": "侧摆连杆-4",
+    "type": 1,
+    "entities": [
+      {
+        "reference_component": "小拇指电机外骨骼-2/侧摆从动连杆-1",
+        "actual_component": "小拇指电机外骨骼-2/侧摆从动连杆-1",
+        "reference_type": 4
+      },
+      {
+        "reference_component": "侧摆连杆-4",
+        "actual_component": "侧摆连杆-4",
+        "reference_type": 4
+      }
+    ]
+  },
+  {
+    "component": "侧摆连杆-4",
+    "type": 1,
+    "entities": [
+      {
+        "reference_component": "侧摆主动连杆-4",
+        "actual_component": "侧摆主动连杆-4",
+        "reference_type": 4
+      },
+      {
+        "reference_component": "侧摆连杆-4",
+        "actual_component": "侧摆连杆-4",
+        "reference_type": 4
+      }
+    ]
+  },
+  {
+    "component": "侧摆连杆-3",
+    "type": 11,
+    "entities": [
+      {
+        "reference_component": "侧摆连杆-3",
+        "actual_component": "侧摆连杆-3",
+        "reference_type": 3
+      },
+      {
+        "reference_component": "侧摆连杆-3",
+        "actual_component": "侧摆连杆-3",
+        "reference_type": 3
+      },
+      {
+        "reference_component": "侧摆主动连杆-3",
+        "actual_component": "侧摆主动连杆-3",
+        "reference_type": 3
+      },
+      {
+        "reference_component": "侧摆主动连杆-3",
+        "actual_component": "侧摆主动连杆-3",
+        "reference_type": 3
+      }
+    ]
+  },
+  {
+    "component": "侧摆连杆-3",
+    "type": 1,
+    "entities": [
+      {
+        "reference_component": "侧摆主动连杆-3",
+        "actual_component": "侧摆主动连杆-3",
+        "reference_type": 4
+      },
+      {
+        "reference_component": "侧摆连杆-3",
+        "actual_component": "侧摆连杆-3",
+        "reference_type": 4
+      }
+    ]
+  },
+  {
+    "component": "侧摆连杆-3",
+    "type": 1,
+    "entities": [
+      {
+        "reference_component": "无名指电机外骨骼-1/侧摆从动连杆-1",
+        "actual_component": "无名指电机外骨骼-1/侧摆从动连杆-1",
+        "reference_type": 4
+      },
+      {
+        "reference_component": "侧摆连杆-3",
+        "actual_component": "侧摆连杆-3",
+        "reference_type": 4
+      }
+    ]
+  }
+]

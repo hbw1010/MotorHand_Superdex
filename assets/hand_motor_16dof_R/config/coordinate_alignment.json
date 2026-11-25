@@ -1,0 +1,250 @@
+{
+  "reference_urdf": "C:\\Users\\current robotics\\Documents\\Codex\\2026-10-13\\error-code-unsupported-country-region-territory\\outputs\\hand_v14_J_named\\R\\hand_tree_only.urdf",
+  "previous_to_aligned_base": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.04
+    ],
+    [
+      0.0,
+      1.0,
+      8.36534599342605e-34,
+      0.0
+    ],
+    [
+      0.0,
+      8.365345993426268e-34,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "joint_angle_signs": {
+    "thumb_cmc_flex_motor_joint": -1,
+    "thumb_cmc_abd_motor_joint": -1,
+    "thumb_mcp_motor_joint": 1,
+    "thumb_ip_motor_joint": -1,
+    "index_mcp_motor_joint": -1,
+    "index_pip_dip_motor_joint": 1,
+    "middle_mcp_motor_joint": -1,
+    "middle_pip_dip_motor_joint": 1,
+    "ring_mcp_motor_joint": -1,
+    "ring_pip_dip_motor_joint": 1,
+    "pinky_mcp_motor_joint": -1,
+    "pinky_pip_dip_motor_joint": 1,
+    "index_mcp_abd_motor_joint": 1,
+    "middle_mcp_abd_motor_joint": 1,
+    "ring_mcp_abd_motor_joint": 1,
+    "pinky_mcp_abd_motor_joint": 1,
+    "middle_mcp_abd_output_joint": 1,
+    "middle_mcp_connecting_rod_joint_3": 1,
+    "middle_mcp_connecting_rod_joint_6": 1,
+    "middle_mcp_connecting_rod_joint_1": 1,
+    "middle_mcp_output_joint": 1,
+    "middle_mcp_connecting_rod_joint_2": 1,
+    "middle_mcp_connecting_rod_joint_4": 1,
+    "middle_pip_connecting_rod_joint_1": 1,
+    "middle_pip_connecting_rod_joint_2": 1,
+    "middle_dip_connecting_rod_joint_1": 1,
+    "middle_dip_connecting_rod_joint_2": 1,
+    "middle_pip_output_joint": 1,
+    "middle_dip_output_joint": 1,
+    "index_mcp_abd_output_joint": 1,
+    "index_mcp_connecting_rod_joint_3": 1,
+    "index_mcp_connecting_rod_joint_6": 1,
+    "index_mcp_connecting_rod_joint_1": 1,
+    "index_mcp_output_joint": 1,
+    "index_mcp_connecting_rod_joint_2": 1,
+    "index_mcp_connecting_rod_joint_4": 1,
+    "index_pip_connecting_rod_joint_1": 1,
+    "index_pip_connecting_rod_joint_2": 1,
+    "index_dip_connecting_rod_joint_1": 1,
+    "index_dip_connecting_rod_joint_2": 1,
+    "index_pip_output_joint": 1,
+    "index_dip_output_joint": 1,
+    "ring_mcp_abd_output_joint": 1,
+    "ring_mcp_connecting_rod_joint_3": 1,
+    "ring_mcp_connecting_rod_joint_6": 1,
+    "ring_mcp_connecting_rod_joint_1": 1,
+    "ring_mcp_output_joint": 1,
+    "ring_mcp_connecting_rod_joint_2": 1,
+    "ring_mcp_connecting_rod_joint_4": 1,
+    "ring_pip_connecting_rod_joint_1": 1,
+    "ring_pip_connecting_rod_joint_2": 1,
+    "ring_dip_connecting_rod_joint_1": 1,
+    "ring_dip_connecting_rod_joint_2": 1,
+    "ring_pip_output_joint": 1,
+    "ring_dip_output_joint": 1,
+    "pinky_mcp_abd_output_joint": 1,
+    "pinky_mcp_connecting_rod_joint_3": 1,
+    "pinky_mcp_connecting_rod_joint_6": 1,
+    "pinky_mcp_connecting_rod_joint_1": 1,
+    "pinky_mcp_output_joint": 1,
+    "pinky_mcp_connecting_rod_joint_2": 1,
+    "pinky_mcp_connecting_rod_joint_4": 1,
+    "pinky_pip_connecting_rod_joint_1": 1,
+    "pinky_pip_connecting_rod_joint_2": 1,
+    "pinky_dip_connecting_rod_joint_1": 1,
+    "pinky_dip_connecting_rod_joint_2": 1,
+    "pinky_pip_output_joint": 1,
+    "pinky_dip_output_joint": 1,
+    "thumb_mcp_connecting_rod_joint_3": -1,
+    "thumb_mcp_connecting_rod_joint_6": -1,
+    "thumb_mcp_connecting_rod_joint_1": -1,
+    "thumb_mcp_output_joint": -1,
+    "thumb_mcp_connecting_rod_joint_2": -1,
+    "thumb_mcp_connecting_rod_joint_4": -1,
+    "thumb_ip_connecting_rod_joint_1": -1,
+    "thumb_ip_output_joint": -1,
+    "index_mcp_abd_connecting_rod_joint_2": 1,
+    "middle_mcp_abd_connecting_rod_joint_2": 1,
+    "ring_mcp_abd_connecting_rod_joint_2": 1,
+    "pinky_mcp_abd_connecting_rod_joint_2": 1
+  },
+  "motor_references": [
+    {
+      "motor": "thumb_cmc_flex_motor_joint",
+      "reference_joint": "J1",
+      "output_link": "thumb_cmc_flex_link",
+      "output_parent": "base_link",
+      "angle_sign_new_over_previous": -1,
+      "previous_positive_output_rate": -1.0000000000000002
+    },
+    {
+      "motor": "thumb_cmc_abd_motor_joint",
+      "reference_joint": "J2",
+      "output_link": "thumb_cmc_abd_link",
+      "output_parent": "thumb_cmc_flex_link",
+      "angle_sign_new_over_previous": -1,
+      "previous_positive_output_rate": -0.9993213261503611
+    },
+    {
+      "motor": "thumb_mcp_motor_joint",
+      "reference_joint": "J3",
+      "output_link": "thumb_mcp_link",
+      "output_parent": "thumb_cmc_abd_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 0.9517067066451884
+    },
+    {
+      "motor": "thumb_ip_motor_joint",
+      "reference_joint": "J4",
+      "output_link": "thumb_ip_link",
+      "output_parent": "thumb_mcp_link",
+      "angle_sign_new_over_previous": -1,
+      "previous_positive_output_rate": -0.5326736807756592
+    },
+    {
+      "motor": "index_mcp_motor_joint",
+      "reference_joint": "J6",
+      "output_link": "index_mcp_link",
+      "output_parent": "index_mount_link",
+      "angle_sign_new_over_previous": -1,
+      "previous_positive_output_rate": -0.9999999895378346
+    },
+    {
+      "motor": "index_pip_dip_motor_joint",
+      "reference_joint": "J7",
+      "output_link": "index_pip_link",
+      "output_parent": "index_mcp_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 0.5499552934298482
+    },
+    {
+      "motor": "middle_mcp_motor_joint",
+      "reference_joint": "J10",
+      "output_link": "middle_mcp_link",
+      "output_parent": "middle_mount_link",
+      "angle_sign_new_over_previous": -1,
+      "previous_positive_output_rate": -0.9999999895377248
+    },
+    {
+      "motor": "middle_pip_dip_motor_joint",
+      "reference_joint": "J11",
+      "output_link": "middle_pip_link",
+      "output_parent": "middle_mcp_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 0.5471236276498692
+    },
+    {
+      "motor": "ring_mcp_motor_joint",
+      "reference_joint": "J14",
+      "output_link": "ring_mcp_link",
+      "output_parent": "ring_mount_link",
+      "angle_sign_new_over_previous": -1,
+      "previous_positive_output_rate": -0.9999999895211134
+    },
+    {
+      "motor": "ring_pip_dip_motor_joint",
+      "reference_joint": "J15",
+      "output_link": "ring_pip_link",
+      "output_parent": "ring_mcp_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 0.5471236276520984
+    },
+    {
+      "motor": "pinky_mcp_motor_joint",
+      "reference_joint": "J18",
+      "output_link": "pinky_mcp_link",
+      "output_parent": "pinky_mount_link",
+      "angle_sign_new_over_previous": -1,
+      "previous_positive_output_rate": -0.9999999895338104
+    },
+    {
+      "motor": "pinky_pip_dip_motor_joint",
+      "reference_joint": "J19",
+      "output_link": "pinky_pip_link",
+      "output_parent": "pinky_mcp_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 1.2497632778996184
+    },
+    {
+      "motor": "index_mcp_abd_motor_joint",
+      "reference_joint": "J5",
+      "output_link": "index_mount_link",
+      "output_parent": "base_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 1.1387179346653573
+    },
+    {
+      "motor": "middle_mcp_abd_motor_joint",
+      "reference_joint": "J9",
+      "output_link": "middle_mount_link",
+      "output_parent": "base_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 1.13871793466829
+    },
+    {
+      "motor": "ring_mcp_abd_motor_joint",
+      "reference_joint": "J13",
+      "output_link": "ring_mount_link",
+      "output_parent": "base_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 1.138717934665401
+    },
+    {
+      "motor": "pinky_mcp_abd_motor_joint",
+      "reference_joint": "J17",
+      "output_link": "pinky_mount_link",
+      "output_parent": "base_link",
+      "angle_sign_new_over_previous": 1,
+      "previous_positive_output_rate": 1.1387258688234292
+    }
+  ],
+  "local_hinge_axis": [
+    0,
+    0,
+    1
+  ],
+  "local_x_rule": "Project corresponding V1.4 +X onto plane normal to the actual 2026-11-25 16DOF hinge axis",
+  "zero": "2026-11-25 16DOF saved CAD pose; not the old model pose or encoder zero",
+  "input_semantics": "16 motor shaft angles; positive relative output follows corresponding V1.4 anatomical joint",
+  "revision": "2026-11-25-thumb-zero4"
+}

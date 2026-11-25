@@ -32,6 +32,17 @@ MOTOR_FINGER: tuple[str, ...] = (
     "pinky", "pinky",
 )
 
+MODEL_MOTOR_JOINTS_16: tuple[str, ...] = MODEL_MOTOR_JOINTS + (
+    "index_mcp_abd_motor_joint",
+    "middle_mcp_abd_motor_joint",
+    "ring_mcp_abd_motor_joint",
+    "pinky_mcp_abd_motor_joint",
+)
+
+MOTOR_FINGER_16: tuple[str, ...] = MOTOR_FINGER + (
+    "index", "middle", "ring", "pinky",
+)
+
 FINGERS: tuple[str, ...] = ("thumb", "index", "middle", "ring", "pinky")
 
 
@@ -67,14 +78,17 @@ class MotorCalibration:
 
 
 class GloveMapping:
-    def __init__(self, data: dict, source: str):
+    def __init__(self, data: dict, source: str, *, motor_joints: tuple[str, ...] | None = None):
         motors = data.get("motors")
         if not isinstance(motors, dict):
             raise ValueError("glove_mapping.json 缺少 motors")
+        if motor_joints is None:
+            motor_joints = MODEL_MOTOR_JOINTS_16 if (data.get("dof") == 16 or "13" in motors) else MODEL_MOTOR_JOINTS
         self.source = source
         self.raw = data
+        self.dof = len(motor_joints)
         self.motors: list[MotorCalibration] = []
-        for motor_id in range(1, 13):
+        for motor_id in range(1, self.dof + 1):
             entry = motors.get(str(motor_id))
             if not isinstance(entry, dict):
                 raise ValueError(f"缺少电机 {motor_id} 的映射")
@@ -82,7 +96,7 @@ class GloveMapping:
                 MotorCalibration(
                     motor_id=motor_id,
                     joint=str(entry["joint"]),
-                    model_joint=MODEL_MOTOR_JOINTS[motor_id - 1],
+                    model_joint=motor_joints[motor_id - 1],
                     zero_deg=float(entry["zero_deg"]),
                     sign=float(entry.get("sign", 1.0)),
                     scale=float(entry.get("scale", 1.0)),
@@ -93,10 +107,10 @@ class GloveMapping:
             )
 
     @classmethod
-    def load(cls, path: str | Path) -> "GloveMapping":
+    def load(cls, path: str | Path, *, motor_joints: tuple[str, ...] | None = None) -> "GloveMapping":
         p = Path(path)
         data = json.loads(p.read_text(encoding="utf-8"))
-        return cls(data, str(p))
+        return cls(data, str(p), motor_joints=motor_joints)
 
     @property
     def model_joint_names(self) -> tuple[str, ...]:

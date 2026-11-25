@@ -1,4 +1,4 @@
-// 本地抓握两个进程共用的单写者邮箱。每个快照携带原始输入时戳。
+// 本地抓握两个进程共用的单写者邮箱。每个快照携带原始输入时戳（并列支持 12-DOF 与 16-DOF）。
 #pragma once
 #include <algorithm>
 #include <array>
@@ -21,9 +21,7 @@
 
 namespace ve33 {
 constexpr size_t max_tree_size = 128;
-constexpr size_t force_size = 64;
-using ForcePacket = std::array<double, force_size>;
-using DisplayPacket = std::array<double, 30>;
+constexpr size_t max_motor_dof = 16;
 static_assert(std::atomic<uint64_t>::is_always_lock_free);
 static_assert(std::atomic<uint32_t>::is_always_lock_free && sizeof(std::atomic<uint32_t>) == 4);
 
@@ -66,20 +64,31 @@ struct Intent {
     int64_t revision{};
     bool enabled{};
     double grip{-1.};
+    bool demo_axes_active{};
+    std::array<double, max_motor_dof> demo_axes{};
 };
 enum class CommitPermission { busy, changed, allowed };
 
-class SharedLink {
+template <size_t Dof>
+class SharedLinkT {
+public:
+    static constexpr size_t dof = Dof;
+    static constexpr size_t force_size = 3 + 5 * Dof + 1;
+    static constexpr size_t display_size = 6 + 2 * Dof;
+    using ForcePacket = std::array<double, force_size>;
+    using DisplayPacket = std::array<double, display_size>;
+
+private:
     struct Page {
-        static constexpr uint32_t abi_version=5;
-        uint32_t version{abi_version}, tree_size{};
+        static constexpr uint32_t abi_version = 6;
+        uint32_t version{abi_version}, tree_size{}, dof_count{uint32_t(Dof)};
         pthread_mutex_t intent_lock{};
         Intent intent;
-        Latest<1+max_tree_size+12> target;
+        Latest<1 + max_tree_size + Dof> target;
         Latest<force_size> force;
         alignas(4) std::atomic<uint32_t> force_notice{};
         // 100 Hz 控制，16 项可覆盖一条 100 ms 指令的完整有效窗口。
-        std::array<Latest<30>,16> display;
+        std::array<Latest<display_size>, 16> display;
         std::atomic<uint64_t> display_count{};
     };
     Page* page_{};
@@ -90,7 +99,8 @@ class SharedLink {
     // 仅限文件首次创建或同一进程内、尚未对外发布时初始化。
     void init(size_t tree_size) {
         new (page_) Page{};
-        page_->tree_size = tree_size;
+        page_->tree_size = static_cast<uint32_t>(tree_size);
+        page_->dof_count = static_cast<uint32_t>(Dof);
         pthread_mutexattr_t attr;
         if (pthread_mutexattr_init(&attr)) throw std::runtime_error("无法初始化命令锁");
         bool failed = pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED) ||
@@ -111,28 +121,30 @@ class SharedLink {
         }
         throw std::runtime_error("命令通道不可用");
     }
-    struct Unlock { pthread_mutex_t* p; ~Unlock(){ pthread_mutex_unlock(p); } };
+    struct Unlock { pthread_mutex_t* p; ~Unlock() { pthread_mutex_unlock(p); } };
+
 public:
-    explicit SharedLink(const std::string& path, size_t tree_size=0) {
+    explicit SharedLinkT(const std::string& path, size_t tree_size = 0) {
         if (tree_size > max_tree_size) throw std::invalid_argument("无效树维度");
         const bool create = tree_size != 0;
-        const int fd = open(path.c_str(), O_RDWR|O_CLOEXEC|O_NOFOLLOW|(create ? O_CREAT|O_EXCL : 0), 0600);
+        const int fd = open(path.c_str(), O_RDWR | O_CLOEXEC | O_NOFOLLOW | (create ? O_CREAT | O_EXCL : 0), 0600);
         if (fd < 0) throw std::runtime_error("打开抓握共享通道失败");
         struct stat info{};
         bool failed = (create && ftruncate(fd, sizeof(Page))) || fstat(fd, &info) || info.st_size != sizeof(Page);
-        auto* ptr = failed ? MAP_FAILED : mmap(nullptr,sizeof(Page),PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
+        auto* ptr = failed ? MAP_FAILED : mmap(nullptr, sizeof(Page), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         close(fd);
         if (ptr == MAP_FAILED) throw std::runtime_error("映射抓握共享通道失败");
         page_ = static_cast<Page*>(ptr);
         try {
             if (create) init(tree_size);
-            if (page_->version != Page::abi_version || !page_->tree_size || page_->tree_size > max_tree_size)
+            if (page_->version != Page::abi_version || page_->dof_count != Dof ||
+                !page_->tree_size || page_->tree_size > max_tree_size)
                 throw std::runtime_error("不兼容的抓握共享通道");
-        } catch (...) { munmap(page_,sizeof(Page)); throw; }
+        } catch (...) { munmap(page_, sizeof(Page)); throw; }
     }
-    SharedLink(const SharedLink&) = delete;
-    ~SharedLink() { munmap(page_,sizeof(Page)); }
-    size_t target_size() const { return 1 + page_->tree_size + 12; }
+    SharedLinkT(const SharedLinkT&) = delete;
+    ~SharedLinkT() { munmap(page_, sizeof(Page)); }
+    size_t target_size() const { return 1 + page_->tree_size + Dof; }
     bool try_read_target(std::vector<double>& result) const {
         result.resize(target_size());
         return page_->target.load(result.data(), result.size());
@@ -143,17 +155,17 @@ public:
         return result;
     }
     void publish_target(const std::vector<double>& data) {
-        if (data.size()!=target_size()) throw std::invalid_argument("目标帧长度错误");
-        page_->target.store(data.data(),data.size());
+        if (data.size() != target_size()) throw std::invalid_argument("目标帧长度错误");
+        page_->target.store(data.data(), data.size());
     }
     void publish_force(const std::vector<double>& data) {
-        if (data.size()!=force_size) throw std::invalid_argument("接触帧长度错误");
-        page_->force.store(data.data(),data.size());
+        if (data.size() != force_size) throw std::invalid_argument("接触帧长度错误");
+        page_->force.store(data.data(), data.size());
         notify_force();
     }
     void invalidate_force() {
         ForcePacket zero{};
-        page_->force.store(zero.data(),force_size);
+        page_->force.store(zero.data(), force_size);
         notify_force();
     }
     uint32_t force_notice() const { return page_->force_notice.load(std::memory_order_acquire); }
@@ -163,7 +175,7 @@ public:
         // 通知先于等待时内核返回 EAGAIN；调用方始终重新检查真实快照与期限。
         syscall(SYS_futex, &page_->force_notice, FUTEX_WAIT, observed, &timeout, nullptr, 0);
     }
-    bool read_force(ForcePacket& data) const { return page_->force.load(data.data(),force_size); }
+    bool read_force(ForcePacket& data) const { return page_->force.load(data.data(), force_size); }
     void publish_display(const DisplayPacket& d) {
         const auto n = page_->display_count.load(std::memory_order_relaxed);
         page_->display[n % page_->display.size()].store(d.data(), d.size());
@@ -176,37 +188,54 @@ public:
         const auto count = std::min<uint64_t>(n, page_->display.size());
         DisplayPacket d;
         double active = 0.;
+        constexpr size_t idx_rev = 2 + 2 * Dof;
+        constexpr size_t idx_deadline = 3 + 2 * Dof;
+        constexpr size_t idx_stamp = 4 + 2 * Dof;
+        constexpr size_t idx_gen = 5 + 2 * Dof;
         for (uint64_t i = 0; i < count; ++i) {
             const auto& slot = page_->display[(n - i - 1) % page_->display.size()];
-            if (!slot.load(d.data(),d.size()) || d[29] != double(intent.generation) ||
-                d[26] != double(revision) || d[27] <= 0.) return {};
+            if (!slot.load(d.data(), d.size()) || d[idx_gen] != double(intent.generation) ||
+                d[idx_rev] != double(revision) || d[idx_deadline] <= 0.) return {};
             if (i == 0) active = d[1];
-            if (d[1] != active || d[28] < double(stamp)) return {};
-            if (d[28] == double(stamp)) return {d.begin(),d.end()-1};
+            if (d[1] != active || d[idx_stamp] < double(stamp)) return {};
+            if (d[idx_stamp] == double(stamp)) return {d.begin(), d.end() - 1};
         }
         return {};
     }
-    void command(bool enabled,int64_t revision,double grip) {
+    void command(bool enabled, int64_t revision, double grip) {
         lock(true); Unlock unlock{&page_->intent_lock};
-        auto& i=page_->intent;
-        if (i.enabled!=enabled || i.revision!=revision) ++i.generation;
-        if (i.enabled && !enabled) i.disabled_generation=i.generation;
-        i.enabled=enabled; i.revision=revision; i.grip=grip;
+        auto& i = page_->intent;
+        if (i.enabled != enabled || i.revision != revision) ++i.generation;
+        if (i.enabled && !enabled) i.disabled_generation = i.generation;
+        i.enabled = enabled; i.revision = revision; i.grip = grip;
+    }
+    void command_demo_axes(bool active, const std::array<double, Dof>& axes) {
+        lock(true); Unlock unlock{&page_->intent_lock};
+        auto& i = page_->intent;
+        i.demo_axes_active = active;
+        for (size_t k = 0; k < Dof; ++k) i.demo_axes[k] = axes[k];
     }
     bool read_intent(Intent& i) const {
         if (!lock(false)) return false;
-        Unlock unlock{&page_->intent_lock}; i=page_->intent; return true;
+        Unlock unlock{&page_->intent_lock}; i = page_->intent; return true;
     }
     void disarm() {
         lock(true); Unlock unlock{&page_->intent_lock};
-        page_->intent.enabled=false;
-        page_->intent.disabled_generation=++page_->intent.generation;
+        page_->intent.enabled = false;
+        page_->intent.disabled_generation = ++page_->intent.generation;
     }
-    template<typename F> CommitPermission if_permitted(const Intent& i,F send) {
+    template<typename F> CommitPermission if_permitted(const Intent& i, F send) {
         if (!lock(false)) return CommitPermission::busy;
         Unlock unlock{&page_->intent_lock};
-        if (!page_->intent.enabled || i.generation!=page_->intent.generation) return CommitPermission::changed;
+        if (!page_->intent.enabled || i.generation != page_->intent.generation) return CommitPermission::changed;
         send(); return CommitPermission::allowed;
     }
 };
+
+using SharedLink = SharedLinkT<12>;
+using SharedLink12 = SharedLinkT<12>;
+using SharedLink16 = SharedLinkT<16>;
+constexpr size_t force_size = SharedLink12::force_size;
+using ForcePacket = SharedLink12::ForcePacket;
+using DisplayPacket = SharedLink12::DisplayPacket;
 } // namespace ve33

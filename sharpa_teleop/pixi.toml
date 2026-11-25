@@ -1,0 +1,32 @@
+[workspace]
+name = "superdex-sharpa-teleop"
+version = "0.1.0"
+description = "Standalone MotorHand -> Sharpa real-hand teleoperation, force feedback and takeover native builder"
+channels = ["conda-forge"]
+platforms = [{ platform = "linux-64", glibc = "2.34" }]
+
+[dependencies]
+python = ">=3.12,<3.13"
+numpy = ">=1.26,<3"
+pyyaml = ">=6,<7"
+pinocchio = ">=3.8,<4"
+nlopt = ">=2.7,<3"
+cxx-compiler = ">=1.11,<2"
+cmake = ">=3.22"
+tinyxml2 = ">=10,<12"
+yaml-cpp = ">=0.7,<1"
+nlohmann_json = ">=3.11,<4"
+eigen = ">=3.4,<4"
+
+[pypi-dependencies]
+mujoco = "==4.0.0"
+
+[activation.env]
+PYTHONNOUSERSITE = "1"
+OMP_NUM_THREADS = "1"
+OPENBLAS_NUM_THREADS = "1"
+
+[tasks]
+build = { cmd = "cmake -S native/hands/sharpa -B .cache/sharpa-control -DCMAKE_BUILD_TYPE=Release -DMOTORHAND_SHARPA_HARDWARE=ON && cmake --build .cache/sharpa-control --parallel 4" }
+build-sim = { cmd = "cmake -S native/hands/sharpa -B .cache/sharpa-sim-control -DCMAKE_BUILD_TYPE=Release -DMOTORHAND_SHARPA_HARDWARE=OFF && cmake --build .cache/sharpa-sim-control --parallel 4" }
+test = { cmd = "ctest --test-dir .cache/sharpa-control --output-on-failure", depends-on = ["build"] }

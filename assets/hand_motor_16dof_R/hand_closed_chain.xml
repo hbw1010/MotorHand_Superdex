@@ -1,0 +1,547 @@
+<?xml version='1.0' encoding='utf8'?>
+<mujoco model="hand_motor_16dof_right_v14_coordinates">
+  <compiler angle="radian" meshdir="meshes" autolimits="true" />
+  <option gravity="0 0 0" timestep="0.001" />
+  <asset>
+    <mesh name="base_link_part_2" file="base_link_part_2.stl" />
+    <mesh name="base_link_part_3" file="base_link_part_3.stl" />
+    <mesh name="base_link" file="base_link.stl" />
+    <mesh name="base_link_part_4" file="base_link_part_4.stl" />
+    <mesh name="base_link_part_5" file="base_link_part_5.stl" />
+    <mesh name="base_link_part_6" file="base_link_part_6.stl" />
+    <mesh name="base_link_part_7" file="base_link_part_7.stl" />
+    <mesh name="middle_mount_link_part_2" file="middle_mount_link_part_2.stl" />
+    <mesh name="middle_mount_link" file="middle_mount_link.stl" />
+    <mesh name="middle_mcp_connecting_rod_3_part_2" file="middle_mcp_connecting_rod_3_part_2.stl" />
+    <mesh name="middle_mcp_connecting_rod_3" file="middle_mcp_connecting_rod_3.stl" />
+    <mesh name="middle_mcp_drive_link" file="middle_mcp_drive_link.stl" />
+    <mesh name="middle_mcp_connecting_rod_6" file="middle_mcp_connecting_rod_6.stl" />
+    <mesh name="middle_mcp_connecting_rod_1" file="middle_mcp_connecting_rod_1.stl" />
+    <mesh name="middle_mcp_link_part_2" file="middle_mcp_link_part_2.stl" />
+    <mesh name="middle_mcp_link" file="middle_mcp_link.stl" />
+    <mesh name="middle_mcp_connecting_rod_2" file="middle_mcp_connecting_rod_2.stl" />
+    <mesh name="middle_mcp_connecting_rod_4" file="middle_mcp_connecting_rod_4.stl" />
+    <mesh name="middle_pip_dip_drive_link" file="middle_pip_dip_drive_link.stl" />
+    <mesh name="middle_pip_connecting_rod_1" file="middle_pip_connecting_rod_1.stl" />
+    <mesh name="middle_pip_connecting_rod_2" file="middle_pip_connecting_rod_2.stl" />
+    <mesh name="middle_dip_connecting_rod_1" file="middle_dip_connecting_rod_1.stl" />
+    <mesh name="middle_dip_connecting_rod_2" file="middle_dip_connecting_rod_2.stl" />
+    <mesh name="middle_dip_link" file="middle_dip_link.stl" />
+    <mesh name="middle_pip_link" file="middle_pip_link.stl" />
+    <mesh name="index_mount_link_part_2" file="index_mount_link_part_2.stl" />
+    <mesh name="index_mount_link_part_3" file="index_mount_link_part_3.stl" />
+    <mesh name="index_mount_link" file="index_mount_link.stl" />
+    <mesh name="index_mount_link_part_4" file="index_mount_link_part_4.stl" />
+    <mesh name="index_mount_link_part_5" file="index_mount_link_part_5.stl" />
+    <mesh name="index_mcp_connecting_rod_3_part_2" file="index_mcp_connecting_rod_3_part_2.stl" />
+    <mesh name="index_mcp_connecting_rod_3" file="index_mcp_connecting_rod_3.stl" />
+    <mesh name="index_mcp_drive_link" file="index_mcp_drive_link.stl" />
+    <mesh name="index_mcp_connecting_rod_6" file="index_mcp_connecting_rod_6.stl" />
+    <mesh name="index_mcp_connecting_rod_1" file="index_mcp_connecting_rod_1.stl" />
+    <mesh name="index_mcp_link_part_2" file="index_mcp_link_part_2.stl" />
+    <mesh name="index_mcp_link" file="index_mcp_link.stl" />
+    <mesh name="index_mcp_connecting_rod_2" file="index_mcp_connecting_rod_2.stl" />
+    <mesh name="index_mcp_connecting_rod_4" file="index_mcp_connecting_rod_4.stl" />
+    <mesh name="index_pip_dip_drive_link" file="index_pip_dip_drive_link.stl" />
+    <mesh name="index_pip_connecting_rod_1" file="index_pip_connecting_rod_1.stl" />
+    <mesh name="index_pip_connecting_rod_2" file="index_pip_connecting_rod_2.stl" />
+    <mesh name="index_dip_connecting_rod_1" file="index_dip_connecting_rod_1.stl" />
+    <mesh name="index_dip_connecting_rod_2" file="index_dip_connecting_rod_2.stl" />
+    <mesh name="index_dip_link" file="index_dip_link.stl" />
+    <mesh name="index_pip_link" file="index_pip_link.stl" />
+    <mesh name="ring_mount_link_part_2" file="ring_mount_link_part_2.stl" />
+    <mesh name="ring_mount_link" file="ring_mount_link.stl" />
+    <mesh name="ring_mcp_connecting_rod_3_part_2" file="ring_mcp_connecting_rod_3_part_2.stl" />
+    <mesh name="ring_mcp_connecting_rod_3" file="ring_mcp_connecting_rod_3.stl" />
+    <mesh name="ring_mcp_drive_link" file="ring_mcp_drive_link.stl" />
+    <mesh name="ring_mcp_connecting_rod_6" file="ring_mcp_connecting_rod_6.stl" />
+    <mesh name="ring_mcp_connecting_rod_1" file="ring_mcp_connecting_rod_1.stl" />
+    <mesh name="ring_mcp_link_part_2" file="ring_mcp_link_part_2.stl" />
+    <mesh name="ring_mcp_link" file="ring_mcp_link.stl" />
+    <mesh name="ring_mcp_connecting_rod_2" file="ring_mcp_connecting_rod_2.stl" />
+    <mesh name="ring_mcp_connecting_rod_4" file="ring_mcp_connecting_rod_4.stl" />
+    <mesh name="ring_pip_dip_drive_link" file="ring_pip_dip_drive_link.stl" />
+    <mesh name="ring_pip_connecting_rod_1" file="ring_pip_connecting_rod_1.stl" />
+    <mesh name="ring_pip_connecting_rod_2" file="ring_pip_connecting_rod_2.stl" />
+    <mesh name="ring_dip_connecting_rod_1" file="ring_dip_connecting_rod_1.stl" />
+    <mesh name="ring_dip_connecting_rod_2" file="ring_dip_connecting_rod_2.stl" />
+    <mesh name="ring_dip_link" file="ring_dip_link.stl" />
+    <mesh name="ring_pip_link" file="ring_pip_link.stl" />
+    <mesh name="pinky_mount_link_part_2" file="pinky_mount_link_part_2.stl" />
+    <mesh name="pinky_mount_link" file="pinky_mount_link.stl" />
+    <mesh name="pinky_mcp_connecting_rod_3_part_2" file="pinky_mcp_connecting_rod_3_part_2.stl" />
+    <mesh name="pinky_mcp_connecting_rod_3" file="pinky_mcp_connecting_rod_3.stl" />
+    <mesh name="pinky_mcp_drive_link" file="pinky_mcp_drive_link.stl" />
+    <mesh name="pinky_mcp_connecting_rod_6" file="pinky_mcp_connecting_rod_6.stl" />
+    <mesh name="pinky_mcp_connecting_rod_1" file="pinky_mcp_connecting_rod_1.stl" />
+    <mesh name="pinky_mcp_link_part_2" file="pinky_mcp_link_part_2.stl" />
+    <mesh name="pinky_mcp_link" file="pinky_mcp_link.stl" />
+    <mesh name="pinky_mcp_connecting_rod_2" file="pinky_mcp_connecting_rod_2.stl" />
+    <mesh name="pinky_mcp_connecting_rod_4" file="pinky_mcp_connecting_rod_4.stl" />
+    <mesh name="pinky_pip_dip_drive_link" file="pinky_pip_dip_drive_link.stl" />
+    <mesh name="pinky_pip_connecting_rod_1" file="pinky_pip_connecting_rod_1.stl" />
+    <mesh name="pinky_pip_connecting_rod_2" file="pinky_pip_connecting_rod_2.stl" />
+    <mesh name="pinky_dip_connecting_rod_1" file="pinky_dip_connecting_rod_1.stl" />
+    <mesh name="pinky_dip_connecting_rod_2" file="pinky_dip_connecting_rod_2.stl" />
+    <mesh name="pinky_dip_link" file="pinky_dip_link.stl" />
+    <mesh name="pinky_pip_link" file="pinky_pip_link.stl" />
+    <mesh name="thumb_cmc_flex_link" file="thumb_cmc_flex_link.stl" />
+    <mesh name="thumb_cmc_flex_link_part_4" file="thumb_cmc_flex_link_part_4.stl" />
+    <mesh name="thumb_cmc_flex_link_part_2" file="thumb_cmc_flex_link_part_2.stl" />
+    <mesh name="thumb_cmc_flex_link_part_3" file="thumb_cmc_flex_link_part_3.stl" />
+    <mesh name="thumb_cmc_abd_link" file="thumb_cmc_abd_link.stl" />
+    <mesh name="thumb_cmc_abd_link_part_3" file="thumb_cmc_abd_link_part_3.stl" />
+    <mesh name="thumb_cmc_abd_link_part_2" file="thumb_cmc_abd_link_part_2.stl" />
+    <mesh name="thumb_mcp_connecting_rod_3_part_2" file="thumb_mcp_connecting_rod_3_part_2.stl" />
+    <mesh name="thumb_mcp_connecting_rod_3" file="thumb_mcp_connecting_rod_3.stl" />
+    <mesh name="thumb_mcp_drive_link_part_2" file="thumb_mcp_drive_link_part_2.stl" />
+    <mesh name="thumb_mcp_drive_link" file="thumb_mcp_drive_link.stl" />
+    <mesh name="thumb_mcp_connecting_rod_6" file="thumb_mcp_connecting_rod_6.stl" />
+    <mesh name="thumb_mcp_connecting_rod_1" file="thumb_mcp_connecting_rod_1.stl" />
+    <mesh name="thumb_mcp_link_part_2" file="thumb_mcp_link_part_2.stl" />
+    <mesh name="thumb_mcp_link" file="thumb_mcp_link.stl" />
+    <mesh name="thumb_mcp_connecting_rod_2" file="thumb_mcp_connecting_rod_2.stl" />
+    <mesh name="thumb_mcp_connecting_rod_4" file="thumb_mcp_connecting_rod_4.stl" />
+    <mesh name="thumb_ip_drive_link_part_2" file="thumb_ip_drive_link_part_2.stl" />
+    <mesh name="thumb_ip_drive_link" file="thumb_ip_drive_link.stl" />
+    <mesh name="thumb_ip_connecting_rod_1" file="thumb_ip_connecting_rod_1.stl" />
+    <mesh name="thumb_ip_link" file="thumb_ip_link.stl" />
+    <mesh name="index_mcp_abd_connecting_rod_1" file="index_mcp_abd_connecting_rod_1.stl" />
+    <mesh name="index_mcp_abd_connecting_rod_1_part_2" file="index_mcp_abd_connecting_rod_1_part_2.stl" />
+    <mesh name="index_mcp_abd_connecting_rod_2" file="index_mcp_abd_connecting_rod_2.stl" />
+    <mesh name="middle_mcp_abd_connecting_rod_1" file="middle_mcp_abd_connecting_rod_1.stl" />
+    <mesh name="middle_mcp_abd_connecting_rod_1_part_2" file="middle_mcp_abd_connecting_rod_1_part_2.stl" />
+    <mesh name="middle_mcp_abd_connecting_rod_2" file="middle_mcp_abd_connecting_rod_2.stl" />
+    <mesh name="ring_mcp_abd_connecting_rod_1" file="ring_mcp_abd_connecting_rod_1.stl" />
+    <mesh name="ring_mcp_abd_connecting_rod_1_part_2" file="ring_mcp_abd_connecting_rod_1_part_2.stl" />
+    <mesh name="ring_mcp_abd_connecting_rod_2" file="ring_mcp_abd_connecting_rod_2.stl" />
+    <mesh name="pinky_mcp_abd_connecting_rod_1" file="pinky_mcp_abd_connecting_rod_1.stl" />
+    <mesh name="pinky_mcp_abd_connecting_rod_1_part_2" file="pinky_mcp_abd_connecting_rod_1_part_2.stl" />
+    <mesh name="pinky_mcp_abd_connecting_rod_2" file="pinky_mcp_abd_connecting_rod_2.stl" />
+  </asset>
+  <worldbody>
+    <body name="base_link">
+      <geom name="base_link_part_2_visual" type="mesh" mesh="base_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.004000000000000004 0.02525 0.015" quat="4.358209174827183e-16 5.92830163351096e-16 -0.7071067811865477 -0.7071067811865474" />
+      <geom name="base_link_part_3_visual" type="mesh" mesh="base_link_part_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.02792026616927454 0.01813321280404517 0.04209896179159358" quat="1.267240267158414e-16 -0.4547573765124695 0.8906153650748992 -4.04625180329384e-18" />
+      <geom name="base_link_visual" type="mesh" mesh="base_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.04 0 0" quat="0.4999999999999997 0.5 -0.5000000000000002 -0.5" />
+      <geom name="base_link_part_4_visual" type="mesh" mesh="base_link_part_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.0606859807323142 0.03361718061428432 -0.008598961791560019" quat="1 -3.530518542598157e-16 2.220446049250312e-16 4.163336342344337e-16" />
+      <geom name="base_link_part_5_visual" type="mesh" mesh="base_link_part_5" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.06568598073231421 0.009617180614284321 -0.008598961791560016" quat="1 3.180670310157316e-16 4.440892098500626e-16 1.110223024625157e-16" />
+      <geom name="base_link_part_6_visual" type="mesh" mesh="base_link_part_6" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.05538593493088321 -0.03672342724847636 -0.01415896179155977" quat="1 -3.862083905756223e-16 2.220446049250317e-16 -9.714451465470126e-16" />
+      <geom name="base_link_part_7_visual" type="mesh" mesh="base_link_part_7" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.06068598073231395 -0.01438281938571547 -0.008598961791559773" quat="1 -3.965583832031386e-16 2.220446049250313e-16 1.110223024625158e-16" />
+      <body name="middle_mount_link" pos="0.07000000000000001 1.983065878194061e-19 0.007" quat="1 5.32834162903905e-16 1.110223024625158e-16 3.330669073875466e-16">
+        <joint name="middle_mcp_abd_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="middle_mount_link_part_2_visual" type="mesh" mesh="middle_mount_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-4.120313733520827e-18 -5.068164766088793e-05 0.005499999999999999" quat="-1.137114430566029e-16 2.003070486801521e-16 0.7071067811865477 0.7071067811865474" />
+        <geom name="middle_mount_link_visual" type="mesh" mesh="middle_mount_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-7.051094998865734e-18 8.843566843552542e-35 0.001" quat="0.5000000000000001 0.5000000000000003 0.4999999999999999 0.4999999999999996" />
+        <body name="middle_mcp_connecting_rod_3" pos="1.387778780781446e-15 -0.005999999999999999 0.004499999999999999" quat="0.7071067811865474 -0.7071067811865477 2.355138688025663e-16 -3.925231146709437e-16">
+          <joint name="middle_mcp_connecting_rod_joint_3" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633968187 2.3541944901929748" />
+          <geom name="middle_mcp_connecting_rod_3_part_2_visual" type="mesh" mesh="middle_mcp_connecting_rod_3_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.02536035267809318 -0.02849160617255355 -0.01509896179156001" quat="0.9848077530121718 2.813941461084309e-16 -1.623523806056675e-16 -0.1736481776671356" />
+          <geom name="middle_mcp_connecting_rod_3_visual" type="mesh" mesh="middle_mcp_connecting_rod_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-3.635914845402801e-18 -5.448799903979371e-19 0.005999999999999999" quat="0.3826834323652837 0 0 0.9238795325112065" />
+          <body name="middle_mcp_drive_link" pos="0.002632619738117625 -0.03045377773365504 0.006000000000000003" quat="6.123233995736766e-17 1 6.798155367234455e-33 -1.110223024625157e-16">
+            <joint name="middle_mcp_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+            <geom name="middle_mcp_drive_link_visual" type="mesh" mesh="middle_mcp_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.0075 3.122502256758253e-16 -3.336443438175693e-31" quat="1 -3.048969157091233e-16 -6.296166512808834e-30 2.065014825802791e-14" />
+            <body name="middle_mcp_connecting_rod_6" pos="0.01500000000000001 6.245004513516506e-16 0.003500000000000012" quat="6.123233995736766e-17 -1 4.078893220340674e-32 6.66133814775094e-16">
+              <joint name="middle_mcp_connecting_rod_joint_6" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+              <geom name="middle_mcp_connecting_rod_6_visual" type="mesh" mesh="middle_mcp_connecting_rod_6" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.008229631676951083 0.005680947320801617 0.0035" quat="9.149086579720707e-17 0.9547154465323973 0.2975204466124057 -8.777683393931681e-17" />
+              <body name="middle_mcp_connecting_rod_1" pos="0.01645926335390219 0.01136189464160324 0.005000000000000104" quat="1 -7.933602540774895e-17 6.66133814775094e-16 -4.575920389866891e-32">
+                <joint name="middle_mcp_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.5354037848317725 0.6021888687580207" />
+                <geom name="middle_mcp_connecting_rod_1_visual" type="mesh" mesh="middle_mcp_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.015 0.0105 -0.0015" quat="-4.277299347933577e-16 -0.7071067811865478 -0.7071067811865472 5.143255404169074e-16" />
+                <body name="middle_mcp_link" pos="-0.01500000000000001 0.02099999999999999 -0.0115" quat="1 -9.655511840670415e-17 1.110223024625157e-16 -1.187027207027691e-31">
+                  <joint name="middle_mcp_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                  <geom name="middle_mcp_link_part_2_visual" type="mesh" mesh="middle_mcp_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.05595282522384445 0.006286039980536875 -0.0110989617915601" quat="0.9961946980917461 -1.216610658035018e-16 -1.220903536718979e-16 0.08715574274765187" />
+                  <geom name="middle_mcp_link_visual" type="mesh" mesh="middle_mcp_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.004908116907964671 0.01909188309205206 0.009999999999999882" quat="5.381612162336612e-15 5.381612162336607e-15 0.7071067811865472 0.7071067811865478" />
+                  <body name="middle_mcp_connecting_rod_2" pos="-0.004242640687115856 0.004242640687122842 0.01150000000000002" quat="1 -8.456975278101975e-17 9.381624149974561e-48 -1.109335647967048e-31">
+                    <joint name="middle_mcp_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.35419449019317 0.7833981633966234" />
+                    <geom name="middle_mcp_connecting_rod_2_visual" type="mesh" mesh="middle_mcp_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="1.74691260083147e-19 -3.168793076361442e-19 -0.0015" quat="2.788116716143406e-16 0.7071067811865488 0.7071067811865462 -1.922160659907921e-16" />
+                    <body name="middle_mcp_connecting_rod_4" pos="8.326672684688674e-17 -0.02700000000000001 0" quat="1 0 0 0">
+                      <joint name="middle_mcp_connecting_rod_joint_4" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633966313 2.354194490193162" />
+                      <geom name="middle_mcp_connecting_rod_4_visual" type="mesh" mesh="middle_mcp_connecting_rod_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.01484924240490737 0.0148492424049296 -0.001500000000000141" quat="0.3826834323655618 6.008483712189088e-17 -1.45057628672857e-16 0.9238795325110912" />
+                    </body>
+                  </body>
+                  <body name="middle_pip_dip_drive_link" pos="0.03725111690796445 -0.006777116907948032 0.009999999999999969" quat="1 -2.970013940877327e-16 -4.440892098500626e-16 -2.198139151208608e-16">
+                    <joint name="middle_pip_dip_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                    <geom name="middle_pip_dip_drive_link_visual" type="mesh" mesh="middle_pip_dip_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.00551473477480068 -0.009373010474954374 2.475281929521492e-18" quat="-6.597752695815718e-17 -0.496436275740637 -0.8680731674972831 1.082696496587044e-16" />
+                    <body name="middle_pip_connecting_rod_1" pos="0.01102946954960135 -0.01874602094990874 -0.001499999999999998" quat="1 -1.564109758919915e-16 1.34953988781345e-47 -8.628166150854816e-32">
+                      <joint name="middle_pip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                      <geom name="middle_pip_connecting_rod_1_visual" type="mesh" mesh="middle_pip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.00223753045039868 0.02941502094990818 0.001500000000000017" quat="0.6797615428059967 -2.085298251126802e-16 7.149707238915444e-16 -0.7334331904965926" />
+                      <body name="middle_pip_connecting_rod_2" pos="0.00616556283960315 0.02000170264288378 0.005000000000000004" quat="1 4.181857894500589e-16 4.440892098500626e-16 3.566300755320442e-31">
+                        <joint name="middle_pip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                        <geom name="middle_pip_connecting_rod_2_visual" type="mesh" mesh="middle_pip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.005999404341762746 -0.005329894233851004 -0.003500000000000056" quat="0.9347698449555257 5.728856277706083e-16 2.573567759053216e-16 -0.3552539049212864" />
+                        <body name="middle_dip_connecting_rod_1" pos="0.01199880868352549 -0.01065978846770201 -0.009500000000000081" quat="1 8.847033566525231e-17 8.397057943799404e-33 9.491382485053055e-17">
+                          <joint name="middle_dip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7522146093359553 2.385378044253838" />
+                          <geom name="middle_dip_connecting_rod_1_visual" type="mesh" mesh="middle_dip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-0.004073420536365127 -0.0001134466126368418 0.006" quat="0.0139211787935431 -1.094659826008353e-16 -1.125571052461383e-16 -0.9999030956952769" />
+                          <body name="middle_dip_connecting_rod_2" pos="0.0002360059924690627 -0.01284633755065817 -8.673617379884035e-19" quat="1 0 0 0">
+                            <joint name="middle_dip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                            <geom name="middle_dip_connecting_rod_2_visual" type="mesh" mesh="middle_dip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.001073563835772988 0.01428471510708281 0.006000000000000004" quat="0.7331246054474606 -8.72807237293023e-17 -2.324044609848975e-16 0.6800943411670951" />
+                            <body name="middle_dip_link" pos="0.002147127671545956 0.02856943021416565 -0.004500000000000004" quat="1 -1.452366196076761e-16 2.506251370327057e-47 -1.725633230170964e-31">
+                              <joint name="middle_dip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.5824097641677253 2.5551828894220683" />
+                              <geom name="middle_dip_link_visual" type="mesh" mesh="middle_dip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.004919974736749784 0.01955000635779293 0.01049999999999999" quat="0.7071067811864002 -0.7071067811863997 4.568750033936897e-07 -4.5687500339369e-07" />
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                      <body name="middle_pip_link" pos="0.002237530450398678 0.02941502094990819 0.002999999999999923" quat="1 4.181887231144383e-16 4.440892098500626e-16 3.56628772723348e-31">
+                        <joint name="middle_pip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.0317282051249386 2.105864448464855" />
+                        <geom name="middle_pip_link_visual" type="mesh" mesh="middle_pip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.007109999999999804 0.0152000000000001 -0.001499999999999998" quat="5.067593670599857e-15 5.067593670599853e-15 0.7071067811865472 0.7071067811865478" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="index_mount_link" pos="0.065 0.024 0.004" quat="1 -4.182672996713025e-34 -2.577771255023843e-66 6.162975822039155e-33">
+        <joint name="index_mcp_abd_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="index_mount_link_part_2_visual" type="mesh" mesh="index_mount_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-6.246995383102657e-37 -5.068164766088359e-05 0.008500000000000051" quat="5.143255404169073e-16 -4.277299347933578e-16 -0.7071067811865477 -0.7071067811865474" />
+        <geom name="index_mount_link_part_3_visual" type="mesh" mesh="index_mount_link_part_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.002732513476968332 0.007500000000000007 0.02011990763700305" quat="0.5582882312509995 -6.995498089604716e-17 -0.8296470640258004 6.863220694985345e-16" />
+        <geom name="index_mount_link_visual" type="mesh" mesh="index_mount_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="3.469446951953614e-18 -4.276423536147513e-50 0.004000000000000057" quat="0.5000000000000002 0.4999999999999995 0.5000000000000001 0.5000000000000002" />
+        <geom name="index_mount_link_part_4_visual" type="mesh" mesh="index_mount_link_part_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="3.469446951953614e-18 -4.276423536147513e-50 0.003000000000000057" quat="3.573162945485297e-16 0.7071067811865474 0.7071067811865477 -2.707206889249803e-16" />
+        <geom name="index_mount_link_part_5_visual" type="mesh" mesh="index_mount_link_part_5" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="3.469446951953614e-18 -4.276423536147513e-50 0.003000000000000056" quat="0.5000000000000002 0.4999999999999995 0.5000000000000001 0.5000000000000002" />
+        <body name="index_mcp_connecting_rod_3" pos="5.828670879282072e-16 -0.005999999999999998 0.007500000000000059" quat="0.7071067811865474 -0.7071067811865477 0 0">
+          <joint name="index_mcp_connecting_rod_joint_3" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633973072 2.3541944901924863" />
+          <geom name="index_mcp_connecting_rod_3_part_2_visual" type="mesh" mesh="index_mcp_connecting_rod_3_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.0253603526781035 -0.02849160617254437 -0.01509896179156001" quat="0.9848077530122034 8.761358564197513e-17 9.728636140797276e-17 -0.1736481776669573" />
+          <geom name="index_mcp_connecting_rod_3_visual" type="mesh" mesh="index_mcp_connecting_rod_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="6.938904696099461e-18 7.120054799605797e-20 0.006000000000000002" quat="0.382683432365115 -4.175744446719563e-16 -4.278833729361057e-16 0.9238795325112763" />
+          <body name="index_mcp_drive_link" pos="0.002632619738136985 -0.03045377773365343 0.006000000000000005" quat="6.123233995736766e-17 1 6.798155367234455e-33 -1.110223024625157e-16">
+            <joint name="index_mcp_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+            <geom name="index_mcp_drive_link_visual" type="mesh" mesh="index_mcp_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.0075 2.289834988289385e-16 5.657964351997618e-18" quat="1 -4.398720848190095e-17 -6.788150018737484e-31 1.543210004228968e-14" />
+            <body name="index_mcp_connecting_rod_6" pos="0.01500000000000772 -3.531896997088779e-15 0.003500000000000014" quat="6.123233995736766e-17 -1 2.719262146893782e-32 4.440892098500626e-16">
+              <joint name="index_mcp_connecting_rod_joint_6" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+              <geom name="index_mcp_connecting_rod_6_visual" type="mesh" mesh="index_mcp_connecting_rod_6" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.008229631676946335 0.005680947320808516 0.003499999999999996" quat="9.149086579724385e-17 0.9547154465322726 0.2975204466128057 -8.777683393927848e-17" />
+              <body name="index_mcp_connecting_rod_1" pos="0.01645926335388725 0.01136189464160885 0.004999999999999998" quat="1 -1.333401244296292e-17 4.440892098500626e-16 5.151119072171412e-33">
+                <joint name="index_mcp_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.5354037848311166 0.6021888687586768" />
+                <geom name="index_mcp_connecting_rod_1_visual" type="mesh" mesh="index_mcp_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.01500000000000001 0.01050000000000001 -0.001500000000000002" quat="1.218024257459634e-16 -0.7071067811865478 -0.7071067811865472 -3.520682012241414e-17" />
+                <body name="index_mcp_link" pos="-0.01500000000000001 0.021 -0.0115" quat="1 0 0 0">
+                  <joint name="index_mcp_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                  <geom name="index_mcp_link_part_2_visual" type="mesh" mesh="index_mcp_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.05195282522384351 0.006286039980525569 -0.01109896179155999" quat="0.9961946980917461 2.763741914981502e-18 -1.112045935351385e-16 0.08715574274765198" />
+                  <geom name="index_mcp_link_visual" type="mesh" mesh="index_mcp_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.002908116907963719 0.01909188309204074 0.009999999999999995" quat="5.067593670599857e-15 5.067593670599853e-15 0.7071067811865472 0.7071067811865478" />
+                  <body name="index_mcp_connecting_rod_2" pos="-0.004242640687118354 0.0042426406871203 0.01149999999999988" quat="1 -1.811248711877232e-16 0 0">
+                    <joint name="index_mcp_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.3541944901925747 0.7833981633972186" />
+                    <geom name="index_mcp_connecting_rod_2_visual" type="mesh" mesh="index_mcp_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-6.849498044938251e-18 2.79865568099877e-19 -0.001499999999999997" quat="6.713347862852852e-16 -0.7071067811865485 -0.7071067811865466 3.573162945485288e-16" />
+                    <body name="index_mcp_connecting_rod_4" pos="5.551115123125783e-17 -0.02700000000000001 0" quat="1 0 0 0">
+                      <joint name="index_mcp_connecting_rod_joint_4" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633972265 2.354194490192567" />
+                      <geom name="index_mcp_connecting_rod_4_visual" type="mesh" mesh="index_mcp_connecting_rod_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.01484924240491602 0.01484924240492077 -0.001499999999999887" quat="0.3826834323652792 -3.926864902430642e-16 -7.768327846841885e-17 0.9238795325112084" />
+                    </body>
+                  </body>
+                  <body name="index_pip_dip_drive_link" pos="0.0332511169079589 -0.006777116907964781 0.009999999999999959" quat="0.9999846964914937 -4.049437904794067e-16 3.353123254603933e-16 -0.005532339723419667">
+                    <joint name="index_pip_dip_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                    <geom name="index_pip_dip_drive_link_visual" type="mesh" mesh="index_pip_dip_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.005592626560431313 -0.009326743973947076 -4.339201196798082e-18" quat="2.233847277867532e-16 0.492816136452516 0.870133470021706 -5.614685587462614e-17" />
+                    <body name="index_pip_connecting_rod_1" pos="0.0111852531208626 -0.01865348794789418 -0.001499999999999998" quat="1 1.767811553193618e-16 2.220446049250313e-16 -2.275446858843361e-33">
+                      <joint name="index_pip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                      <geom name="index_pip_connecting_rod_1_visual" type="mesh" mesh="index_pip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.001472917494960414 0.02946320610615053 0.001499999999999972" quat="0.6892280440432763 4.669599302681391e-16 -1.687230168220712e-16 -0.7245444798659911" />
+                      <body name="index_pip_connecting_rod_2" pos="0.005644073189127408 0.0201550666478582 0.004999999999999977" quat="1 2.138384052665746e-16 -2.220446049250313e-16 -1.822142361097948e-33">
+                        <joint name="index_pip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                        <geom name="index_pip_connecting_rod_2_visual" type="mesh" mesh="index_pip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.006045828535303524 -0.005277175600802936 -0.003499999999999967" quat="0.9363157246121533 2.72869267157919e-16 -2.20911474309243e-16 -0.3511593140499314" />
+                        <body name="index_dip_connecting_rod_1" pos="0.01209165707060705 -0.01055435120160588 -0.009499999999999991" quat="1 2.814422137407655e-16 2.95366730758648e-32 1.04947558091164e-16">
+                          <joint name="index_dip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.8352128288542353 2.3023798247355582" />
+                          <geom name="index_dip_connecting_rod_1_visual" type="mesh" mesh="index_dip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-0.004045892495383775 -0.0004861881485571886 0.006000000000000003" quat="0.05976180183904507 -3.192018199805056e-16 -2.415524156247478e-16 -0.9982126662394897" />
+                          <body name="index_dip_connecting_rod_2" pos="0.001412032363191706 -0.0127706793828375 -3.469446951953614e-18" quat="1 -6.162598564314195e-33 0 0">
+                            <joint name="index_dip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                            <geom name="index_dip_connecting_rod_2_visual" type="mesh" mesh="index_dip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-0.0008605708157443371 0.014299127346485 0.006000000000000037" quat="0.685538200418039 -2.188935350282451e-16 -5.563615892574807e-16 0.7280366582580828" />
+                            <body name="index_dip_link" pos="-0.001721141631484902 0.02859825469297682 -0.003999999999999962" quat="1 2.173369638913893e-16 -4.440892098500626e-16 -2.090612586887815e-33">
+                              <joint name="index_dip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.503694418271722 2.6338982353180715" />
+                              <geom name="index_dip_link_visual" type="mesh" mesh="index_dip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.006242482311629216 0.01934270959790784 0.009999999999999998" quat="0.7070961523278989 -0.7070961523278984 -0.003877030188331962 0.003877030188331966" />
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                      <body name="index_pip_link" pos="0.001472917494960424 0.02946320610615052 0.003000000000000048" quat="1 2.160589845846857e-16 -2.220446049250313e-16 -1.329074703703282e-33">
+                        <joint name="index_pip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.0059877856359103 2.1316048679538833" />
+                        <geom name="index_pip_link_visual" type="mesh" mesh="index_pip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.00878765289286408 0.01510369347658173 -0.001500000000000007" quat="0.003911954934252637 0.003911954934253105 -0.7070959599719064 -0.707095959971907" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="ring_mount_link" pos="0.065 -0.024 0.004" quat="1 0 0 7.771561172376105e-16">
+        <joint name="ring_mcp_abd_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="ring_mount_link_part_2_visual" type="mesh" mesh="ring_mount_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="6.860118798884549e-18 -5.068164766088706e-05 0.008499999999999997" quat="2.00307048680152e-16 8.283440321536623e-16 0.7071067811865477 0.7071067811865474" />
+        <geom name="ring_mount_link_visual" type="mesh" mesh="ring_mount_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="3.469446951953614e-18 0 0.004" quat="0.5000000000000001 0.5000000000000003 0.4999999999999999 0.4999999999999996" />
+        <body name="ring_mcp_connecting_rod_3" pos="1.706967900361178e-15 -0.005999999999999998 0.007499999999999741" quat="0.7071067811865474 -0.7071067811865477 6.280369834735101e-16 -6.280369834735098e-16">
+          <joint name="ring_mcp_connecting_rod_joint_3" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633962024 2.354194490193591" />
+          <geom name="ring_mcp_connecting_rod_3_part_2_visual" type="mesh" mesh="ring_mcp_connecting_rod_3_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.02536035267807446 -0.02849160617257025 -0.01509896179156001" quat="0.9848077530121148 -8.200171816675607e-17 1.445911537729602e-17 -0.1736481776674597" />
+          <geom name="ring_mcp_connecting_rod_3_visual" type="mesh" mesh="ring_mcp_connecting_rod_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-3.646370977917219e-18 3.819440575091184e-19 0.005999999999999995" quat="0.3826834323655881 1.875440244483447e-16 1.626560700192595e-16 0.9238795325110803" />
+          <body name="ring_mcp_drive_link" pos="0.002632619738097267 -0.0304537777336568 0.006000000000000002" quat="6.123233995736766e-17 1 6.798155367234455e-33 -1.110223024625157e-16">
+            <joint name="ring_mcp_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+            <geom name="ring_mcp_drive_link_visual" type="mesh" mesh="ring_mcp_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.007500000000000007 3.05311331771918e-16 2.18851740004395e-18" quat="1 -2.144429006261187e-16 -4.33304591251389e-30 2.020605904817785e-14" />
+            <body name="ring_mcp_connecting_rod_6" pos="0.01500000000000001 6.106226635438361e-16 0.003500000000000014" quat="6.123233995736766e-17 -1 4.078893220340674e-32 6.66133814775094e-16">
+              <joint name="ring_mcp_connecting_rod_joint_6" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+              <geom name="ring_mcp_connecting_rod_6_visual" type="mesh" mesh="ring_mcp_connecting_rod_6" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.008229631676954879 0.005680947320796118 0.003499999999999997" quat="6.944277032080272e-16 -0.9547154465324967 -0.2975204466120866 2.164063032065181e-16" />
+              <body name="ring_mcp_connecting_rod_1" pos="0.01645926335390976 0.01136189464159223 0.005000000000000081" quat="1 -9.99043127877757e-17 6.66133814775094e-16 -1.060136820272911e-31">
+                <joint name="ring_mcp_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.535403784832441 0.6021888687573526" />
+                <geom name="ring_mcp_connecting_rod_1_visual" type="mesh" mesh="ring_mcp_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.015 0.0105 -0.001500000000000001" quat="4.329780281177465e-17 -0.7071067811865474 -0.7071067811865477 4.329780281177468e-17" />
+                <body name="ring_mcp_link" pos="-0.015 0.021 -0.0115" quat="1 0 0 0">
+                  <joint name="ring_mcp_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                  <geom name="ring_mcp_link_part_2_visual" type="mesh" mesh="ring_mcp_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.05195282522385078 0.00628603998047059 -0.01109896179156008" quat="0.9961946980917946 -1.244248077184894e-16 -1.088576013669017e-17 0.08715574274709768" />
+                  <geom name="ring_mcp_link_visual" type="mesh" mesh="ring_mcp_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.002908116907985223 0.01909188309204034 0.009999999999999905" quat="3.989252869314248e-13 3.987682776855566e-13 0.7071067811865477 0.7071067811865474" />
+                  <body name="ring_mcp_connecting_rod_2" pos="-0.004242640687113025 0.004242640687125672 0.01149999999999968" quat="1 -7.010256872520545e-17 7.344687413976751e-48 -1.047705889746657e-31">
+                    <joint name="ring_mcp_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.354194490193838 0.7833981633959554" />
+                    <geom name="ring_mcp_connecting_rod_2_visual" type="mesh" mesh="ring_mcp_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="4.502307675335049e-20 4.810934913131795e-19 -0.001500000000000001" quat="5.928301633510965e-16 -0.7071067811865485 -0.7071067811865466 4.358209174827177e-16" />
+                    <body name="ring_mcp_connecting_rod_4" pos="6.938893903907228e-17 -0.02700000000000001 0" quat="1 0 0 0">
+                      <joint name="ring_mcp_connecting_rod_joint_4" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633959822 2.354194490193811" />
+                      <geom name="ring_mcp_connecting_rod_4_visual" type="mesh" mesh="ring_mcp_connecting_rod_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.01484924240489294 0.01484924240493924 -0.001499999999999782" quat="0.3826834323656297 1.450576286728614e-16 6.008483712188022e-17 0.9238795325110631" />
+                    </body>
+                  </body>
+                  <body name="ring_pip_dip_drive_link" pos="0.03325111690794207 -0.006777116908010125 0.009999999999999919" quat="1 -1.781117900253296e-16 9.88719051216613e-33 -5.551115123125795e-17">
+                    <joint name="ring_pip_dip_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                    <geom name="ring_pip_dip_drive_link_visual" type="mesh" mesh="ring_pip_dip_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.005514734774785161 -0.009373010474963493 -3.366367655206431e-19" quat="5.538419084785571e-16 0.4964362757413551 0.8680731674968725 5.21176045151185e-16" />
+                    <body name="ring_pip_connecting_rod_1" pos="0.01102946954957029 -0.018746020949927 -0.001500000000000001" quat="1 3.735851224726992e-17 -1.110223024625157e-16 5.96144104446184e-32">
+                      <joint name="ring_pip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                      <geom name="ring_pip_connecting_rod_1_visual" type="mesh" mesh="ring_pip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.002237530450456254 0.02941502094992833 0.001499999999999987" quat="0.6797615428055834 1.628548830228062e-16 1.509373832154955e-16 -0.7334331904969756" />
+                      <body name="ring_pip_connecting_rod_2" pos="0.006165562839650113 0.02000170264289951 0.004999999999999984" quat="1 1.197339333682081e-16 2.066168541992559e-47 1.725633230170964e-31">
+                        <joint name="ring_pip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                        <geom name="ring_pip_connecting_rod_2_visual" type="mesh" mesh="ring_pip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.006013357335921413 -0.005314147020032494 -0.003499999999999977" quat="0.9352347344215907 0 0 -0.3540282355001881" />
+                        <body name="ring_dip_connecting_rod_1" pos="0.01202671467184283 -0.01062829404006499 -0.009500000000000005" quat="1 1.06412127114133e-17 5.907059680986493e-34 5.551115123044985e-17">
+                          <joint name="ring_dip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7829396433276401 2.3546530102621532" />
+                          <geom name="ring_dip_connecting_rod_1_visual" type="mesh" mesh="ring_dip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-0.004067373530529952 -0.0002491938264575026 0.006000000000000007" quat="0.03059024558846394 -2.185444905345703e-16 -1.177627440125979e-16 -0.9995320089295977" />
+                          <body name="ring_dip_connecting_rod_2" pos="0.0006641793861138501 -0.01283132701777151 0" quat="1 0 0 0">
+                            <joint name="ring_dip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                            <geom name="ring_dip_connecting_rod_2_visual" type="mesh" mesh="ring_dip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.0002251522810713411 0.01432323048235879 0.006000000000000029" quat="0.7126420688968452 1.582383266411569e-16 1.557704675415714e-16 0.701527819575549" />
+                            <body name="ring_dip_link" pos="0.000450304562125553 0.02864646096468686 -0.003999999999999983" quat="1 -1.592974107757737e-16 3.141587491598506e-47 -1.97215226305253e-31">
+                              <joint name="ring_dip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.5550206873268686 2.582571966262925" />
+                              <geom name="ring_dip_link_visual" type="mesh" mesh="ring_dip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.005679231931464909 0.01942315176969561 0.01" quat="0.7071067540157945 -0.7071067540157939 0.0001960235882509384 -0.0001960235882506245" />
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                      <body name="ring_pip_link" pos="0.002237530450456243 0.02941502094992833 0.002999999999999992" quat="1 1.173735987482487e-16 1.736089562954837e-47 1.479114197289397e-31">
+                        <joint name="ring_pip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.0317282051257308 2.1058644484640627" />
+                        <geom name="ring_pip_link_visual" type="mesh" mesh="ring_pip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.008109999999982869 0.01520000000000915 -0.001499999999999996" quat="3.985327638167538e-13 3.98532763816754e-13 0.7071067811865477 0.7071067811865474" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="pinky_mount_link" pos="0.05969999999999999 -0.04633999999999998 0.001440000000000001" quat="1 1.185996674476025e-17 7.262135155982345e-34 6.123233995736765e-17">
+        <joint name="pinky_mcp_abd_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="pinky_mount_link_part_2_visual" type="mesh" mesh="pinky_mount_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="3.941414693728698e-18 -5.068164766088693e-05 0.0055" quat="-1.137114430566029e-16 2.003070486801521e-16 0.7071067811865477 0.7071067811865474" />
+        <geom name="pinky_mount_link_visual" type="mesh" mesh="pinky_mount_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="8.69408097333501e-20 2.37199334895205e-20 0.001" quat="0.4999999999999998 0.5 0.5000000000000002 0.5" />
+        <body name="pinky_mcp_connecting_rod_3" pos="1.235123114895487e-15 -0.006000000000000005 0.004499999999999702" quat="0.7071067811865474 -0.7071067811865477 7.850462293418873e-17 7.850462293418877e-17">
+          <joint name="pinky_mcp_connecting_rod_joint_3" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633973469 2.3541944901924463" />
+          <geom name="pinky_mcp_connecting_rod_3_part_2_visual" type="mesh" mesh="pinky_mcp_connecting_rod_3_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.02536035267810526 -0.0284916061725428 -0.01509896179155999" quat="0.9848077530122087 -1.913373423891157e-16 3.37379358802539e-17 -0.173648177666927" />
+          <geom name="pinky_mcp_connecting_rod_3_visual" type="mesh" mesh="pinky_mcp_connecting_rod_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="3.344546861683284e-18 1.423196009371231e-19 0.006000000000000005" quat="0.3826834323650884 8.497279155086099e-17 2.051424657947914e-16 0.9238795325112873" />
+          <body name="pinky_mcp_drive_link" pos="0.002632619738134556 -0.0304537777336536 0.006000000000000005" quat="6.123233995736766e-17 1 6.798155367234455e-33 -1.110223024625157e-16">
+            <joint name="pinky_mcp_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+            <geom name="pinky_mcp_drive_link_visual" type="mesh" mesh="pinky_mcp_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.0075 3.05311331771918e-16 -8.219823455816968e-18" quat="1 2.160772804500237e-16 4.438038479299065e-30 2.05391259555654e-14" />
+            <body name="pinky_mcp_connecting_rod_6" pos="0.01500000000000912 -4.121702978920894e-15 0.003499999999999989" quat="6.123233995736766e-17 -1 -1.359631073446891e-32 -2.220446049250313e-16">
+              <joint name="pinky_mcp_connecting_rod_joint_6" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+              <geom name="pinky_mcp_connecting_rod_6_visual" type="mesh" mesh="pinky_mcp_connecting_rod_6" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.008229631676946505 0.0056809473208083 0.003499999999999999" quat="2.542805577198611e-17 0.9547154465322764 0.2975204466127935 1.242125802018045e-16" />
+              <body name="pinky_mcp_connecting_rod_1" pos="0.01645926335388687 0.01136189464160736 0.004999999999999998" quat="1 -2.124041493641989e-16 -2.220446049250313e-16 -2.813562766674988e-31">
+                <joint name="pinky_mcp_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.535403784831167 0.6021888687586268" />
+                <geom name="pinky_mcp_connecting_rod_1_visual" type="mesh" mesh="pinky_mcp_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.01500000000000002 0.0105 -0.001500000000000009" quat="4.329780281177465e-17 -0.7071067811865474 -0.7071067811865477 4.329780281177468e-17" />
+                <body name="pinky_mcp_link" pos="-0.01500000000000001 0.021 -0.01150000000000001" quat="1 0 0 0">
+                  <joint name="pinky_mcp_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                  <geom name="pinky_mcp_link_part_2_visual" type="mesh" mesh="pinky_mcp_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.22 0.28 0.32 1" pos="0.04310982522384359 0.006755039980526745 -0.01109896179155999" quat="0.9961946980917461 -2.073746795308056e-16 -1.814293356126563e-17 0.08715574274765177" />
+                  <geom name="pinky_mcp_link_visual" type="mesh" mesh="pinky_mcp_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.003091883092036196 0.01909188309204188 0.01000000000000001" quat="5.067593670599854e-15 5.067593670599856e-15 0.7071067811865477 0.7071067811865474" />
+                  <body name="pinky_mcp_connecting_rod_2" pos="-0.004242640687118132 0.004242640687120536 0.01150000000000004" quat="1 -7.010256872520771e-17 5.184485233395519e-48 -7.395570986446985e-32">
+                    <joint name="pinky_mcp_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.3541944901926293 0.7833981633971642" />
+                    <geom name="pinky_mcp_connecting_rod_2_visual" type="mesh" mesh="pinky_mcp_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-6.911340721350979e-18 1.480265839256391e-19 -0.001500000000000001" quat="5.143255404169079e-16 -0.7071067811865485 -0.7071067811865466 5.143255404169065e-16" />
+                    <body name="pinky_mcp_connecting_rod_4" pos="6.938893903907228e-17 -0.02700000000000001 0" quat="1 0 0 0">
+                      <joint name="pinky_mcp_connecting_rod_joint_4" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633971899 2.3541944901926035" />
+                      <geom name="pinky_mcp_connecting_rod_4_visual" type="mesh" mesh="pinky_mcp_connecting_rod_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.01484924240491115 0.0148492424049213 -0.001500000000000035" quat="0.3826834323650851 8.497279155086026e-17 2.051424657947917e-16 0.9238795325112887" />
+                    </body>
+                  </body>
+                  <body name="pinky_pip_dip_drive_link" pos="0.02440811690796282 -0.006308116907959029 0.01000000000000003" quat="1 1.228932607166379e-16 4.440892098500626e-16 -4.267419750902946e-16">
+                    <joint name="pinky_pip_dip_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                    <geom name="pinky_pip_dip_drive_link_visual" type="mesh" mesh="pinky_pip_dip_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.009076458569484974 -0.005990285872679454 3.460420713388547e-18" quat="1.239410226693207e-16 -0.2875614021799164 -0.9577622042951582 2.672029192235515e-17" />
+                    <body name="pinky_pip_connecting_rod_1" pos="0.01815291713896991 -0.01198057174535891 -0.001499999999999994" quat="1 -3.5771146326468e-17 -9.920551947149116e-49 2.77333911991762e-32">
+                      <joint name="pinky_pip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                      <geom name="pinky_pip_connecting_rod_1_visual" type="mesh" mesh="pinky_pip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-0.01410291713896961 0.02591057174535756 0.001499999999999977" quat="0.8596699912645688 -6.571016850614482e-17 -2.192429434262979e-16 -0.5108497882148686" />
+                      <body name="pinky_pip_connecting_rod_2" pos="-0.005690875278615642 0.02014190190390779 0.004999999999999984" quat="1 -5.23713372422379e-17 -4.440892098500626e-16 7.535006737792991e-32">
+                        <joint name="pinky_pip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                        <geom name="pinky_pip_connecting_rod_2_visual" type="mesh" mesh="pinky_pip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.006620701387597881 -0.004535078625145799 -0.003499999999999982" quat="0.9552511498825069 3.711896373147255e-16 -1.149398137727822e-16 -0.2957959442726493" />
+                        <body name="pinky_dip_connecting_rod_1" pos="0.013241402775196 -0.009070157250291311 -0.009499999999999988" quat="1 -2.686686683137507e-16 2.220446049250312e-16 5.438358097187291e-16">
+                          <joint name="pinky_dip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.008912697939558 2.1286799556502354" />
+                          <geom name="pinky_dip_connecting_rod_1_visual" type="mesh" mesh="pinky_dip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-0.003736722317774584 -0.001625586454128305 0.00599999999999999" quat="0.2037313527092466 2.173876259123481e-16 4.523744772316687e-17 -0.9790268310538075" />
+                          <body name="pinky_dip_connecting_rod_2" pos="0.005013637592285736 -0.01182994190125848 0" quat="1 0 0 0">
+                            <joint name="pinky_dip_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                            <geom name="pinky_dip_connecting_rod_2_visual" type="mesh" mesh="pinky_dip_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.001368546279540377 0.01425947776325174 0.006000000000000102" quat="0.7401133416229201 -3.003428261970356e-17 -6.273184155419205e-16 0.6724821496157015" />
+                            <body name="pinky_dip_link" pos="0.002737092559082804 0.02851895552650759 -0.002999999999999989" quat="1 2.520085631027531e-16 -2.220446049250313e-16 5.595714183187563e-32">
+                              <joint name="pinky_dip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.3095296771535103 1.828062976436283" />
+                              <geom name="pinky_dip_link_visual" type="mesh" mesh="pinky_dip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.02146067089120907 0.009861521429232507 0.009000000000000008" quat="0.7068515440438289 -0.7068515440438292 -0.01899722829401211 0.01899722829401211" />
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                      <body name="pinky_pip_link" pos="-0.01410291713896894 0.02591057174535941 0.002999999999999996" quat="1 -5.237133724223665e-17 -4.440892098500626e-16 7.535006737793047e-32">
+                        <joint name="pinky_pip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.434814922728469 2.7027777308613246" />
+                        <geom name="pinky_pip_link_visual" type="mesh" mesh="pinky_pip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.00604999999999985 0.01147000000000008 -0.001500000000000002" quat="4.67507055592891e-15 4.83207980179729e-15 0.7071067811865477 0.7071067811865474" />
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="thumb_cmc_flex_link" pos="-0.007999999999899948 0.02925000000029467 0.01826273086614101" quat="6.123233995736766e-17 -1 4.440892098500626e-16 -2.719262146893782e-32">
+        <joint name="thumb_cmc_flex_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="thumb_cmc_flex_link_visual" type="mesh" mesh="thumb_cmc_flex_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-1.000593718624999e-13 2.946686790769349e-13 0.00976273086614101" quat="0.1703998024982242 -0.1703998024982239 0.686268101625426 -0.6862681016254264" />
+        <geom name="thumb_cmc_flex_link_part_4_visual" type="mesh" mesh="thumb_cmc_flex_link_part_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.02462593327978437 -0.005845372495383828 0.001812730866141004" quat="0.1703998024982244 -0.6862681016254264 -0.1703998024982243 -0.6862681016254258" />
+        <geom name="thumb_cmc_flex_link_part_2_visual" type="mesh" mesh="thumb_cmc_flex_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.01378489007500779 0.01817626934916267 -0.02383623092541898" quat="0.9705296567427151 -1.079337018882973e-16 -1.411933677076895e-16 0.2409817117186856" />
+        <geom name="thumb_cmc_flex_link_part_3_visual" type="mesh" mesh="thumb_cmc_flex_link_part_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.007106822174094256 0.007119822193486721 0.06744871159845524" quat="0.6862681016254267 0.1703998024982245 -0.6862681016254255 0.1703998024982242" />
+        <body name="thumb_cmc_abd_link" pos="-0.02367607861590472 -0.01253000754279302 0.04676273086614076" quat="0.6057556842307003 0.6057556842306998 -0.3647739725120149 -0.3647739725120153">
+          <joint name="thumb_cmc_abd_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+          <geom name="thumb_cmc_abd_link_visual" type="mesh" mesh="thumb_cmc_abd_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.01998627787145956 0.0007407407407409348 -0.02743726913389309" quat="0.01309681666719831 0.01309681666719655 -0.7069854831559023 -0.7069854831559041" />
+          <geom name="thumb_cmc_abd_link_part_3_visual" type="mesh" mesh="thumb_cmc_abd_link_part_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.03997255574291256 0.001481481481482009 -0.01943726913389346" quat="0.490653381462653 0.4906533814626544 0.5091750772173194 0.5091750772173202" />
+          <geom name="thumb_cmc_abd_link_part_2_visual" type="mesh" mesh="thumb_cmc_abd_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.003933153155390235 0.02247065348586175 -0.02383623092545256" quat="0.886456234320774 -9.841641216654362e-17 -5.138250149947268e-17 0.4628124292127783" />
+          <body name="thumb_mcp_connecting_rod_3" pos="0.03991700018735699 0.002980452321841114 -0.01593726913389344" quat="0.5899252460623265 -0.6039596295787704 0.3677400791851127 0.3898566455228188">
+            <joint name="thumb_mcp_connecting_rod_joint_3" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633974982 2.3541944901922953" />
+            <geom name="thumb_mcp_connecting_rod_3_part_2_visual" type="mesh" mesh="thumb_mcp_connecting_rod_3_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-0.01497931249368873 -0.03507904370796801 -0.02259896179156001" quat="0.7384817764731516 6.773083144573843e-17 2.388352835995145e-16 -0.6742734354970973" />
+            <geom name="thumb_mcp_connecting_rod_3_visual" type="mesh" mesh="thumb_mcp_connecting_rod_3" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-1.934382107884346e-17 1.435898685530984e-17 -0.001500000000000005" quat="0.8181271733830302 2.909178743561377e-16 6.877455779337451e-17 0.5750373276338617" />
+            <body name="thumb_mcp_drive_link" pos="-0.0264332833892077 -0.01535072617833495 -0.00700000000000002" quat="7.273661547324617e-16 1 -1.110223024625161e-16 6.661338147750939e-16">
+              <joint name="thumb_mcp_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+              <geom name="thumb_mcp_drive_link_part_2_visual" type="mesh" mesh="thumb_mcp_drive_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.02277772746563671 -0.001255027221455788 0.01559896179156179" quat="1.230556059689748e-16 0.9819907398824348 0.1889290522528188 -3.155000508604837e-16" />
+              <geom name="thumb_mcp_drive_link_visual" type="mesh" mesh="thumb_mcp_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.003193876790933566 0.006785952478785568 -0.005499999999999998" quat="0.8443489322522838 4.687078127020761e-17 2.974252467662984e-17 0.5357936922029115" />
+              <body name="thumb_mcp_connecting_rod_6" pos="0.006387753581867054 0.01357190495757105 -0.001999999999999971" quat="6.123233995736766e-17 1 0 0">
+                <joint name="thumb_mcp_connecting_rod_joint_6" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                <geom name="thumb_mcp_connecting_rod_6_visual" type="mesh" mesh="thumb_mcp_connecting_rod_6" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.008644675755255656 -0.005026885823896823 0.003499999999999998" quat="5.912120480261612e-17 0.9655225464808075 -0.2603194426799832 -1.593996861169321e-17" />
+                <body name="thumb_mcp_connecting_rod_1" pos="0.01728935151051242 -0.01005377164779382 0.004999999999999991" quat="1 9.018734482858977e-16 7.771561172376096e-16 1.380994771247306e-16">
+                  <joint name="thumb_mcp_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.535403784831021 0.6021888687587721" />
+                  <geom name="thumb_mcp_connecting_rod_1_visual" type="mesh" mesh="thumb_mcp_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.003112579888432567 0.01804333246487814 -0.001500000000000007" quat="5.975714320578619e-17 0.9759082087568668 0.2181815026095558 1.335976394019762e-17" />
+                  <body name="thumb_mcp_link" pos="0.01261291335873233 0.02251475997218519 -0.0115" quat="1 1.243136489642453e-19 -1.006300389946278e-37 -8.09485039117231e-19">
+                    <joint name="thumb_mcp_output_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                    <geom name="thumb_mcp_link_part_2_visual" type="mesh" mesh="thumb_mcp_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.02397904002333607 -0.03618653247972199 -0.01109896179155999" quat="0.8878334268526012 -3.239581008616294e-16 -8.218932814292894e-17 -0.4601649771149112" />
+                    <geom name="thumb_mcp_link_visual" type="mesh" mesh="thumb_mcp_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.0165963110575403 0.009570608708961814 0.009999999999999988" quat="0.3788633530736638 0.3788633530736635 0.5970448556832059 0.5970448556832063" />
+                    <body name="thumb_mcp_connecting_rod_2" pos="0.002031984861932569 0.005645443961362115 0.01149999999999999" quat="1 -3.91788698765113e-16 -2.220446049250313e-16 -6.273184273630418e-17">
+                      <joint name="thumb_mcp_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-2.354194490192389 0.7833981633974043" />
+                      <geom name="thumb_mcp_connecting_rod_2_visual" type="mesh" mesh="thumb_mcp_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="-4.355966418515356e-20 1.410396824385611e-20 -0.001499999999999999" quat="5.975714320578607e-17 0.9759082087568647 0.2181815026095657 1.335976394019823e-17" />
+                      <body name="thumb_mcp_connecting_rod_4" pos="-0.02442942892362773 -0.01149795644736144 -3.469446951953614e-18" quat="1 1.860227329867476e-18 4.195933417786542e-36 2.255602501058547e-18">
+                        <joint name="thumb_mcp_connecting_rod_joint_4" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.7833981633974667 2.3541944901923264" />
+                        <geom name="thumb_mcp_connecting_rod_4_visual" type="mesh" mesh="thumb_mcp_connecting_rod_4" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.007111947016762535 0.01975905386476728 -0.001499999999999992" quat="0.8181271733830296 2.724910874884011e-16 1.915259043474102e-16 0.5750373276338625" />
+                      </body>
+                    </body>
+                    <body name="thumb_ip_drive_link" pos="0.004195451488792504 -0.02482829377289322 0.01273726913389279" quat="1 -2.06239938311472e-16 -2.220446049250312e-16 -6.37424631698473e-16">
+                      <joint name="thumb_ip_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                      <geom name="thumb_ip_drive_link_part_2_visual" type="mesh" mesh="thumb_ip_drive_link_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.005666139235417645 -0.022097394144792 -0.02383623092545257" quat="0.639086084731098 1.419056171972017e-16 -1.707823245660817e-16 -0.7691352132772727" />
+                      <geom name="thumb_ip_drive_link_visual" type="mesh" mesh="thumb_ip_drive_link" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="-0.00601299644774844 -0.009061429176424947 -0.002737269133892783" quat="-5.102675153993426e-17 -0.8811694540739778 -0.4728005850323874 2.246096094566074e-16" />
+                      <body name="thumb_ip_connecting_rod_1" pos="-0.01202599289549691 -0.01812285835284984 -0.004237269133892774" quat="1 -2.357171451488876e-16 2.220446049250313e-16 -3.575968249120639e-17">
+                        <joint name="thumb_ip_connecting_rod_joint_1" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+                        <geom name="thumb_ip_connecting_rod_1_visual" type="mesh" mesh="thumb_ip_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.02725018170013166 0.01129945119507184 0.001500000000000003" quat="0.1952754811979498 4.335986707414414e-17 -2.177698980658846e-16 -0.980748431782029" />
+                        <body name="thumb_ip_link" pos="0.02725018170013167 0.01129945119507185 -0.0105" quat="1 2.264923060755945e-16 7.18576115531381e-33 3.172629251660088e-17">
+                          <joint name="thumb_ip_output_joint" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-0.995371561350662 2.1422210922391316" />
+                          <geom name="thumb_ip_link_visual" type="mesh" mesh="thumb_ip_link" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.008887552330868898 0.01634048388408577 0.012" quat="0.5970448556832062 -0.5970448556832065 0.3788633530736634 -0.3788633530736633" />
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="index_mcp_abd_connecting_rod_1" pos="0.0400000000000002 0.02400000000000033 0.01523726913389265" quat="1 -1.843650065138329e-17 8.88178419700125e-16 -8.277001274810683e-33">
+        <joint name="index_mcp_abd_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="index_mcp_abd_connecting_rod_1_visual" type="mesh" mesh="index_mcp_abd_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.003564017278327789 -0.00659907424111748 -0.002737269133892613" quat="-4.282438004809501e-18 0.8588370927530559 -0.5122488146511214 -1.267162650391335e-16" />
+        <geom name="index_mcp_abd_connecting_rod_1_part_2_visual" type="mesh" mesh="index_mcp_abd_connecting_rod_1_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.02276528488499108 -0.001463477342025901 -0.02383623092545257" quat="0.9689886682945544 0 0 -0.2471051612507235" />
+        <body name="index_mcp_abd_connecting_rod_2" pos="0.007128034556655602 -0.013198148482235 -0.004237269133892614" quat="1 3.820316789944275e-17 1.110223024625157e-16 6.66328182918921e-32">
+          <joint name="index_mcp_abd_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.1401401623432579 1.9974524912465355" />
+          <geom name="index_mcp_abd_connecting_rod_2_visual" type="mesh" mesh="index_mcp_abd_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.009977871787672992 0.0006648868992134104 0.001500000000001947" quat="0.7067154977017565 0.7067154977017568 0.02352031692300033 0.02352031692300157" />
+        </body>
+      </body>
+      <body name="middle_mcp_abd_connecting_rod_1" pos="0.04500000000000021 3.05311331771918e-16 0.01523726913389256" quat="1 3.555464730903595e-16 2.220446049250314e-16 3.330669073875467e-16">
+        <joint name="middle_mcp_abd_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="middle_mcp_abd_connecting_rod_1_visual" type="mesh" mesh="middle_mcp_abd_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.003564017278327814 -0.006599074241117553 -0.002737269133892576" quat="5.258860483145231e-17 -0.8588370927530541 0.5122488146511244 -3.136619356147626e-17" />
+        <geom name="middle_mcp_abd_connecting_rod_1_part_2_visual" type="mesh" mesh="middle_mcp_abd_connecting_rod_1_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.02276528488499107 -0.001463477342026078 -0.02383623092545257" quat="0.9689886682945534 5.486836790485385e-17 2.151587060282963e-16 -0.2471051612507271" />
+        <body name="middle_mcp_abd_connecting_rod_2" pos="0.007128034556655581 -0.0131981484822351 -0.004237269133892578" quat="1 1.411474995521636e-16 5.2193317624876e-48 3.697785493223493e-32">
+          <joint name="middle_mcp_abd_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.1401401623432752 1.9974524912465181" />
+          <geom name="middle_mcp_abd_connecting_rod_2_visual" type="mesh" mesh="middle_mcp_abd_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.009977871787673663 0.0006648868992136879 0.001499999999999996" quat="0.7067154977017569 0.7067154977017563 0.02352031692300173 0.0235203169230019" />
+        </body>
+      </body>
+      <body name="ring_mcp_abd_connecting_rod_1" pos="0.04000000000000022 -0.02399999999999968 0.01523726913389259" quat="1 -4.504656437596582e-16 2.22044604925031e-16 7.771561172376106e-16">
+        <joint name="ring_mcp_abd_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="ring_mcp_abd_connecting_rod_1_visual" type="mesh" mesh="ring_mcp_abd_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.003564017278327818 -0.006599074241117576 -0.002737269133892579" quat="6.815600765336575e-16 -0.8588370927530538 0.5122488146511248 -2.77242379101393e-16" />
+        <geom name="ring_mcp_abd_connecting_rod_1_part_2_visual" type="mesh" mesh="ring_mcp_abd_connecting_rod_1_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.02276528488499107 -0.001463477342026117 -0.02383623092545258" quat="0.9689886682945532 2.743418395242703e-17 1.075793530141481e-16 -0.2471051612507281" />
+        <body name="ring_mcp_abd_connecting_rod_2" pos="0.007128034556655581 -0.01319814848223513 -0.004237269133892579" quat="1 2.720495705650045e-17 -4.191587314470643e-49 -1.540743955509788e-32">
+          <joint name="ring_mcp_abd_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.1401401623432768 1.9974524912465166" />
+          <geom name="ring_mcp_abd_connecting_rod_2_visual" type="mesh" mesh="ring_mcp_abd_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.009977871787673667 0.0006648868992136971 0.001500000000000007" quat="0.7067154977017565 0.7067154977017568 0.0235203169230017 0.02352031692300169" />
+        </body>
+      </body>
+      <body name="pinky_mcp_abd_connecting_rod_1" pos="0.03469995419856953 -0.04634060786276057 0.009677269133893315" quat="1 -1.986309212681912e-16 2.220446049250313e-16 6.123233995736765e-17">
+        <joint name="pinky_mcp_abd_motor_joint" type="hinge" axis="0 0 1" limited="false" damping="0.01" />
+        <geom name="pinky_mcp_abd_connecting_rod_1_visual" type="mesh" mesh="pinky_mcp_abd_connecting_rod_1" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.003564058936604742 -0.00659905174221332 -0.002737269133892576" quat="6.815609516120594e-16 -0.8588387095997589 0.5122461038339099 -2.772402278386552e-16" />
+        <geom name="pinky_mcp_abd_connecting_rod_1_part_2_visual" type="mesh" mesh="pinky_mcp_abd_connecting_rod_1_part_2" contype="0" conaffinity="0" density="1000" rgba="0.66 0.76 0.84 1" pos="0.02276529412311338 -0.001463333630299823 -0.02383623092545257" quat="0.9689894482470666 -5.389844895994443e-19 -1.144379007040639e-16 -0.2471021027548037" />
+        <body name="pinky_mcp_abd_connecting_rod_2" pos="0.007128117873209432 -0.0131981034844266 -0.004237269133892577" quat="1 -6.39845451373105e-18 -4.929190058317721e-51 7.703719777548945e-34">
+          <joint name="pinky_mcp_abd_connecting_rod_joint_2" type="hinge" axis="0 0 1" limited="true" damping="0.01" range="-1.140162055275127 1.9974305983146663" />
+          <geom name="pinky_mcp_abd_connecting_rod_2_visual" type="mesh" mesh="pinky_mcp_abd_connecting_rod_2" contype="0" conaffinity="0" density="1000" rgba="0.8 0.64 0.31 1" pos="0.009977853030112085 0.0006651683316899174 0.001500000000000002" quat="0.7067151659281146 0.706715165928114 0.02353028361915617 0.02353028361915619" />
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <connect name="closure_00_0" body1="middle_mcp_connecting_rod_1" body2="middle_mcp_connecting_rod_3" anchor="-0.01500000000000001 0 -0.0115" />
+    <connect name="closure_00_1" body1="middle_mcp_connecting_rod_1" body2="middle_mcp_connecting_rod_3" anchor="-0.01500000000000003 -1.734723475976807e-17 0.0185" />
+    <connect name="closure_01_0" body1="middle_mcp_connecting_rod_2" body2="middle_mcp_connecting_rod_3" anchor="4.163336342344337e-17 -0.021 -1.663425645237251e-18" />
+    <connect name="closure_01_1" body1="middle_mcp_connecting_rod_2" body2="middle_mcp_connecting_rod_3" anchor="1.387778780781446e-17 -0.02100000000000003 0.03" />
+    <connect name="closure_02_0" body1="middle_mcp_connecting_rod_4" body2="middle_mount_link" anchor="-0.01484924240490544 0.0148492424049296 -1.45260274046467e-16" />
+    <connect name="closure_02_1" body1="middle_mcp_connecting_rod_4" body2="middle_mount_link" anchor="-0.01484924240490547 0.01484924240492957 0.02999999999999985" />
+    <connect name="closure_03_0" body1="middle_mcp_link" body2="middle_pip_link" anchor="0.02890811690796469 0.01909188309205171 0.01989999999999993" />
+    <connect name="closure_03_1" body1="middle_mcp_link" body2="middle_pip_link" anchor="0.02890811690796466 0.01909188309205169 0.04989999999999993" />
+    <connect name="closure_04_0" body1="middle_dip_connecting_rod_1" body2="middle_pip_link" anchor="-0.008146841072730254 -0.000226893225273677 -0.005299999999999981" />
+    <connect name="closure_04_1" body1="middle_dip_connecting_rod_1" body2="middle_pip_link" anchor="-0.008146841072730254 -0.0002268932252736978 0.02470000000000002" />
+    <connect name="closure_05_0" body1="middle_pip_link" body2="middle_dip_link" anchor="0.007390000000000202 0.01519999999999988 0.007500000000000059" />
+    <connect name="closure_05_1" body1="middle_pip_link" body2="middle_dip_link" anchor="0.007390000000000174 0.01519999999999986 0.03750000000000005" />
+    <connect name="closure_06_0" body1="index_mcp_connecting_rod_1" body2="index_mcp_connecting_rod_3" anchor="-0.01500000000000001 3.469446951953614e-18 -0.01149999999999999" />
+    <connect name="closure_06_1" body1="index_mcp_connecting_rod_1" body2="index_mcp_connecting_rod_3" anchor="-0.01500000000000003 3.469446951953614e-18 0.01850000000000001" />
+    <connect name="closure_07_0" body1="index_mcp_connecting_rod_2" body2="index_mcp_connecting_rod_3" anchor="5.551115123125783e-17 -0.021 4.333310390927152e-18" />
+    <connect name="closure_07_1" body1="index_mcp_connecting_rod_2" body2="index_mcp_connecting_rod_3" anchor="4.163336342344337e-17 -0.021 0.03" />
+    <connect name="closure_08_0" body1="index_mcp_connecting_rod_4" body2="index_mount_link" anchor="-0.01484924240491423 0.01484924240492075 1.119491456324465e-16" />
+    <connect name="closure_08_1" body1="index_mcp_connecting_rod_4" body2="index_mount_link" anchor="-0.01484924240491424 0.01484924240492074 0.03000000000000011" />
+    <connect name="closure_09_0" body1="index_mcp_link" body2="index_pip_link" anchor="0.0249081169079637 0.01909188309204042 0.01940000000000001" />
+    <connect name="closure_09_1" body1="index_mcp_link" body2="index_pip_link" anchor="0.0249081169079637 0.01909188309204043 0.04940000000000001" />
+    <connect name="closure_10_0" body1="index_dip_connecting_rod_1" body2="index_pip_link" anchor="-0.008091784990767487 -0.0009723762971143891 -0.004799999999999919" />
+    <connect name="closure_10_1" body1="index_dip_connecting_rod_1" body2="index_pip_link" anchor="-0.008091784990767514 -0.0009723762971143649 0.02520000000000008" />
+    <connect name="closure_11_0" body1="index_pip_link" body2="index_dip_link" anchor="0.003711581937565545 0.01524199985306185 0.007000000000000022" />
+    <connect name="closure_11_1" body1="index_pip_link" body2="index_dip_link" anchor="0.003711581937565517 0.01524199985306185 0.03700000000000002" />
+    <connect name="closure_12_0" body1="ring_mcp_connecting_rod_1" body2="ring_mcp_connecting_rod_3" anchor="-0.01500000000000001 0 -0.01149999999999998" />
+    <connect name="closure_12_1" body1="ring_mcp_connecting_rod_1" body2="ring_mcp_connecting_rod_3" anchor="-0.01500000000000003 -1.040834085586084e-17 0.01850000000000002" />
+    <connect name="closure_13_0" body1="ring_mcp_connecting_rod_2" body2="ring_mcp_connecting_rod_3" anchor="4.163336342344337e-17 -0.02100000000000001 1.294364648057693e-17" />
+    <connect name="closure_13_1" body1="ring_mcp_connecting_rod_2" body2="ring_mcp_connecting_rod_3" anchor="2.775557561562891e-17 -0.02100000000000002 0.03000000000000001" />
+    <connect name="closure_14_0" body1="ring_mcp_connecting_rod_4" body2="ring_mount_link" anchor="-0.0148492424048958 0.01484924240493925 2.278518266333479e-16" />
+    <connect name="closure_14_1" body1="ring_mcp_connecting_rod_4" body2="ring_mount_link" anchor="-0.01484924240489581 0.01484924240493923 0.03000000000000023" />
+    <connect name="closure_15_0" body1="ring_mcp_link" body2="ring_pip_link" anchor="0.02490811690798519 0.01909188309201553 0.01939999999999995" />
+    <connect name="closure_15_1" body1="ring_mcp_link" body2="ring_pip_link" anchor="0.02490811690798519 0.01909188309201552 0.04939999999999994" />
+    <connect name="closure_16_0" body1="ring_dip_connecting_rod_1" body2="ring_pip_link" anchor="-0.008134747061059849 -0.0004983876529150028 -0.004799999999999967" />
+    <connect name="closure_16_1" body1="ring_dip_connecting_rod_1" body2="ring_pip_link" anchor="-0.008134747061059849 -0.0004983876529150132 0.02520000000000003" />
+    <connect name="closure_17_0" body1="ring_pip_link" body2="ring_dip_link" anchor="0.005390000000017131 0.01519999999999392 0.007000000000000046" />
+    <connect name="closure_17_1" body1="ring_pip_link" body2="ring_dip_link" anchor="0.005390000000017131 0.01519999999999391 0.03700000000000004" />
+    <connect name="closure_18_0" body1="pinky_mcp_connecting_rod_1" body2="pinky_mcp_connecting_rod_3" anchor="-0.01500000000000003 1.387778780781446e-17 -0.01150000000000002" />
+    <connect name="closure_18_1" body1="pinky_mcp_connecting_rod_1" body2="pinky_mcp_connecting_rod_3" anchor="-0.01500000000000003 -1.040834085586084e-17 0.01849999999999998" />
+    <connect name="closure_19_0" body1="pinky_mcp_connecting_rod_2" body2="pinky_mcp_connecting_rod_3" anchor="4.163336342344337e-17 -0.021 -4.849884242042373e-18" />
+    <connect name="closure_19_1" body1="pinky_mcp_connecting_rod_2" body2="pinky_mcp_connecting_rod_3" anchor="4.163336342344337e-17 -0.02100000000000003 0.03" />
+    <connect name="closure_20_0" body1="pinky_mcp_connecting_rod_4" body2="pinky_mount_link" anchor="-0.01484924240491371 0.01484924240492129 -3.978390344505042e-17" />
+    <connect name="closure_20_1" body1="pinky_mcp_connecting_rod_4" body2="pinky_mount_link" anchor="-0.01484924240491371 0.01484924240492127 0.02999999999999996" />
+    <connect name="closure_21_0" body1="pinky_mcp_link" body2="pinky_pip_link" anchor="0.0129081169079638 0.01909188309204164 0.01840000000000003" />
+    <connect name="closure_21_1" body1="pinky_mcp_link" body2="pinky_pip_link" anchor="0.0129081169079638 0.01909188309204161 0.04840000000000003" />
+    <connect name="closure_22_0" body1="pinky_dip_connecting_rod_1" body2="pinky_pip_link" anchor="-0.007473444635549525 -0.003251172908257247 -0.003800000000000013" />
+    <connect name="closure_22_1" body1="pinky_dip_connecting_rod_1" body2="pinky_pip_link" anchor="-0.007473444635549539 -0.003251172908257292 0.02619999999999999" />
+    <connect name="closure_23_0" body1="pinky_pip_link" body2="pinky_dip_link" anchor="0.003450000000000147 0.01146999999999994 0.006000000000000006" />
+    <connect name="closure_23_1" body1="pinky_pip_link" body2="pinky_dip_link" anchor="0.003450000000000147 0.01146999999999991 0.036" />
+    <connect name="closure_24_0" body1="thumb_mcp_connecting_rod_1" body2="thumb_mcp_connecting_rod_3" anchor="-0.006387753581867136 0.01357190495757108 -0.01149999999999997" />
+    <connect name="closure_24_1" body1="thumb_mcp_connecting_rod_1" body2="thumb_mcp_connecting_rod_3" anchor="-0.006387753581867136 0.01357190495757106 -0.04149999999999997" />
+    <connect name="closure_25_0" body1="thumb_mcp_connecting_rod_2" body2="thumb_mcp_connecting_rod_3" anchor="-0.01900066694059929 -0.008942855014614493 2.081668171172169e-17" />
+    <connect name="closure_25_1" body1="thumb_mcp_connecting_rod_2" body2="thumb_mcp_connecting_rod_3" anchor="-0.01900066694059929 -0.008942855014614519 -0.02999999999999997" />
+    <connect name="closure_26_0" body1="thumb_mcp_connecting_rod_4" body2="thumb_cmc_abd_link" anchor="0.007111947016762604 0.01975905386476718 1.387778780781446e-17" />
+    <connect name="closure_26_1" body1="thumb_mcp_connecting_rod_4" body2="thumb_cmc_abd_link" anchor="0.007111947016762593 0.01975905386476717 -0.02999999999999998" />
+    <connect name="closure_27_0" body1="thumb_mcp_link" body2="thumb_ip_link" anchor="0.024048690236385 -0.006263280408204692 -0.0004999999999999866" />
+    <connect name="closure_27_1" body1="thumb_mcp_link" body2="thumb_ip_link" anchor="0.02404869023638501 -0.006263280408204725 -0.03049999999999999" />
+    <connect name="closure_28_0" body1="index_mcp_abd_connecting_rod_2" body2="index_mount_link" anchor="0.01995574357534664 0.001329773798427071 0.005000000000001975" />
+    <connect name="closure_28_1" body1="index_mcp_abd_connecting_rod_2" body2="index_mount_link" anchor="0.01995574357534657 0.001329773798427076 0.03500000000000197" />
+    <connect name="closure_29_0" body1="middle_mcp_abd_connecting_rod_2" body2="middle_mount_link" anchor="0.01995574357534734 0.001329773798427378 0.003000000000000022" />
+    <connect name="closure_29_1" body1="middle_mcp_abd_connecting_rod_2" body2="middle_mount_link" anchor="0.01995574357534734 0.001329773798427377 0.03300000000000002" />
+    <connect name="closure_30_0" body1="ring_mcp_abd_connecting_rod_2" body2="ring_mount_link" anchor="0.01995574357534731 0.001329773798427381 0.002999999999999989" />
+    <connect name="closure_30_1" body1="ring_mcp_abd_connecting_rod_2" body2="ring_mount_link" anchor="0.01995574357534732 0.001329773798427362 0.03299999999999999" />
+    <connect name="closure_31_0" body1="pinky_mcp_abd_connecting_rod_2" body2="pinky_mount_link" anchor="0.01995570606022416 0.001330336663379793 0.002999999999999269" />
+    <connect name="closure_31_1" body1="pinky_mcp_abd_connecting_rod_2" body2="pinky_mount_link" anchor="0.01995570606022416 0.00133033666337978 0.03299999999999927" />
+  </equality>
+</mujoco>

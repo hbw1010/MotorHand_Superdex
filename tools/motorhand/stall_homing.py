@@ -32,22 +32,29 @@ DEFAULT_HOMING = {
 }
 
 
-def load_homing_config(raw_config, *, disabled_motor_ids=()):
-    cfg = {**DEFAULT_HOMING, **(raw_config or {})}
-    def _vec12(key, lo, hi):
+def load_homing_config(raw_config, *, disabled_motor_ids=(), dof=MOTOR_COUNT):
+    axis_count = int(dof)
+    base_default = {
+        **DEFAULT_HOMING,
+        "torque_nm": [1.2, 0.9] + [1.0] * max(0, axis_count - 2),
+        "direction_sign": [-1.0] * axis_count,
+        "stop_offset_deg": [0.0] * axis_count,
+    }
+    cfg = {**base_default, **(raw_config or {})}
+    def _vec(key, lo, hi):
         vals = cfg[key]
-        if not isinstance(vals, (list, tuple)) or len(vals) != MOTOR_COUNT:
-            raise ValueError(f"stall_homing.{key} 必须是长度为 12 的列表")
+        if not isinstance(vals, (list, tuple)) or len(vals) != axis_count:
+            raise ValueError(f"stall_homing.{key} 必须是长度为 {axis_count} 的列表")
         out = [float(v) for v in vals]
         if any(not math.isfinite(v) or not lo <= v <= hi for v in out):
             raise ValueError(f"stall_homing.{key} 超出安全范围 [{lo}, {hi}]")
         return out
 
-    torque_nm = _vec12("torque_nm", 0.0, 5.0)
-    direction_sign = _vec12("direction_sign", -1.0, 1.0)
+    torque_nm = _vec("torque_nm", 0.0, 5.0)
+    direction_sign = _vec("direction_sign", -1.0, 1.0)
     if any(s not in (-1.0, 1.0) for s in direction_sign):
         raise ValueError("stall_homing.direction_sign 每项必须为 -1 或 1")
-    stop_offset_deg = _vec12("stop_offset_deg", -90.0, 90.0)
+    stop_offset_deg = _vec("stop_offset_deg", -90.0, 90.0)
     damping_kd = float(cfg["damping_kd"])
     if not math.isfinite(damping_kd) or not 0.0 <= damping_kd <= 0.3:
         raise ValueError("stall_homing.damping_kd 应在 [0, 0.3] 范围内")
@@ -61,8 +68,8 @@ def load_homing_config(raw_config, *, disabled_motor_ids=()):
         raise ValueError("stall_homing 堵转判据参数超出范围")
     if not (0.05 <= min_run <= 2.0 and 0.5 <= timeout <= 12.0 and 10.0 <= max_travel <= 260.0):
         raise ValueError("stall_homing 时间或最大行程参数超出范围")
-    skip = {int(mid) for mid in cfg.get("skip_motor_ids", ()) if 1 <= int(mid) <= MOTOR_COUNT}
-    skip.update(int(mid) for mid in disabled_motor_ids if 1 <= int(mid) <= MOTOR_COUNT)
+    skip = {int(mid) for mid in cfg.get("skip_motor_ids", ()) if 1 <= int(mid) <= axis_count}
+    skip.update(int(mid) for mid in disabled_motor_ids if 1 <= int(mid) <= axis_count)
     return {
         "enabled": bool(cfg.get("enabled", True)),
         "torque_nm": torque_nm,
@@ -154,7 +161,7 @@ def run_stall_homing(read_raw, send_mit_batch, release_all, axes, ratios, homing
                         done[mid] = zero_deg
 
             # 构建仅包含尚未到位轴的 MIT 小力矩指令（已到位与屏蔽轴立刻置 0 退出）
-            batch = [0.0] * (MOTOR_COUNT * 5)
+            batch = [0.0] * (len(axes) * 5)
             active_mask = 0
             for mid in active_ids:
                 if mid in done:

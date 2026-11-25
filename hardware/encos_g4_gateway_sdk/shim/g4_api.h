@@ -14,6 +14,9 @@ typedef struct G4Joint {
 
 void* g4_open(const char* port, int baud, unsigned hz);
 void* g4_open_fresh(const char* port, int baud, unsigned hz);
+void* g4_open_axes(const char* port, int baud, unsigned hz, int axis_count);
+void* g4_open_fresh_axes(const char* port, int baud, unsigned hz, int axis_count);
+void* g4_open_reader_axes(const char* port, int axis_count);
 int g4_transport_lost(void* handle);
 void g4_close(void* handle);
 int g4_snapshots_with_current_time(void* handle, G4Joint* out, int64_t* current_times, int capacity);

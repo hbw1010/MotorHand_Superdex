@@ -13,8 +13,9 @@ class GatewayTransport {
 public:
     enum class Event { none, lost, restored };
 
-    explicit GatewayTransport(const std::string& port) : port_(port) {
-        if (!port_.empty() && !(device_ = g4_open(port_.c_str(), 921600, 200)))
+    explicit GatewayTransport(const std::string& port, int axis_count = 12)
+        : port_(port), axis_count_(axis_count) {
+        if (!port_.empty() && !(device_ = g4_open_axes(port_.c_str(), 921600, 200, axis_count_)))
             throw std::runtime_error("无法打开 G4 网关");
     }
     GatewayTransport(const GatewayTransport&) = delete;
@@ -23,6 +24,7 @@ public:
 
     void* handle() const { return device_; }
     unsigned reconnects() const { return reconnects_; }
+    int axis_count() const { return axis_count_; }
 
     Event poll(int64_t now) {
         if (closed_ || port_.empty()) return Event::none;
@@ -35,7 +37,7 @@ public:
             return Event::lost;
         }
         if (now < retry_at_) return Event::none;
-        if (!(device_ = g4_open_fresh(port_.c_str(), 921600, 200))) {
+        if (!(device_ = g4_open_fresh_axes(port_.c_str(), 921600, 200, axis_count_))) {
             delay_ = std::min(delay_ * 2, max_delay);
             retry_at_ = now + delay_;
             return Event::none;
@@ -52,6 +54,7 @@ public:
 
 private:
     const std::string port_;
+    const int axis_count_;
     void* device_ = nullptr;
     static constexpr int64_t initial_delay = 250'000'000, max_delay = 2'000'000'000;
     int64_t retry_at_ = 0, delay_ = initial_delay;

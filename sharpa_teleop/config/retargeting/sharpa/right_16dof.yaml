@@ -1,0 +1,92 @@
+# sharpa_teleop/tools/fit_16dof_retarget.py 针对 hand_motor_16dof_R 闭链模型联合拟合生成。
+# 16-DOF 模式释放全部 22 个 Sharpa 自由度（含四指 MCP_AA 侧摆），不修改 12-DOF right.yaml。
+geometry:
+  task_axis_scale:
+  - 0.98
+  - 0.8697889648374842
+  - 0.94
+  wrist_offset_m:
+  - 0.0
+  - 0.009801489803677295
+  - 0.034
+optimizer:
+  type: AdaptiveOptimizerAnalytical
+  urdf_path: ../../../assets/sharpa-hand/wave_01/right_sharpa_wave/right_sharpa_wave_pad.urdf
+  link_naming:
+    prefix: right_
+    palm: hand_C_MC
+    fingers:
+    - thumb
+    - index
+    - middle
+    - ring
+    - pinky
+    pip: '{finger}_pad_pip'
+    dip: '{finger}_pad_dip'
+    tip: '{finger}_pad_tip'
+    link1: '{finger}_MCP_VL'
+retarget:
+  huber_delta: 2.0
+  huber_delta_dir: 0.5
+  norm_delta: 0.4
+  w_pos: 6.0
+  w_dir: 0.3
+  w_full_hand: 1.5
+  scaling: 1.06
+  fixed_joints: {}
+  thumb_skip_pip: true
+  w_hyper: 1.0
+  soft_min: 0.0
+  w_couple: 0.1
+  couple_ratio: 0.7
+  lp_alpha: 0.2
+  segment_scaling:
+    thumb:
+    - 1.252481
+    - 1.234106
+    - 1.205948
+    index:
+    - 1.057248
+    - 1.109021
+    - 1.10025
+    middle:
+    - 1.006796
+    - 1.036345
+    - 1.035759
+    ring:
+    - 1.029024
+    - 1.070378
+    - 1.066098
+    pinky:
+    - 1.121378
+    - 1.218428
+    - 1.203348
+  pinch_thresholds:
+    index:
+      d1: 1.6
+      d2: 3.6
+    middle:
+      d1: 1.6
+      d2: 3.6
+    ring:
+      d1: 1.6
+      d2: 3.6
+    pinky:
+      d1: 1.6
+      d2: 3.6
+  pinch_weight_max: 0.92
+  mediapipe_rotation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  wrist_offset_cm:
+  - 0.0
+  - 0.0
+  - 0.0
+  thumb_offset_cm:
+  - -0.2
+  - 0.05
+  - 0.55
+  w_tip_scale: 3.0
+  pinch_close_gain: 1.0
+  allow_free_finger_aa: true

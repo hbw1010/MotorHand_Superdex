@@ -68,19 +68,20 @@ class FrictionCompensator:
     away on its own.
     """
 
-    def __init__(self, cfg: Mapping[str, Any] | None) -> None:
+    def __init__(self, cfg: Mapping[str, Any] | None, *, dof: int = 12) -> None:
         cfg = dict(cfg or {})
+        self.dof = int(dof)
         self.enabled = bool(cfg.get("enabled", False))
-        self.coulomb = _vec(cfg.get("coulomb_nm", 0.0))
-        self.viscous = _vec(cfg.get("viscous_nm_s_per_rad", 0.0))
+        self.coulomb = _vec(cfg.get("coulomb_nm", 0.0), self.dof)
+        self.viscous = _vec(cfg.get("viscous_nm_s_per_rad", 0.0), self.dof)
         self.v_scale = max(1e-4, float(cfg.get("velocity_scale_rad_s", 0.08)))
         self.v_dead = max(0.0, float(cfg.get("velocity_deadband_rad_s", 0.02)))
         self.gain = float(cfg.get("gain", 1.0))
-        self.limit = _vec(cfg.get("max_nm", 0.6))
+        self.limit = _vec(cfg.get("max_nm", 0.6), self.dof)
 
     def torque(self, dq: np.ndarray) -> np.ndarray:
         if not self.enabled or self.gain <= 0.0:
-            return np.zeros(12)
+            return np.zeros(self.dof)
         dq = np.asarray(dq, dtype=float)
         # Deadband: no assist while (nearly) at rest, so estimator noise or a
         # settling link can never start a self-sustained drift.

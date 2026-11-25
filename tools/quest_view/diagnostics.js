@@ -1,13 +1,20 @@
 import * as THREE from 'three';
 import {ForceReadout} from './force-readout.mjs';
 
-// 顺序与右手 joint_space.json 的独立关节和 G4 电机 ID 一致。
-const FINGER_AXES = [
+// 顺序与右手 joint_space.json 的独立关节和 G4 电机 ID 一致（并列支持 12-DOF 与 16-DOF）。
+const FINGER_AXES_12 = [
   ['拇指', [[1, '腕掌屈伸'], [2, '腕掌外展'], [3, '掌指关节'], [4, '指间关节']]],
   ['食指', [[5, '掌指屈伸'], [6, '近端 / 远端指间联动']]],
   ['中指', [[7, '掌指屈伸'], [8, '近端 / 远端指间联动']]],
   ['无名指', [[9, '掌指屈伸'], [10, '近端 / 远端指间联动']]],
   ['小指', [[11, '掌指屈伸'], [12, '近端 / 远端指间联动']]],
+];
+const FINGER_AXES_16 = [
+  ['拇指', [[1, '腕掌屈伸'], [2, '腕掌外展'], [3, '掌指'], [4, '指间']]],
+  ['食指', [[5, '掌指屈伸'], [6, '指间联动'], [13, '侧摆']]],
+  ['中指', [[7, '掌指屈伸'], [8, '指间联动'], [14, '侧摆']]],
+  ['无名指', [[9, '掌指屈伸'], [10, '指间联动'], [15, '侧摆']]],
+  ['小指', [[11, '掌指屈伸'], [12, '指间联动'], [16, '侧摆']]],
 ];
 const GHOST_ORIENTATION = new THREE.Quaternion().setFromRotationMatrix(
   new THREE.Matrix4().set(0,1,0,0, 1,0,0,0, 0,0,-1,0, 0,0,0,1)
@@ -84,10 +91,12 @@ function motorReadout(card, frame, {axis, loaded, available}) {
 }
 
 function jointLoads(card, frame, readout) {
-  background(card, '接触载荷', 'J1–J12 · 模型名义力矩（N·m）');
+  const is16 = frame.dof === 16 || (frame.motor_feedback?.nominal_nm?.length ?? 0) === 16;
+  const fingerAxes = is16 ? FINGER_AXES_16 : FINGER_AXES_12;
+  background(card, '接触载荷', is16 ? 'J1–J16 · 模型名义力矩（N·m）' : 'J1–J12 · 模型名义力矩（N·m）');
   const {ctx} = card;
   const nominal = frame.motor_feedback?.nominal_nm ?? [];
-  FINGER_AXES.forEach(([finger, axes], index) => {
+  fingerAxes.forEach(([finger, axes], index) => {
     const y = 130 + index * 66;
     const width = 514 / axes.length;
     if (index) {

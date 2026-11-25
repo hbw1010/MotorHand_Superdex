@@ -1,0 +1,13 @@
+{
+  "active_commands_tested": 16,
+  "passive_following_cases": 14,
+  "non_active_commands_rejected": 65,
+  "rejected_commands_preserve_state": true,
+  "max_closure_gap_m": 1.69318793809859e-11,
+  "counts": {
+    "active": 16,
+    "passive": 64,
+    "fixed": 0
+  },
+  "srdf_scope": "Semantic annotation only; no MoveIt closed-chain planning integration claimed"
+}

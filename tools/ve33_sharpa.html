@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SuperDex · Sharpa 真机力反馈</title>
+<style>
+:root{color-scheme:dark;--base:#101b28;--border:#344a5d;--bright:#edf6fa;--soft:#a6bfce;--cyan:#86deed}
+*{box-sizing:border-box}body{margin:0;background:var(--base);color:var(--bright);font:16px system-ui,sans-serif}
+main{max-width:1440px;margin:auto;padding:clamp(16px,4vw,42px)}
+header{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+.header-left{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.task-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:10px;background:#152332}
+.task-tab{background:transparent;color:var(--soft);border:none;border-radius:7px;padding:7px 14px;font-weight:600;cursor:pointer;font:inherit}
+.task-tab:hover:not(:disabled){color:var(--bright);background:#20384b}
+.task-tab[aria-pressed="true"]{background:var(--cyan);color:#082537;font-weight:700}
+.model-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid #3a647a;border-radius:10px;background:#112435}
+.model-tabs[hidden]{display:none}
+.model-tab{background:transparent;color:var(--soft);border:none;border-radius:7px;padding:7px 12px;font-weight:600;cursor:pointer;font-size:14px}
+.model-tab:hover:not(:disabled){color:var(--bright);background:#1f3b52}
+.model-tab[aria-pressed="true"]{background:#8fe7cf;color:#08251e;font-weight:700}
+.demo-axes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:8px 14px;margin-top:10px}
+.demo-axis-item{display:flex;flex-direction:column;gap:4px;padding:8px 10px;border:1px solid #293e50;border-radius:8px;background:#101d2b;font-size:13px}
+.demo-axis-item.abd-axis{border-color:#3a7d8f;background:#102533}
+.demo-axis-head{display:flex;justify-content:space-between;align-items:center;gap:6px;color:var(--soft)}
+.demo-axis-head strong{color:var(--bright);font-weight:600}
+.demo-axis-item input[type=range]{width:100%}
+.preset-btn{background:#20384b;color:var(--bright);font-size:13px;padding:6px 10px;font-weight:600}
+.preset-btn.active{background:#8fe7cf;color:#08251e}
+#task-switch-status{font-size:14px;color:#f4ca89}
+h1{font-size:clamp(22px,4vw,32px);margin:0;letter-spacing:.025em}
+h2{font-size:18px;margin:0}
+button,select{font:inherit;border:1px solid var(--border);border-radius:7px;padding:8px 13px;background:#20384b;color:var(--bright);cursor:pointer}
+button{background:var(--cyan);color:#082537;font-weight:700}button:disabled{opacity:.45;cursor:default}
+input[type=text],input[type=number]{font:inherit;border:1px solid var(--border);border-radius:7px;padding:7px 10px;background:#101b28;color:var(--bright)}
+input[type=range]{width:115px;accent-color:var(--cyan)}output{min-width:44px;color:var(--cyan)}
+#sharpa-panel{display:flex;flex-direction:column;gap:14px}
+.sharpa-card{border:1px solid var(--border);border-radius:12px;background:#152332;padding:15px 17px}
+.sharpa-card.real-card{border-color:#3a7d6d}
+.sharpa-card.sim-card{border-color:#5a6b82;background:#13202e}
+.sharpa-split{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+@media(max-width:1060px){.sharpa-split{grid-template-columns:1fr}}
+.sharpa-row{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.sharpa-row label{display:flex;gap:7px;align-items:center}
+.sharpa-btn-real{background:#8fe7cf;color:#08251e}
+.sharpa-btn-sim{background:#9ec5ff;color:#0a1d38}
+.sharpa-btn-record{background:#f7b277;color:#261306}
+.sharpa-btn-replay{background:#c5b3ff;color:#1b1138}
+.sharpa-btn-danger{background:#f6a497;color:#26161a}
+.sharpa-btn-secondary{background:#20384b;color:var(--bright)}
+.sharpa-btn-takeover{background:#f4ca89;color:#1d1607;font-size:16px;padding:9px 16px}
+.sharpa-btn-takeover[data-active="yes"]{background:#8fe7cf;color:#08251e}
+.sharpa-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.sharpa-badge{padding:4px 10px;border-radius:999px;background:#1c2f41;color:var(--soft);font-size:14px;border:1px solid #2c4357}
+.sharpa-badge.ok{color:#8fe7cf;border-color:#3a7d6d}
+.sharpa-badge.warn{color:#f4ca89;border-color:#7d683a}
+.sharpa-badge.err{color:#f6a497;border-color:#8d4242}
+.sharpa-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+@media(max-width:1020px){.sharpa-grid{grid-template-columns:1fr}}
+.g4-table{overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
+th,td{text-align:right;border-top:1px solid #293e50;padding:8px 10px}
+th{color:var(--soft);background:#1c2f41}
+th:nth-child(2),td:nth-child(2){text-align:left}
+tbody tr:hover{background:#1b3040}
+.sharpa-bar-wrap{display:inline-flex;align-items:center;gap:6px;width:130px;justify-content:flex-end}
+.sharpa-bar-bg{width:76px;height:8px;border-radius:4px;background:#101b28;overflow:hidden;border:1px solid #293e50}
+.sharpa-bar-fill{height:100%;background:var(--cyan);width:0%}
+.sharpa-bar-fill.hot{background:#f4ca89}
+#sharpa-logs{margin:8px 0 0;padding:10px 12px;border-radius:8px;background:#0d1620;border:1px solid #263a4b;color:#b7d0df;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:220px;overflow:auto;white-space:pre-wrap}
+.tag-pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;margin-left:8px;vertical-align:middle}
+.tag-real{background:#1c473e;color:#8fe7cf}
+.tag-sim{background:#1f3554;color:#9ec5ff}
+#sharpa-preview{position:relative;width:100%;aspect-ratio:16/8;min-height:300px;max-height:58vh;overflow:hidden;background:#131e2b;border:1px solid var(--border);border-radius:12px}
+#sharpa-preview canvas{display:block;width:100%;height:100%;touch-action:none}
+.sharpa-3d-overlay{position:absolute;left:12px;right:12px;top:10px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;gap:10px}
+.sharpa-3d-overlay span{background:rgba(16,27,40,.78);padding:5px 10px;border-radius:8px;font-size:13px;color:#d8eff5;border:1px solid rgba(52,74,93,.8)}
+.sharpa-3d-overlay button{pointer-events:auto;padding:5px 10px;font-size:13px}
+</style>
+<main>
+<header>
+  <div class="header-left">
+    <h1>Sharpa 真机力反馈</h1>
+    <nav id="task-tabs" class="task-tabs" aria-label="任务切换">
+      <button type="button" class="task-tab" data-task="local_grasp" aria-pressed="false">固定腕部抓握</button>
+      <button type="button" class="task-tab" data-task="tabletop" aria-pressed="false">VR 桌面多物体</button>
+      <button type="button" class="task-tab" data-task="sharpa_real" aria-pressed="true">sharpa真机力反馈</button>
+    </nav>
+    <nav id="hand-model-tabs" class="model-tabs" aria-label="手部自由度型号切换">
+      <button type="button" class="model-tab" data-hand-model="12dof" aria-pressed="true">12-DOF (VE40)</button>
+      <button type="button" class="model-tab" data-hand-model="16dof" aria-pressed="false">16-DOF</button>
+    </nav>
+    <span id="task-switch-status" role="status"></span>
+  </div>
+  <button type="button" id="sharpa-stop" class="sharpa-btn-danger" disabled>安全停止并卸力 (Esc)</button>
+</header>
+
+<section id="sharpa-panel" aria-label="Sharpa 仿真与真机控制台">
+  <!-- 实时 3D 并排可视化视窗（MotorHand VE40 + Sharpa WaveSE + 仿真抓握球） -->
+  <div id="sharpa-preview" aria-label="MotorHand VE40 与 Sharpa 并排 3D 实时可视化">
+    <div class="sharpa-3d-overlay">
+      <span id="sharpa-3d-status">正在初始化 3D 可视化视窗…</span>
+      <button type="button" id="sharpa-reset-cam" class="sharpa-btn-secondary">重置视角</button>
+    </div>
+  </div>
+
+  <!-- 顶部全局状态条 -->
+  <div class="sharpa-card" style="padding:12px 17px">
+    <div class="sharpa-row" style="justify-content:space-between;margin:0">
+      <div>
+        <strong id="sharpa-status-text" style="font-size:17px;color:#f4ca89">正在连接 Sharpa 控制服务…</strong>
+      </div>
+      <div class="sharpa-row" style="margin:0">
+        <label>手侧
+          <select id="sharpa-hand">
+            <option value="right">右手 (WaveSE-R-01)</option>
+            <option value="left">左手 (WaveSE-L-01)</option>
+          </select>
+        </label>
+        <label title="位置阻抗接触刚度 Kp = (5 + 55×硬度) × 2.7，上限 80 N·m/rad，单轴预算 9.5 N·m">位置阻抗硬度 <input id="sharpa-hardness" type="range" min="0" max="1" step="0.05" value="0.30"><output id="sharpa-hardness-val" style="min-width:128px">0.30 (Kp≈58)</output></label>
+        <label>频率 Hz <input id="sharpa-rate" type="number" min="10" max="200" value="50" style="width:72px"></label>
+      </div>
+    </div>
+    <div class="sharpa-badges" id="sharpa-badges"></div>
+    <p id="sharpa-message" role="status" style="margin:6px 0 0;min-height:1.2em;color:#f4ca89"></p>
+  </div>
+
+  <!-- 仿真 vs 真机 严格分离的双区面板 -->
+  <div class="sharpa-split">
+    <!-- 左区：真机控制 -->
+    <div class="sharpa-card real-card">
+      <div class="sharpa-row" style="justify-content:space-between;margin-top:0">
+        <h2>Sharpa 真机控制 <span class="tag-pill tag-real">真机硬件</span></h2>
+        <div class="sharpa-row" style="margin:0">
+          <button type="button" id="sharpa-discover" class="sharpa-btn-secondary">发现真机</button>
+          <button type="button" id="sharpa-clear-latch" class="sharpa-btn-secondary" title="仅清除插拔网线导致的 0x0907 锁存警告">清网线锁存</button>
+          <button type="button" id="sharpa-inspect" class="sharpa-btn-secondary">只读体检</button>
+        </div>
+      </div>
+      <div class="sharpa-row">
+        <label>SN <input id="sharpa-serial" type="text" placeholder="点击「发现真机」或输入 SN" size="18"></label>
+        <label>固件 <input id="sharpa-firmware" type="text" value="3.0.10" size="7"></label>
+      </div>
+      <div class="sharpa-row">
+        <label>真机模式
+          <select id="sharpa-real-mode">
+            <option value="force-contact">位置阻抗力反馈 · MIT Pos/Kp/Kd 阻挡墙 (force-contact)</option>
+            <option value="force-linear">纯力矩线性反射 · MIT Tor 前馈 (force-linear)</option>
+            <option value="teleop">真机纯遥操 · 手套只读无出力 (teleop)</option>
+          </select>
+        </label>
+      </div>
+      <p style="margin:4px 0 6px;font-size:13px;color:var(--soft)">注：<code>force-contact</code> 为<strong>驱动器位置力反馈</strong>（受阻时由驱动器 MIT <code>Kp/Kd/目标角</code> 顶住虚拟接触面，单轴名义预算 9.5 N·m；自由空间仅轻摩擦补偿，与前两个仿真标签的纯前馈力矩机制不同）。</p>
+      <div class="sharpa-row">
+        <label><input id="sharpa-skip-home" type="checkbox" checked>手套已佩戴，跳过启动伺服回零</label>
+        <label style="color:#f4ca89;font-weight:600"><input id="sharpa-execute" type="checkbox">确认允许真机出力 (--execute)</label>
+      </div>
+      <div class="sharpa-row" style="margin-bottom:0">
+        <button type="button" id="sharpa-start-real" class="sharpa-btn-real">启动真机</button>
+      </div>
+    </div>
+
+    <!-- 右区：离线仿真 -->
+    <div class="sharpa-card sim-card">
+      <div class="sharpa-row" style="justify-content:space-between;margin-top:0">
+        <h2>离线仿真验证 <span class="tag-pill tag-sim">仅仿真</span></h2>
+      </div>
+      <div class="sharpa-row">
+        <label>仿真模式
+          <select id="sharpa-sim-mode">
+            <option value="sim-teleop">虚拟 Sharpa + 真实手套控制 (sim-teleop)</option>
+            <option value="sim">纯离线仿真 · 假手套演示 (sim)</option>
+          </select>
+        </label>
+      </div>
+      <div class="sharpa-row">
+        <label><input id="sharpa-with-object" type="checkbox" checked>仿真加载抓握球（测试接触力反馈）</label>
+        <label><input id="sharpa-sim-feedback" type="checkbox">仿真时开启手套真机力反馈</label>
+      </div>
+      <div class="sharpa-row" style="margin-bottom:0">
+        <button type="button" id="sharpa-start-sim" class="sharpa-btn-sim">启动仿真</button>
+        <button type="button" id="sharpa-sim-to-real" class="sharpa-btn-real" hidden>仿真切真机 · 启动真机</button>
+      </div>
+      <p id="sharpa-sim-hint" style="margin:8px 0 0;font-size:13px;color:var(--soft)">仿真与真机完全隔离；仿真验证无误后，可直接点击「启动真机」一键停仿真并切入真机控制。</p>
+    </div>
+  </div>
+
+  <!-- 全轴交互式仿真控制（离线仿真 sim 模式下可直接驱动 12/16 轴含 J13–J16 侧摆） -->
+  <div id="sharpa-demo-axes-card" class="sharpa-card sim-card" hidden>
+    <div class="sharpa-row" style="justify-content:space-between;margin-top:0">
+      <div>
+        <h2 id="sharpa-demo-axes-title" style="display:inline">全轴交互仿真控制（假手套测试）</h2>
+        <span id="sharpa-demo-axes-mode" style="color:var(--soft);font-size:13px;margin-left:8px">自动演示波形中</span>
+      </div>
+      <div class="sharpa-row" style="margin:0;gap:6px">
+        <button type="button" class="preset-btn" data-sharpa-preset="auto">自动演示</button>
+        <button type="button" class="preset-btn" data-sharpa-preset="open">摊平零位</button>
+        <button type="button" class="preset-btn" data-sharpa-preset="fist">握拳</button>
+        <button type="button" class="preset-btn" data-sharpa-preset="spread_out" data-16-only="1">四指扇形张开</button>
+        <button type="button" class="preset-btn" data-sharpa-preset="spread_in" data-16-only="1">四指并拢</button>
+        <button type="button" class="preset-btn" data-sharpa-preset="pinch_index">食指对指</button>
+        <button type="button" class="preset-btn" data-sharpa-preset="pinch_middle">中指对指</button>
+      </div>
+    </div>
+    <div id="sharpa-demo-axes-grid" class="demo-axes-grid"></div>
+  </div>
+
+  <!-- 数据录制 · 数据回放 · 实时接管 独立操作条 -->
+  <div class="sharpa-card">
+    <div class="sharpa-row" style="justify-content:space-between;margin-top:0">
+      <h2>数据录制 · 数据回放 · 实时接管</h2>
+      <div class="sharpa-row" style="margin:0">
+        <label>录制/回放目标
+          <select id="sharpa-data-target">
+            <option value="real">Sharpa 真机</option>
+            <option value="sim">离线仿真</option>
+          </select>
+        </label>
+        <label>已录轨迹
+          <select id="sharpa-trajectory"><option value="">（暂无已录制轨迹）</option></select>
+        </label>
+        <button type="button" id="sharpa-refresh-rec" class="sharpa-btn-secondary" style="padding:6px 10px;font-size:14px">刷新</button>
+      </div>
+    </div>
+    <div class="sharpa-row" style="margin-bottom:0">
+      <button type="button" id="sharpa-btn-record" class="sharpa-btn-record">数据录制（遥操并保存 .jsonl）</button>
+      <button type="button" id="sharpa-btn-record-ro" class="sharpa-btn-secondary" title="不驱动 Sharpa，仅只读记录当前 22 轴轨迹">只读录制</button>
+      <button type="button" id="sharpa-btn-replay" class="sharpa-btn-replay">数据回放（支持随时接管）</button>
+      <button type="button" id="sharpa-takeover-toggle" class="sharpa-btn-takeover" data-active="no" disabled>人手接管 Sharpa (Space)</button>
+    </div>
+    <p style="margin:8px 0 0;font-size:13px;color:var(--soft)">操作流程：先点 <strong>数据录制</strong> 录下 22 轴动作 → 停机保存 → 选择轨迹点 <strong>数据回放</strong>（回放期手套 MIT 位置跟随 <code>kp=45</code> 同步姿态）→ 随时点 <strong>人手接管 Sharpa</strong>（或按 <strong>Space</strong>）无缝切入人手主导 + 位置阻抗力反馈，再按恢复回放。</p>
+  </div>
+
+  <!-- 实时遥测 -->
+  <div class="sharpa-grid">
+    <div class="sharpa-card">
+      <h2 style="margin:0 0 8px">Sharpa 22 轴实时姿态与受力反馈</h2>
+      <div class="g4-table">
+        <table>
+          <thead><tr><th>#</th><th>Sharpa 关节</th><th>实测 rad</th><th>目标 rad</th><th>负载力矩 N·m</th><th>受阻</th></tr></thead>
+          <tbody id="sharpa-joints-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="sharpa-card">
+      <h2 id="sharpa-glove-heading" style="margin:0 0 8px">MotorHand 12 轴位置阻抗力反馈（MIT Pos / Kp / Kd）</h2>
+      <div class="g4-table">
+        <table>
+          <thead><tr><th>轴</th><th>实测角 rad</th><th>目标角 rad</th><th>Kp</th><th>Kd</th><th>估算力矩 N·m</th></tr></thead>
+          <tbody id="sharpa-glove-body"></tbody>
+        </table>
+      </div>
+      <h2 style="margin:14px 0 6px;font-size:16px">运行日志（motorhand_sharpa）</h2>
+      <pre id="sharpa-logs">尚未启动 Sharpa 会话。</pre>
+    </div>
+  </div>
+</section>
+</main>
+<script type="module" src="/sharpa-viewer.js"></script>
+<script type="module" src="/sharpa-control.js"></script>
+</html>

@@ -68,9 +68,9 @@ extern "C" {
 uint32_t g4_joint_size() { return sizeof(G4Joint); }
 int64_t g4_now_ns() { return MonotonicNs(); }
 
-static void* OpenGateway(const char* port, int baud, unsigned hz, bool wait_for_first_packets) {
+static void* OpenGateway(const char* port, int baud, unsigned hz, bool wait_for_first_packets, int axis_count = 12) {
     auto* shim = new Shim();
-    if (!shim->client.Connect(port, baud, hz, false, wait_for_first_packets)) {
+    if (!shim->client.Connect(port, baud, hz, false, wait_for_first_packets, static_cast<size_t>(axis_count))) {
         delete shim;
         return nullptr;
     }
@@ -80,12 +80,20 @@ static void* OpenGateway(const char* port, int baud, unsigned hz, bool wait_for_
 }
 
 void* g4_open(const char* port, int baud, unsigned hz) {
-    return OpenGateway(port, baud, hz, true);
+    return OpenGateway(port, baud, hz, true, 12);
 }
 
-// 重连使用干净的 SDK/路由/看门狗状态，以 12 轴实测新样本作为就绪依据。
+void* g4_open_axes(const char* port, int baud, unsigned hz, int axis_count) {
+    return OpenGateway(port, baud, hz, true, axis_count);
+}
+
+// 重连使用干净的 SDK/路由/看门狗状态，以实测新样本作为就绪依据。
 void* g4_open_fresh(const char* port, int baud, unsigned hz) {
-    return OpenGateway(port, baud, hz, false);
+    return OpenGateway(port, baud, hz, false, 12);
+}
+
+void* g4_open_fresh_axes(const char* port, int baud, unsigned hz, int axis_count) {
+    return OpenGateway(port, baud, hz, false, axis_count);
 }
 
 int g4_transport_lost(void* h) {
@@ -103,7 +111,16 @@ int g4_transport_lost(void* h) {
 // 仅读取位置。采集期间和关闭时均不发送电机控制帧。
 void* g4_open_reader(const char* port) {
     auto* shim = new Shim();
-    if (!shim->client.Connect(port, 921600, 200, true)) {
+    if (!shim->client.Connect(port, 921600, 200, true, true, 12)) {
+        delete shim;
+        return nullptr;
+    }
+    return shim;
+}
+
+void* g4_open_reader_axes(const char* port, int axis_count) {
+    auto* shim = new Shim();
+    if (!shim->client.Connect(port, 921600, 200, true, true, static_cast<size_t>(axis_count))) {
         delete shim;
         return nullptr;
     }
@@ -128,7 +145,8 @@ void g4_set_disabled_mask(void* h, uint32_t mask) {
     auto* shim = static_cast<Shim*>(h);
     std::lock_guard<std::mutex> lock(shim->mutex);
     shim->disabled_mask = mask;
-    for (uint16_t id = 1; id <= 12; ++id) {
+    const size_t n = shim->client.AxisCount();
+    for (uint16_t id = 1; id <= n; ++id) {
         if (mask & (1u << (id - 1))) {
             const uint8_t bus = shim->client.BusForId(id);
             shim->pending.erase({bus, id});
@@ -139,13 +157,12 @@ void g4_set_disabled_mask(void* h, uint32_t mask) {
 
 int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadline_ns,
                       int64_t previous_deadline_ns) {
-    constexpr int axes = 12;
-    if (!h || !commands || count != axes) return -1;
+    if (!h || !commands || (count != 12 && count != 16)) return -1;
     auto* shim = static_cast<Shim*>(h);
     std::lock_guard<std::mutex> lock(shim->mutex);
     if (shim->client.TransportLost()) return -1;
-    std::array<std::pair<lqs::JointKey, MotorCommand>, axes> batch;
-    for (int axis = 0; axis < axes; ++axis) {
+    std::array<std::pair<lqs::JointKey, MotorCommand>, lqs::HandClientG4::kMaxAxes> batch;
+    for (int axis = 0; axis < count; ++axis) {
         const float* fields = commands + axis * 5;
         for (int field = 0; field < 5; ++field) {
             if (!std::isfinite(fields[field])) return -1;
@@ -167,7 +184,7 @@ int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadli
         }
     }
     if (previous_deadline_ns) {
-        for (int axis = 0; axis < axes; ++axis) {
+        for (int axis = 0; axis < count; ++axis) {
             if (shim->disabled_mask & (1u << axis)) continue;
             const auto& entry = batch[axis];
             auto it = shim->pending.find(entry.first);
@@ -175,8 +192,8 @@ int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadli
         }
     }
     const auto submit_before = previous_deadline_ns ? std::min(previous_deadline_ns, deadline_ns) : deadline_ns;
-    if (!shim->client.SetCommandBatchBefore(batch, submit_before)) return 0;
-    for (int axis = 0; axis < axes; ++axis) {
+    if (!shim->client.SetCommandBatchBefore(batch.data(), static_cast<size_t>(count), submit_before)) return 0;
+    for (int axis = 0; axis < count; ++axis) {
         if (shim->disabled_mask & (1u << axis)) {
             shim->pending.erase(batch[axis].first);
             continue;
@@ -187,14 +204,13 @@ int g4_renew_mit_batch(void* h, const float* commands, int count, int64_t deadli
 }
 
 int g4_homing_mit_batch(void* h, const float* commands, int count, uint32_t active_mask, int64_t deadline_ns) {
-    constexpr int axes = 12;
-    if (!h || !commands || count != axes) return -1;
+    if (!h || !commands || (count != 12 && count != 16)) return -1;
     auto* shim = static_cast<Shim*>(h);
     std::lock_guard<std::mutex> lock(shim->mutex);
     if (shim->client.TransportLost()) return -1;
     const uint32_t effective_mask = active_mask & ~shim->disabled_mask;
-    std::array<std::pair<lqs::JointKey, MotorCommand>, axes> batch;
-    for (int axis = 0; axis < axes; ++axis) {
+    std::array<std::pair<lqs::JointKey, MotorCommand>, lqs::HandClientG4::kMaxAxes> batch;
+    for (int axis = 0; axis < count; ++axis) {
         const float* fields = commands + axis * 5;
         for (int field = 0; field < 5; ++field) {
             if (!std::isfinite(fields[field])) return -1;
@@ -215,8 +231,8 @@ int g4_homing_mit_batch(void* h, const float* commands, int count, uint32_t acti
             command.is_mit_mode = false;
         }
     }
-    if (!shim->client.SetCommandBatchBefore(batch, deadline_ns)) return 0;
-    for (int axis = 0; axis < axes; ++axis) {
+    if (!shim->client.SetCommandBatchBefore(batch.data(), static_cast<size_t>(count), deadline_ns)) return 0;
+    for (int axis = 0; axis < count; ++axis) {
         if (effective_mask & (1u << axis)) {
             shim->pending[batch[axis].first] = Pending{deadline_ns, 0};
         } else {
@@ -240,7 +256,7 @@ void g4_release(void* h, uint32_t bus, uint32_t id) {
     std::lock_guard<std::mutex> lock(shim->mutex);
     const uint8_t target_bus = bus == 0 ? shim->client.BusForId(uint16_t(id)) : uint8_t(bus);
     lqs::JointKey key{target_bus, uint16_t(id)};
-    if (id >= 1 && id <= 12 && (shim->disabled_mask & (1u << (id - 1)))) {
+    if (id >= 1 && id <= lqs::HandClientG4::kMaxAxes && (shim->disabled_mask & (1u << (id - 1)))) {
         shim->pending.erase(key);
         shim->client.DisableJoint(target_bus, uint16_t(id));
         return;

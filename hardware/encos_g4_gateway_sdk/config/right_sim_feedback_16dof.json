@@ -1,0 +1,71 @@
+{
+  "dof": 16,
+  "driver_impedance": {
+    "stiffness_nm_per_rad": [5.0, 60.0],
+    "gain": 1.0,
+    "damping_s": 0.008,
+    "damping_max": 0.5,
+    "joint_gain": [1.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    "k_max_nm_per_rad": [100.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0],
+    "position_compensation_gain": 2.0,
+    "position_compensation_max_nm": 3.0,
+    "release_lookahead_s": 0.02,
+    "rebound_mode": "soften",
+    "damping_off_velocity_rad_s": 0.15,
+    "damping_on_velocity_rad_s": 0.05,
+    "torque_margin": 0.95
+  },
+  "torque_limit_nm": [15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0, 15.0],
+  "friction_comp": {
+    "enabled": true,
+    "coulomb_nm": [0.35, 0.15, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.25, 0.25, 0.25, 0.25],
+    "viscous_nm_s_per_rad": 0.04,
+    "velocity_scale_rad_s": 0.09,
+    "velocity_deadband_rad_s": 0.025,
+    "gain": 1.0,
+    "max_nm": [0.48, 0.25, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48, 0.40, 0.40, 0.40, 0.40]
+  },
+  "velocity_filter_hz": 20.0,
+  "feedback_ramp_s": 0.15,
+  "release_margin_rad": 0.01,
+  "stale_release_clearance_m": 0.01,
+  "torque_sign": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+  "control_hz": 100.0,
+  "command_ttl_s": 0.1,
+  "hardness": 0.92,
+  "wrist_tracker_offset_m": [0.053, 0.01529, 0.09343],
+  "wrist_tracker_pose": [-0.083883, 0.041709, 0.054733, -0.209216, 0.698881, -0.312492, 0.608394],
+  "disabled_motor_ids": [],
+  "preserve_zero_on_reconnect": true,
+  "stall_homing": {
+    "enabled": true,
+    "torque_nm": [1.2, 0.9, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.8],
+    "damping_kd": 0.12,
+    "direction_sign": [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
+    "stop_offset_deg": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "stall_velocity_deg_s": 3.0,
+    "stall_span_deg": 1.2,
+    "stall_dwell_s": 0.25,
+    "min_run_s": 0.35,
+    "timeout_s": 5.0,
+    "max_travel_deg": 180.0,
+    "skip_motor_ids": []
+  },
+  "feedback_profiles": {
+    "nominal": {
+      "anchors_nm": [[0.0, 0.0], [0.03, 0.03], [0.27745119178421784, 9.0], [1.0, 14.25]]
+    },
+    "nominal-plus": {
+      "anchors_nm": [[0.0, 0.0], [0.03, 0.03], [0.12, 6.5], [0.27745119178421784, 11.5], [1.0, 14.25]]
+    },
+    "nominal-fingers": {
+      "anchors_nm": [[0.0, 0.0], [0.03, 0.03], [0.12, 6.5], [0.27745119178421784, 11.5], [1.0, 14.25]],
+      "axis_curves": [
+        {
+          "motor_ids": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+          "anchors_nm": [[0.0, 0.0], [0.03, 0.03], [0.08, 6.5], [0.16, 10.5], [0.27745119178421784, 11.5], [1.0, 14.25]]
+        }
+      ]
+    }
+  }
+}

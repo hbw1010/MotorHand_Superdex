@@ -1,0 +1,105 @@
+{
+  "source_file_changes": [
+    "中指电机外骨骼.SLDASM",
+    "中指联动机构.SLDASM",
+    "右手.SLDPRT",
+    "大拇指电机外骨骼.SLDASM",
+    "大拇指电机外骨骼前端.SLDASM",
+    "大拇指联动机构.SLDASM",
+    "小拇指电机外骨骼.SLDASM",
+    "小拇指联动机构.SLDASM",
+    "手部电机外骨骼.SLDASM",
+    "指间电机.SLDASM",
+    "无名指电机外骨骼.SLDASM",
+    "无名指联动机构.SLDASM",
+    "装配体1.SLDASM",
+    "食指电机外骨骼.SLDASM",
+    "食指联动机构.SLDASM"
+  ],
+  "visible_components": 115,
+  "changed_component_poses": 16,
+  "changed_poses": [
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-1-1",
+      "translation_m": 0.003841880146372138,
+      "rotation_deg": 1.6661465951123833E-16
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-2-1",
+      "translation_m": 0.0029881290027333604,
+      "rotation_deg": 3.084441452413278E-15
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-3-1",
+      "translation_m": 2.7633747496715815E-15,
+      "rotation_deg": 8.159616425958793
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/测试-关节1-4-1",
+      "translation_m": 2.712257768150411E-15,
+      "rotation_deg": 8.159616425958756
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/第一指节主动连杆-1",
+      "translation_m": 0.004349485885342363,
+      "rotation_deg": 2.9788056122545917E-15
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/第一指节从动连杆-1",
+      "translation_m": 0.003848939853819189,
+      "rotation_deg": 8.15961642595901
+    },
+    {
+      "component": "大拇指电机外骨骼-2/指间电机-1/指间电机动子-1",
+      "translation_m": 0.0008414701054995198,
+      "rotation_deg": 2.11357333167065
+    },
+    {
+      "component": "大拇指电机外骨骼-2/指间电机-1/指间电机定子-1",
+      "translation_m": 0.0008414701056274841,
+      "rotation_deg": 2.1135733316706493
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/第二三指节主动连杆-1",
+      "translation_m": 0.014101173149594625,
+      "rotation_deg": 37.6211114195687
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/第二指节从动连杆-1",
+      "translation_m": 0.016967810935428162,
+      "rotation_deg": 15.711805308026513
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第一指关节-1",
+      "translation_m": 0.0024901075022792252,
+      "rotation_deg": 8.159616425958884
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/联动机构-外骨骼第三指关节-1",
+      "translation_m": 0.009728234385511824,
+      "rotation_deg": 27.6750032119875
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指间电机-1/指间电机动子-1",
+      "translation_m": 0.004349485885340776,
+      "rotation_deg": 6.0650794490385226E-15
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/指间电机-1/指间电机定子-1",
+      "translation_m": 0.005427495502317437,
+      "rotation_deg": 8.159616425958783
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/指间电机-1/指间电机动子-1",
+      "translation_m": 0.02101570006783021,
+      "rotation_deg": 37.62111141956834
+    },
+    {
+      "component": "大拇指电机外骨骼-2/大拇指电机外骨骼前端-1/大拇指联动机构-1/指间电机-1/指间电机定子-1",
+      "translation_m": 0.009014540610939462,
+      "rotation_deg": 8.159616425958863
+    }
+  ],
+  "mesh_reuse_reason": "Only assembly state changed; all 41 reused part/configuration meshes match unchanged actual part-file hashes",
+  "reused_mesh_configurations": 41
+}

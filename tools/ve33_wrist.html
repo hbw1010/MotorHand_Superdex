@@ -14,6 +14,11 @@ header{display:flex;gap:14px;align-items:center;justify-content:space-between;fl
 .task-tab{background:transparent;color:var(--soft);border:none;border-radius:7px;padding:7px 14px;font-weight:600;cursor:pointer}
 .task-tab:hover:not(:disabled){color:var(--bright);background:#20384b}
 .task-tab[aria-pressed="true"]{background:var(--cyan);color:#082537;font-weight:700}
+.model-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid #3a647a;border-radius:10px;background:#112435}
+.model-tabs[hidden]{display:none}
+.model-tab{background:transparent;color:var(--soft);border:none;border-radius:7px;padding:7px 12px;font-weight:600;cursor:pointer;font-size:14px}
+.model-tab:hover:not(:disabled){color:var(--bright);background:#1f3b52}
+.model-tab[aria-pressed="true"]{background:#8fe7cf;color:#08251e;font-weight:700}
 #task-switch-status{font-size:14px;color:#f4ca89}
 h1{font-size:clamp(22px,4vw,32px);margin:0;letter-spacing:.025em}
 button,select{font:inherit;border:1px solid var(--border);border-radius:7px;padding:9px 13px;background:#20384b;color:var(--bright)}
@@ -26,6 +31,14 @@ button{background:var(--cyan);color:#082537;font-weight:700}button:disabled{opac
 .cube-settings button{background:#20384b;color:var(--bright)}
 .local-grasp{margin:13px 0;padding:13px 15px;border:1px solid var(--border);border-radius:10px;background:#152332}
 .local-grasp .controls{margin:5px 0}.local-grasp output{min-width:50px}
+.demo-axes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px;margin-top:10px}
+.demo-axis-item{display:flex;flex-direction:column;gap:4px;padding:8px 10px;border:1px solid #293e50;border-radius:8px;background:#101d2b;font-size:13px}
+.demo-axis-item.abd-axis{border-color:#3a7d8f;background:#102533}
+.demo-axis-head{display:flex;justify-content:space-between;align-items:center;gap:6px;color:var(--soft)}
+.demo-axis-head strong{color:var(--bright);font-weight:600}
+.demo-axis-item input[type=range]{width:100%}
+.preset-btn{background:#20384b;color:var(--bright);font-size:14px;padding:6px 11px;font-weight:600}
+.preset-btn.active{background:#8fe7cf;color:#08251e}
 a{color:var(--cyan)}
 input[type=range]{width:110px;accent-color:var(--cyan)} output{min-width:43px;color:var(--cyan)}
 #status{margin:0;color:#d8eff5}p{line-height:1.55;color:var(--soft)}
@@ -46,6 +59,11 @@ th:nth-child(2),td:nth-child(2){text-align:left}tbody tr:hover{background:#1b304
     <nav id="task-tabs" class="task-tabs" aria-label="仿真任务切换" hidden>
       <button type="button" class="task-tab" data-task="local_grasp" aria-pressed="false">固定腕部抓握</button>
       <button type="button" class="task-tab" data-task="tabletop" aria-pressed="false">VR 桌面多物体</button>
+      <button type="button" class="task-tab" data-task="sharpa_real" aria-pressed="false">sharpa真机力反馈</button>
+    </nav>
+    <nav id="hand-model-tabs" class="model-tabs" aria-label="手部自由度型号切换">
+      <button type="button" class="model-tab" data-hand-model="12dof" aria-pressed="true">12-DOF (VE40)</button>
+      <button type="button" class="model-tab" data-hand-model="16dof" aria-pressed="false">16-DOF</button>
     </nav>
     <span id="task-switch-status" role="status"></span>
   </div>
@@ -97,6 +115,21 @@ th:nth-child(2),td:nth-child(2){text-align:left}tbody tr:hover{background:#1b304
     <a id="grasp-csv" href="/api/v1/recording.csv" download hidden>下载 CSV</a>
     <span id="grasp-message" role="status"></span>
   </div>
+</section>
+<section id="demo-axes-panel" class="local-grasp" aria-label="全轴交互式仿真控制" hidden>
+  <div class="controls" style="justify-content:space-between;margin-top:0">
+    <div><strong id="demo-axes-title">全轴交互仿真控制（无硬件测试）</strong> <span id="demo-axes-mode" style="color:var(--soft);font-size:14px;margin-left:8px">自动演示波形中</span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="preset-btn" data-demo-preset="auto">自动演示</button>
+      <button type="button" class="preset-btn" data-demo-preset="open">摊平零位</button>
+      <button type="button" class="preset-btn" data-demo-preset="fist">握拳</button>
+      <button type="button" class="preset-btn" data-demo-preset="spread_out" data-16-only="1">四指扇形张开</button>
+      <button type="button" class="preset-btn" data-demo-preset="spread_in" data-16-only="1">四指并拢</button>
+      <button type="button" class="preset-btn" data-demo-preset="pinch_index">食指对指</button>
+      <button type="button" class="preset-btn" data-demo-preset="pinch_middle">中指对指</button>
+    </div>
+  </div>
+  <div id="demo-axes-grid" class="demo-axes-grid"></div>
 </section>
 <section id="g4-control" aria-label="MotorHand 网页控制台">
 <div class="g4-header">

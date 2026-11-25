@@ -1,0 +1,86 @@
+{
+  "index_base": 1,
+  "reason": "Restore the finger grouping order displayed in the previous 12-input viewer",
+  "mapping": [
+    {
+      "joint": "thumb_cmc_flex_motor_joint",
+      "previous_16dof_index": 9,
+      "index": 1
+    },
+    {
+      "joint": "thumb_cmc_abd_motor_joint",
+      "previous_16dof_index": 10,
+      "index": 2
+    },
+    {
+      "joint": "thumb_mcp_motor_joint",
+      "previous_16dof_index": 11,
+      "index": 3
+    },
+    {
+      "joint": "thumb_ip_motor_joint",
+      "previous_16dof_index": 12,
+      "index": 4
+    },
+    {
+      "joint": "index_mcp_motor_joint",
+      "previous_16dof_index": 3,
+      "index": 5
+    },
+    {
+      "joint": "index_pip_dip_motor_joint",
+      "previous_16dof_index": 4,
+      "index": 6
+    },
+    {
+      "joint": "middle_mcp_motor_joint",
+      "previous_16dof_index": 1,
+      "index": 7
+    },
+    {
+      "joint": "middle_pip_dip_motor_joint",
+      "previous_16dof_index": 2,
+      "index": 8
+    },
+    {
+      "joint": "ring_mcp_motor_joint",
+      "previous_16dof_index": 5,
+      "index": 9
+    },
+    {
+      "joint": "ring_pip_dip_motor_joint",
+      "previous_16dof_index": 6,
+      "index": 10
+    },
+    {
+      "joint": "pinky_mcp_motor_joint",
+      "previous_16dof_index": 7,
+      "index": 11
+    },
+    {
+      "joint": "pinky_pip_dip_motor_joint",
+      "previous_16dof_index": 8,
+      "index": 12
+    },
+    {
+      "joint": "index_mcp_abd_motor_joint",
+      "previous_16dof_index": 13,
+      "index": 13
+    },
+    {
+      "joint": "middle_mcp_abd_motor_joint",
+      "previous_16dof_index": 14,
+      "index": 14
+    },
+    {
+      "joint": "ring_mcp_abd_motor_joint",
+      "previous_16dof_index": 15,
+      "index": 15
+    },
+    {
+      "joint": "pinky_mcp_abd_motor_joint",
+      "previous_16dof_index": 16,
+      "index": 16
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "coupler": "侧摆连杆-3",
+    "automatic_guess": [
+      "侧摆连杆-3",
+      "无名指电机外骨骼-1/侧摆从动连杆-1"
+    ],
+    "actual_owner": "无名指电机外骨骼-1/侧摆从动连杆-1",
+    "evidence": "SolidWorks IMateEntity2.ReferenceComponent + IEntity.GetComponent"
+  },
+  {
+    "coupler": "侧摆连杆-4",
+    "automatic_guess": [
+      "侧摆连杆-4",
+      "小拇指电机外骨骼-2/侧摆从动连杆-1"
+    ],
+    "actual_owner": "小拇指电机外骨骼-2/侧摆从动连杆-1",
+    "evidence": "SolidWorks IMateEntity2.ReferenceComponent + IEntity.GetComponent"
+  }
+]

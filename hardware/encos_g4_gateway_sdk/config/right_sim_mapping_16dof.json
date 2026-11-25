@@ -1,0 +1,187 @@
+{
+  "calibrated": true,
+  "dof": 16,
+  "home_current_a": 1.0,
+  "home_current_a_by_motor": {
+    "1": 1.5
+  },
+  "id_order_confirmed": true,
+  "direction_confirmed": true,
+  "mapping_source": "16dof_cad_default_thumb_1_to_4_fingers_5_to_12_abd_13_to_16",
+  "limits_reference": "raw_motor_deg_converted_from_zero_relative_limits",
+  "motors": {
+    "1": {
+      "joint": "thumb_cmc_flex",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": -90.0,
+      "max_deg": 90.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "2": {
+      "joint": "thumb_cmc_abd",
+      "zero_deg": 0.0,
+      "sign": -1.0,
+      "scale": 1.0,
+      "min_deg": -150.0,
+      "max_deg": 150.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "3": {
+      "joint": "thumb_mcp",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": 0.0,
+      "max_deg": 90.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "4": {
+      "joint": "thumb_ip",
+      "zero_deg": 0.0,
+      "sign": -1.0,
+      "scale": 1.0,
+      "min_deg": -90.0,
+      "max_deg": 0.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "5": {
+      "joint": "index_mcp_flex",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": 0.0,
+      "max_deg": 90.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "6": {
+      "joint": "index_pip",
+      "zero_deg": 0.0,
+      "sign": -1.0,
+      "scale": 1.0,
+      "min_deg": -90.0,
+      "max_deg": 0.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "7": {
+      "joint": "middle_mcp_flex",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": 0.0,
+      "max_deg": 90.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "8": {
+      "joint": "middle_pip",
+      "zero_deg": 0.0,
+      "sign": -1.0,
+      "scale": 1.0,
+      "min_deg": -90.0,
+      "max_deg": 0.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "9": {
+      "joint": "ring_mcp_flex",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": 0.0,
+      "max_deg": 90.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "10": {
+      "joint": "ring_pip",
+      "zero_deg": 0.0,
+      "sign": -1.0,
+      "scale": 1.0,
+      "min_deg": -90.0,
+      "max_deg": 0.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "11": {
+      "joint": "pinky_mcp_flex",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": 0.0,
+      "max_deg": 90.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "12": {
+      "joint": "pinky_pip",
+      "zero_deg": 0.0,
+      "sign": -1.0,
+      "scale": 1.0,
+      "min_deg": -90.0,
+      "max_deg": 0.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "13": {
+      "joint": "index_mcp_abd",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": -35.0,
+      "max_deg": 35.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "14": {
+      "joint": "middle_mcp_abd",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": -35.0,
+      "max_deg": 35.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "15": {
+      "joint": "ring_mcp_abd",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": -35.0,
+      "max_deg": 35.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    },
+    "16": {
+      "joint": "pinky_mcp_abd",
+      "zero_deg": 0.0,
+      "sign": 1.0,
+      "scale": 1.0,
+      "min_deg": -35.0,
+      "max_deg": 35.0,
+      "speed_rpm": 30.0,
+      "current_limit_a": 0.8
+    }
+  },
+  "haptic": {
+    "torque_constant_nm_per_a": null,
+    "max_current_a": 0.25,
+    "kp": 45.0,
+    "kd": 0.5
+  },
+  "zero_calibrated_fingers": [
+    "thumb",
+    "index",
+    "middle",
+    "ring",
+    "pinky"
+  ]
+}

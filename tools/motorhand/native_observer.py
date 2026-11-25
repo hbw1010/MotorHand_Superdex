@@ -1,10 +1,11 @@
-"""本地抓握控制台和录制。数据取自 C++ 周期结束后的有序快照。"""
+"""本地抓握控制台和录制。数据取自 C++ 周期结束后的有序快照（支持 12-DOF 与 16-DOF 并列切换）。"""
 import math
 from pathlib import Path
 import time
 from types import SimpleNamespace
 
 from .feedback import CONFIG
+from .hand_profiles import AVAILABLE_HAND_MODELS, get_hand_profile
 from ve33_web_control import measure_frame_gaps
 
 
@@ -12,21 +13,27 @@ def _finite(value):
     return value if math.isfinite(value) else None
 
 
-def observe_native(sample, axes):
+def observe_native(sample, axes, *, config=None):
     """从单一控制周期解码状态，保留该周期使用的物理帧和命令期限。"""
+    cfg = CONFIG if config is None else config
+    dof = len(axes)
     ctrl = sample["feedback"]
     now = sample["now"]
     frame = sample["force"]
     matches = frame[-1] == sample["revision"]
     has_timing = matches and 0 < frame[0] <= frame[1] <= now
     source = min(frame[:2]) if matches else 0
-    ttl = int(CONFIG["command_ttl_s"] * 1e9)
+    ttl = int(cfg["command_ttl_s"] * 1e9)
     expiry = min(source, sample["stamp"]) + ttl if source and sample["stamp"] else 0
     fresh = (matches and frame[2] == 1 and source > 0 and source <= now < expiry
              and all(math.isfinite(x) for x in frame))
     nominal = ctrl.nominal if ctrl.valid_nominal else None
     sent = ctrl.sent if ctrl.valid_sent and ctrl.active else None
     speed, position, mapped, gate, weights = ctrl.dq, ctrl.position, ctrl.mapped_contact, ctrl.gate, ctrl.frame_weight
+    off_torque = 3
+    off_sim = 3 + 2 * dof
+    off_input = 3 + 3 * dof
+    off_enc = 3 + 4 * dof
     rows = []
     for i, (mid, (name, _)) in enumerate(axes.items()):
         code = sample["axis_status"][i]
@@ -34,9 +41,11 @@ def observe_native(sample, axes):
         state = {1: "在线", -2: "路由错误", -1: f"报警 {sample['errors'][i]}"}.get(code, "缺失或过期")
         rows.append(dict(id=mid, joint=name, state=state, raw_deg=_finite(sample["raw"][i]),
                          input_rad=_finite(sample["q"][i]), encoder_rad=_finite(sample["encoder"][i]),
-                         age_ms=(now-stamp)/1e6 if stamp else None,
-                         sim_rad=frame[27+i] if fresh else None, contact_motor_nm=frame[3+i] if fresh else None,
-                         contact_input_rad=frame[39+i] if fresh else None, contact_encoder_rad=frame[51+i] if fresh else None,
+                         age_ms=(now - stamp) / 1e6 if stamp else None,
+                         sim_rad=frame[off_sim + i] if fresh else None,
+                         contact_motor_nm=frame[off_torque + i] if fresh else None,
+                         contact_input_rad=frame[off_input + i] if fresh else None,
+                         contact_encoder_rad=frame[off_enc + i] if fresh else None,
                          motor_rad_s=speed[i] if nominal is not None else None,
                          position_motor_nm=position[i] if fresh and nominal is not None else None,
                          mapped_contact_nm=mapped[i] if fresh and nominal is not None else None,
@@ -52,7 +61,7 @@ def observe_native(sample, axes):
         message = "串口已打开 · 等待电机位置回包"
     elif sample["requires_new_zero"]:
         message = "网关已重连 · 请重新标零"
-    return dict(rows=rows, online=online, calibrated=sample["calibrated"],
+    return dict(rows=rows, online=online, dof=dof, calibrated=sample["calibrated"],
                 control_sample_ns=now, control_revision=sample["revision"], diagnostic_ttl_ns=ttl,
                 force_expiry_ns=expiry if fresh else 0,
                 requested=sample["requested"], active=ctrl.active, output_error=ctrl.output_error,
@@ -61,12 +70,12 @@ def observe_native(sample, axes):
                 last_feedback_interruption=ctrl.last_interruption or None, feedback_handoffs=ctrl.handoff_count,
                 last_feedback_handoff_ms=ctrl.last_handoff_gap_ms if ctrl.handoff_count else None,
                 pose_error=sample["pose_error"] or None, wrist_ms=None,
-                contact_ms=(now-source)/1e6 if source else None, contact_frame_ns=int(frame[1]) if fresh else None,
+                contact_ms=(now - source) / 1e6 if source else None, contact_frame_ns=int(frame[1]) if fresh else None,
                 physics_input_ns=int(frame[0]) if has_timing else None,
                 physics_solved_ns=int(frame[1]) if has_timing else None,
                 command_deadline_ns=ctrl.submitted_until if ctrl.valid_sent and ctrl.active else None,
-                motor_ms=(now-sample["stamp"])/1e6 if sample["stamp"] else None,
-                applied_ms=(now-frame[0])/1e6 if fresh else None, max_angle_error_rad=measure_frame_gaps(rows),
+                motor_ms=(now - sample["stamp"]) / 1e6 if sample["stamp"] else None,
+                applied_ms=(now - frame[0]) / 1e6 if fresh else None, max_angle_error_rad=measure_frame_gaps(rows),
                 control_cycle_ms=sample["cycle_ms"], control_missed_ticks=sample["missed_ticks"],
                 transport_online=sample["transport_online"], reconnect_count=sample["reconnect_count"],
                 requires_new_zero=sample["requires_new_zero"])
@@ -74,8 +83,11 @@ def observe_native(sample, axes):
 
 def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, recorder,
                        device, demo, profile, load_zero, capture_zero, mapping_identity, *,
-                       fixed_wrist=True, on_switch_task=None):
+                       fixed_wrist=True, on_switch_task=None, on_switch_hand_model=None,
+                       hand_model="12dof"):
     zero = dict.fromkeys(axes, 0.) if demo else load_zero(zero_path, axes)
+    spec = get_hand_profile(hand_model)
+
     def start(values, *, fresh_zero=False):
         loop.start([values[mid] for mid in axes] if values else [], fresh_zero=fresh_zero)
 
@@ -83,43 +95,94 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
         return {mid: SimpleNamespace(id=mid, bus=bus, valid=valid, error=alarm, angle_deg=angle, received_ns=stamp)
                 for mid, bus, valid, alarm, angle, stamp in loop.raw_for_zero()}
 
+    def demo_meta():
+        active, vals = control.demo_axes_state(len(axes))
+        return dict(
+            demo_grip=control.demo_grip.value if demo else None,
+            demo_axes_active=active if demo else False,
+            demo_axes=vals if demo else None,
+            demo_axes_limits=[list(axes[mid][1].model_rad_limits()) for mid in axes] if demo else None,
+            demo_axes_joints=[axes[mid][0] for mid in axes] if demo else None,
+        )
+
     status = dict(device="演示" if demo else str(device.resolve()), zero_path=None if demo else str(zero_path.resolve()),
                   axes=mapping_identity(axes), zero_revision=0, zero_error=None,
+                  hand_model=spec.model_id, hand_model_label=spec.label, dof=spec.dof,
+                  available_hand_models=list(AVAILABLE_HAND_MODELS),
                   task=control.current_task() or ("local_grasp" if fixed_wrist else "tabletop"),
                   available_tasks=list(control.task_names),
                   can_align=not fixed_wrist and control.align is not None, fixed_wrist=fixed_wrist,
                   demo=demo, can_zero=not demo, can_feedback=not demo, feedback_profile=profile,
                   feedback_source="joint_position_and_contact_force", feedback_gain=1., grasp_backend="cpp",
-                  control_backend="cpp", active=False, requested=False)
+                  control_backend="cpp", active=False, requested=False, **demo_meta())
     seq = 0
     waiting_for_zero = False
     settings = control.grasp_request()
-    start(zero)
+    if loop is not None:
+        start(zero)
     try:
         while renderer.is_alive():
-            next_task = control.pending_task()
-            if next_task and on_switch_task is not None and not control.zero.is_set() and not control.home.is_set():
-                status.update(requested=False, active=False, feedback_message="正在切换仿真任务…")
+            next_model = control.pending_hand_model()
+            if next_model and on_switch_hand_model is not None and not control.zero.is_set() and not control.home.is_set():
+                status.update(requested=False, active=False, feedback_message=f"正在切换手部型号至 {next_model}…")
                 control.publish(status)
-                renderer, fixed_wrist = on_switch_task(renderer, next_task)
-                status.update(task=next_task, fixed_wrist=fixed_wrist,
-                              can_align=not fixed_wrist and control.align is not None)
+                renderer, fixed_wrist, new_loop, axes, zero_path, spec = on_switch_hand_model(renderer, next_model)
+                loop = new_loop
+                seq = 0
+                waiting_for_zero = False
+                zero = dict.fromkeys(axes, 0.) if demo else load_zero(zero_path, axes)
+                if loop is not None:
+                    start(zero)
+                status.update(
+                    hand_model=spec.model_id, hand_model_label=spec.label, dof=spec.dof,
+                    zero_path=None if demo else str(zero_path.resolve()),
+                    axes=mapping_identity(axes),
+                    fixed_wrist=fixed_wrist,
+                    can_align=not fixed_wrist and control.current_task() != "sharpa_real" and control.align is not None,
+                    rows=[], online=0, active=False, requested=False,
+                    **demo_meta(),
+                )
                 settings = control.grasp_request()
                 control.publish(status)
                 continue
+            next_task = control.pending_task()
+            if next_task and on_switch_task is not None and not control.zero.is_set() and not control.home.is_set():
+                status.update(requested=False, active=False, feedback_message="正在切换任务…")
+                control.publish(status)
+                switched = on_switch_task(renderer, next_task)
+                if len(switched) == 3:
+                    renderer, fixed_wrist, new_loop = switched
+                    if new_loop is not loop:
+                        loop = new_loop
+                        seq = 0
+                        waiting_for_zero = False
+                        if loop is not None:
+                            zero = dict.fromkeys(axes, 0.) if demo else load_zero(zero_path, axes)
+                            start(zero)
+                else:
+                    renderer, fixed_wrist = switched
+                status.update(task=next_task, fixed_wrist=fixed_wrist,
+                              can_align=not fixed_wrist and next_task != "sharpa_real" and control.align is not None)
+                settings = control.grasp_request()
+                control.publish(status)
+                continue
+            if loop is None:
+                # Sharpa 真机力反馈标签独占串口，主观察循环仅待命监听标签/型号切换
+                time.sleep(0.05)
+                continue
             if control.home.is_set():
                 import json as _json
-                from .feedback import CONFIG_DIR
                 from .stall_homing import load_homing_config, run_stall_homing
                 loop.stop()
                 status.update(calibrating=True, homing=True, requested=False, active=False,
                               zero_error=None, feedback_message="自动顶限位回零中 · 切勿佩戴在人手上")
                 control.publish(status)
                 try:
-                    live_cfg = _json.loads((CONFIG_DIR / "right_sim_feedback.json").read_text(encoding="utf-8"))
+                    live_cfg = _json.loads(spec.feedback_path.read_text(encoding="utf-8"))
                     homing_cfg = load_homing_config(
                         live_cfg.get("stall_homing"),
                         disabled_motor_ids=live_cfg.get("disabled_motor_ids", ()),
+                        dof=len(axes),
                     )
                     ratios = [axes[i + 1][1].sign * axes[i + 1][1].scale * live_cfg["torque_sign"][i]
                               for i in range(len(axes))]
@@ -157,15 +220,15 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
                     status["zero_error"] = str(exc)
                     loop.stop()
                     start(None)
-                status.update(calibrating=False, zero_revision=status["zero_revision"]+1)
+                status.update(calibrating=False, zero_revision=status["zero_revision"] + 1)
                 control.zero.clear()
 
             recording = recorder is not None and control.is_local_grasp() and (recorder.active or control.record_requested.is_set())
             new_settings = control.grasp_request()
             samples = loop.samples(seq, not recording)
             for s in samples:
-                if recording and seq and s["seq"] > seq+1:
-                    control.record_dropped.value += s["seq"]-seq-1
+                if recording and seq and s["seq"] > seq + 1:
+                    control.record_dropped.value += s["seq"] - seq - 1
                 seq = s["seq"]
                 if s["requires_new_zero"] and not waiting_for_zero:
                     zero = None
@@ -185,7 +248,7 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
                 wrist_stamp = control.wrist_stamp.value if control.wrist_stamp is not None else 0
                 status.update(wrist=wrist_state.value.decode() if wrist_state is not None else "",
                               wrist_ms=(samples[-1]["now"] - wrist_stamp) / 1e6 if wrist_stamp else None,
-                              demo_grip=control.demo_grip.value if demo else None)
+                              **demo_meta())
                 if control.record_requested is not None:
                     ready = control.record_ready.value
                     status.update(recording=control.record_requested.is_set(),
@@ -195,4 +258,5 @@ def run_native_control(loop, control, axes, zero_path, wrist_state, renderer, re
                 control.publish(status)
             time.sleep(.025 if recording else .05)
     finally:
-        loop.stop()
+        if loop is not None:
+            loop.stop()

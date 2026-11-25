@@ -152,7 +152,7 @@ class GloveKinematics:
         if self._derivative is not None and self._derivative_key == key:
             return self._derivative
         if self._fast is not None:
-            derivative = np.zeros((len(self.joint_names), 12), dtype=float)
+            derivative = np.zeros((len(self.joint_names), len(self._motor_column)), dtype=float)
             motor_col = self._motor_column
             blocks = self._fast.derivative(target["q"], list(motor_col))
             for deps, motors, dq_dep in blocks.values():
@@ -165,7 +165,7 @@ class GloveKinematics:
             self._derivative = derivative
             self._derivative_key = key
             return derivative
-        derivative = np.zeros((len(self.joint_names), 12), dtype=float)
+        derivative = np.zeros((len(self.joint_names), len(self._motor_column)), dtype=float)
         motor_col = dict(self._motor_column)
 
         def residual_and_jac(state: dict[str, float], group: str):

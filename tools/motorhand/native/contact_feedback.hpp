@@ -3,31 +3,40 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstddef>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 #include <vector>
 
 namespace ve33 {
-using Axes = std::array<double, 12>;
+template <size_t Dof>
+using AxesT = std::array<double, Dof>;
+using Axes = AxesT<12>;
+using Axes12 = AxesT<12>;
+using Axes16 = AxesT<16>;
 
-class ContactFeedback {
+template <size_t Dof>
+class ContactFeedbackT {
 public:
+    static constexpr size_t dof = Dof;
+    using AxesType = AxesT<Dof>;
     using Curve = std::vector<std::array<double, 2>>;
-    ContactFeedback(Axes limits, Axes stiffness, Axes position_limits, double deadband, double contact_min,
-                    double blend_end, double full_load, double motor_damping, double rebound_lookahead,
-                    Curve anchors = {})
+    ContactFeedbackT(AxesType limits, AxesType stiffness, AxesType position_limits, double deadband, double contact_min,
+                     double blend_end, double full_load, double motor_damping, double rebound_lookahead,
+                     Curve anchors = {})
         : limits_(limits), stiffness_(stiffness), position_limits_(position_limits),
           deadband_(deadband), contact_min_(contact_min),
           blend_end_(blend_end), full_load_(full_load), motor_damping_(motor_damping),
           rebound_lookahead_(rebound_lookahead) {
         if (!anchors.empty()) validate(anchors, *std::min_element(limits_.begin(), limits_.end()));
         curves_.fill(anchors);
+        friction_blend_.fill(1.);
     }
 
     void set_axis_curve(int motor_id, Curve anchors) {
         if (motor_id < 1 || motor_id > static_cast<int>(limits_.size()))
-            throw std::invalid_argument("反馈轴编号应为 1–12");
+            throw std::invalid_argument("反馈轴编号超出范围");
         const auto axis = static_cast<std::size_t>(motor_id - 1);
         validate(anchors, limits_[axis]);
         // 渐入后的接触项幅值可落在 0 到 blend_end 之间的任一点。
@@ -40,12 +49,12 @@ public:
         curves_[axis] = std::move(anchors);
     }
 
-    void set_friction(bool enabled, Axes coulomb, Axes viscous, double v_scale,
-                      double v_deadband, double gain, Axes max_nm) {
+    void set_friction(bool enabled, AxesType coulomb, AxesType viscous, double v_scale,
+                      double v_deadband, double gain, AxesType max_nm) {
         if (!std::isfinite(v_scale) || !std::isfinite(v_deadband) || !std::isfinite(gain) ||
             v_scale <= 0. || v_deadband < 0. || gain < 0.)
             throw std::invalid_argument("摩擦力补偿参数无效");
-        for (std::size_t i = 0; i < 12; ++i) {
+        for (std::size_t i = 0; i < Dof; ++i) {
             if (!std::isfinite(coulomb[i]) || !std::isfinite(viscous[i]) || !std::isfinite(max_nm[i]) ||
                 coulomb[i] < 0. || viscous[i] < 0. || max_nm[i] < 0.)
                 throw std::invalid_argument("逐轴摩擦力补偿参数无效");
@@ -69,15 +78,15 @@ public:
         gate_.fill(false);
     }
 
-    const Axes& mapped() const { return mapped_; }
-    const Axes& damping() const { return damping_; }
-    const Axes& friction() const { return friction_; }
-    const std::array<bool, 12>& gate() const { return gate_; }
+    const AxesType& mapped() const { return mapped_; }
+    const AxesType& damping() const { return damping_; }
+    const AxesType& friction() const { return friction_; }
+    const std::array<bool, Dof>& gate() const { return gate_; }
 
-    std::tuple<Axes, Axes, int> plan(const Axes& q, const Axes& dq, const Axes& reaction,
-                                    const Axes& sim_pos, const Axes& sampled_pos, const Axes& frame_weight,
-                                    double ramp, double dt) {
-        Axes output{}, position{};
+    std::tuple<AxesType, AxesType, int> plan(const AxesType& q, const AxesType& dq, const AxesType& reaction,
+                                             const AxesType& sim_pos, const AxesType& sampled_pos,
+                                             const AxesType& frame_weight, double ramp, double dt) {
+        AxesType output{}, position{};
         int loaded_count = 0;
         const double alpha = -std::expm1(-2. * 3.14159265358979323846 * 15. * dt);
         const double alpha_fric = -std::expm1(-2. * 3.14159265358979323846 * 20. * dt);
@@ -185,7 +194,7 @@ private:
         for (std::size_t i = 0; i < anchors.size(); ++i) {
             const auto [x, y] = anchors[i];
             if (!std::isfinite(x) || !std::isfinite(y) || x < 0. || y < 0. || y > limit ||
-                (i && (x <= anchors[i-1][0] || y < anchors[i-1][1])))
+                (i && (x <= anchors[i - 1][0] || y < anchors[i - 1][1])))
                 throw std::invalid_argument("Invalid feedback curve anchor");
         }
     }
@@ -201,15 +210,19 @@ private:
         return a[1] + (magnitude - a[0]) * (b[1] - a[1]) / (b[0] - a[0]);
     }
 
-    Axes limits_, stiffness_, position_limits_;
+    AxesType limits_, stiffness_, position_limits_;
     double deadband_, contact_min_, blend_end_, full_load_, motor_damping_;
     double rebound_lookahead_;
     bool friction_enabled_ = false;
-    Axes friction_coulomb_{}, friction_viscous_{}, friction_max_{};
+    AxesType friction_coulomb_{}, friction_viscous_{}, friction_max_{};
     double friction_v_scale_ = 0.09, friction_v_deadband_ = 0.025, friction_gain_ = 1.;
-    std::array<Curve, 12> curves_;
-    Axes slew_{}, filtered_{}, mapped_{}, damping_{}, friction_{};
-    Axes friction_blend_{1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.};
-    std::array<bool, 12> gate_{};
+    std::array<Curve, Dof> curves_;
+    AxesType slew_{}, filtered_{}, mapped_{}, damping_{}, friction_{};
+    AxesType friction_blend_{};
+    std::array<bool, Dof> gate_{};
 };
+
+using ContactFeedback = ContactFeedbackT<12>;
+using ContactFeedback12 = ContactFeedbackT<12>;
+using ContactFeedback16 = ContactFeedbackT<16>;
 } // namespace ve33

@@ -14,8 +14,9 @@ mode/cuda/dbg*
 mode/cuda/dev*
 mode/cuda/opt
 build*
-# ...but not the checked-in wheel build driver, which `build*` matches by accident.
+# ...but not the checked-in wheel/asset build drivers, which `build*` matches by accident.
 !tools/build_wheels.py
+!tools/build_16dof_superdex_bot.py
 ref
 *.local.cmake
 cmake-build*
@@ -30,7 +31,11 @@ audit_reports/
 default.profraw
 *.egg-info/
 
-# Python bytecode and local VE33 asset packages
+# Python bytecode and local asset archives
 __pycache__/
 *.py[cod]
-/assets/hand_motor_ve33/**/*.zip
+/assets/*.zip
+/assets/**/*.zip
+sharpa_teleop/.pixi/
+sharpa_teleop/.cache/
+sharpa_teleop/recordings/*.jsonl

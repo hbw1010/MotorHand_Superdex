@@ -24,15 +24,20 @@ public:
     HandClientG4() { ResetDefaultBuses(); }
     ~HandClientG4() { Disconnect(); }
 
+    static constexpr size_t kMaxAxes = 16;
+
     uint8_t BusForId(uint16_t id) const {
-        if (id >= 1 && id <= 12) return bus_for_id_[id - 1].load(std::memory_order_relaxed);
+        if (id >= 1 && id <= kMaxAxes) return bus_for_id_[id - 1].load(std::memory_order_relaxed);
         return 1;
     }
 
+    size_t AxisCount() const { return axis_count_; }
+
     bool Connect(const std::string& port = "/dev/ttyUSB0", int baud = 921600, unsigned hz = 200,
-                 bool query_only = false, bool wait_for_first_packets = true) {
+                 bool query_only = false, bool wait_for_first_packets = true, size_t axis_count = 12) {
         Disconnect();
         if (!serial_.Open(port, baud)) return false;
+        axis_count_ = (axis_count >= 1 && axis_count <= kMaxAxes) ? axis_count : 12;
         ResetDefaultBuses();
         transport_lost_ = false;
         last_reply_us_ = 0;
@@ -72,17 +77,23 @@ public:
         commands_[{bus, id}] = cmd;
     }
 
-    void SetCommandBatch(const std::array<std::pair<JointKey, MotorCommand>, 12>& batch) {
+    template<size_t N>
+    void SetCommandBatch(const std::array<std::pair<JointKey, MotorCommand>, N>& batch) {
         std::lock_guard<std::mutex> lock(cmd_mutex_);
         for (const auto& [key, command] : batch) commands_[key] = command;
     }
 
-    bool SetCommandBatchBefore(const std::array<std::pair<JointKey, MotorCommand>, 12>& batch, int64_t until_ns) {
+    bool SetCommandBatchBefore(const std::pair<JointKey, MotorCommand>* batch, size_t count, int64_t until_ns) {
         std::lock_guard<std::mutex> lock(cmd_mutex_);
         const auto now = std::chrono::steady_clock::now().time_since_epoch();
         if (std::chrono::duration_cast<std::chrono::nanoseconds>(now).count() >= until_ns) return false;
-        for (const auto& [key, command] : batch) commands_[key] = command;
+        for (size_t i = 0; i < count; ++i) commands_[batch[i].first] = batch[i].second;
         return true;
+    }
+
+    template<size_t N>
+    bool SetCommandBatchBefore(const std::array<std::pair<JointKey, MotorCommand>, N>& batch, int64_t until_ns) {
+        return SetCommandBatchBefore(batch.data(), N, until_ns);
     }
 
     void DisableJoint(uint8_t bus, uint16_t id) {
@@ -116,25 +127,31 @@ private:
     std::mutex snapshot_mutex_;
     std::map<JointKey, HandSnapshot> latest_snapshots_;
     std::map<JointKey, TimedHandSnapshot> latest_timed_snapshots_;
-    std::array<std::atomic<uint8_t>, 12> bus_for_id_{};
+    std::array<std::atomic<uint8_t>, kMaxAxes> bus_for_id_{};
+    size_t axis_count_ = 12;
 
     void ResetDefaultBuses() {
         for (uint16_t id = 1; id <= 12; ++id) {
             bus_for_id_[id - 1].store(static_cast<uint8_t>(3 - (id - 1) / 4), std::memory_order_relaxed);
         }
+        for (uint16_t id = 13; id <= kMaxAxes; ++id) {
+            bus_for_id_[id - 1].store(static_cast<uint8_t>(4), std::memory_order_relaxed);
+        }
     }
 
     void SendReleaseBatchAll() {
-        std::array<GatewayWireFrame, 12> rel_batch;
-        for (size_t i = 0; i < 12; ++i) {
+        std::array<GatewayWireFrame, kMaxAxes> rel_batch;
+        const size_t n = std::min(axis_count_, kMaxAxes);
+        for (size_t i = 0; i < n; ++i) {
             const uint16_t id = static_cast<uint16_t>(i + 1);
             rel_batch[i] = gateway::Release(BusForId(id), id);
             gateway::Seal(rel_batch[i]);
         }
 
+        const size_t bytes = n * sizeof(GatewayWireFrame);
         for (int r = 0; r < 3; ++r) {
             bool term_err = false;
-            serial_.WriteAll(rel_batch.data(), sizeof(rel_batch), 5'000'000, 10'000'000, term_err);
+            serial_.WriteAll(rel_batch.data(), bytes, 5'000'000, 10'000'000, term_err);
             if (term_err) break;
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
@@ -146,10 +163,10 @@ private:
         std::array<uint8_t, sizeof(GatewayWireFrame)> pending_tail{};
         size_t tail_len = 0;
         std::map<JointKey, gateway::RouteState> routes;
+        const size_t active_axes = std::min(axis_count_, kMaxAxes);
+        const uint8_t max_bus = active_axes > 12 ? 4 : 3;
         auto add_route = [&](uint8_t b, uint16_t id) { routes.emplace(JointKey{b, id}, gateway::RouteState(b, id)); };
-        for (uint16_t id = 9; id <= 12; ++id) add_route(1, id);
-        for (uint16_t id = 5; id <= 8; ++id) add_route(2, id);
-        for (uint16_t id = 1; id <= 4; ++id) add_route(3, id);
+        for (uint16_t id = 1; id <= active_axes; ++id) add_route(BusForId(id), id);
 
         const auto cycle = std::chrono::microseconds(1000000 / target_hz_);
         uint16_t sequence = 0;
@@ -174,7 +191,7 @@ private:
                 const int n = serial_.Read(rx, sizeof(rx));
                 if (n > 0) {
                     parser.Feed(rx, static_cast<size_t>(n), [&](const GatewayWireFrame& f) {
-                        if (f.kind != 0x90 || f.bus < 1 || f.bus > 3 || f.can_id < 1 || f.can_id > 12) return;
+                        if (f.kind != 0x90 || f.bus < 1 || f.bus > max_bus || f.can_id < 1 || f.can_id > active_axes) return;
                         JointKey k{f.bus, f.can_id};
                         const auto now = gateway::NowUs();
                         auto it = routes.find(k);
@@ -240,10 +257,10 @@ private:
                 }
             }
             if (tail_len == 0) {
-                std::array<GatewayWireFrame, 16> tx_batch;
+                std::array<GatewayWireFrame, kMaxAxes> tx_batch;
                 size_t tx_count = 0;
                 const auto now_us = gateway::NowUs();
-                const uint8_t probe_step = static_cast<uint8_t>((tick_count / 2) % 3);
+                const uint8_t probe_step = static_cast<uint8_t>((tick_count / 2) % max_bus);
                 ++tick_count;
                 {
                     std::lock_guard<std::mutex> lock(cmd_mutex_);
@@ -255,9 +272,9 @@ private:
                         const bool online = (route.feedback.valid & gateway::Position) &&
                             now_us >= route.feedback.position_time &&
                             now_us - route.feedback.position_time <= 100'000;
-                        // 离线且无有效控制命令的轴按 10 ms 节拍轮询三路 CAN 总线，自动发现真实挂载总线。
+                        // 离线且无有效控制命令的轴按 10 ms 节拍轮询 CAN 总线（12 轴 1..3，16 轴 1..4），自动发现真实挂载总线。
                         if (!c.enabled && !online && probe_step > 0) {
-                            tx_bus = static_cast<uint8_t>(((k.bus - 1 + probe_step) % 3) + 1);
+                            tx_bus = static_cast<uint8_t>(((k.bus - 1 + probe_step) % max_bus) + 1);
                         }
                         auto f = gateway::CommandFrame(tx_bus, k.id, c);
                         f.sequence = ++sequence;

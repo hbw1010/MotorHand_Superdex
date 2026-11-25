@@ -1,4 +1,4 @@
-"""G4 采集进程与场景 HTTP 服务共享的操作和状态。"""
+"""G4 采集进程与场景 HTTP 服务共享的操作和状态（支持 12-DOF 与 16-DOF 并列切换及全轴演示控制）。"""
 
 import json
 import math
@@ -43,7 +43,8 @@ def panel_snapshot(state, now_ns, revision):
 
 class WebControl:
     def __init__(self, context, align, *, default_enabled=True, cube_switch=False, allow_reset=False,
-                 local_grasp=False, demo=False, switchable_tasks=(), initial_task=None):
+                 local_grasp=False, demo=False, switchable_tasks=(), initial_task=None,
+                 initial_hand_model="12dof"):
         self.align = align
         self.requested = context.Event()
         self.zero = context.Event()
@@ -55,6 +56,10 @@ class WebControl:
         self.task.value = default_task.encode()
         self.requested_task = context.Array("c", 32)
         self.requested_task.value = b""
+        self.hand_model = context.Array("c", 16)
+        self.hand_model.value = str(initial_hand_model).encode()
+        self.requested_hand_model = context.Array("c", 16)
+        self.requested_hand_model.value = b""
         has_local_grasp = local_grasp or ("local_grasp" in self.task_names)
         self.grasp = context.Array("c", 2048) if has_local_grasp else None
         self.record_requested = context.Event() if has_local_grasp else None
@@ -62,6 +67,8 @@ class WebControl:
         self.record_error = context.Array("c", 256) if has_local_grasp else None
         self.record_dropped = context.Value("Q", 0) if has_local_grasp else None
         self.demo_grip = context.Value("d", -1.) if demo else None
+        self.demo_axes_active = context.Event()
+        self.demo_axes = context.Array("d", 16)
         if has_local_grasp:
             from ve33_local_grasp import DEFAULT_GRASP
             self.grasp.value = json.dumps({**DEFAULT_GRASP, "contact_revision": 0}).encode()
@@ -70,20 +77,41 @@ class WebControl:
         self.wrist_stamp = context.Value("q", 0, lock=False)
         if self.cube_fixed is not None:
             self.cube_fixed.set()
-        self.snapshot = context.Array("c", 16_384)
+        self.snapshot = context.Array("c", 32_768)
         self.command_lock = context.Lock()
-        self.native_link_path = None
+        self._native_link_path_buf = context.Array("c", 512)
+        self._native_link_path_buf.value = b""
+        self._native_link_dof = context.Value("i", 16 if initial_hand_model == "16dof" else 12)
         self._native_link = None
+        self._native_link_opened = None
         if default_enabled:
             self.requested.set()
+
+    @property
+    def native_link_path(self):
+        val = self._native_link_path_buf.value.decode()
+        return val or None
+
+    @native_link_path.setter
+    def native_link_path(self, value):
+        self._native_link_path_buf.value = (str(value) if value else "").encode()
+        self._native_link = None
+        self._native_link_opened = None
 
     def __getstate__(self):
         state = self.__dict__.copy()
         state["_native_link"] = None
+        state["_native_link_opened"] = None
         return state
 
     def current_task(self):
         return self.task.value.decode()
+
+    def current_hand_model(self):
+        return self.hand_model.value.decode() or "12dof"
+
+    def current_dof(self):
+        return int(self._native_link_dof.value)
 
     def is_local_grasp(self):
         return self.grasp is not None and (not self.task_names or self.current_task() == "local_grasp")
@@ -92,6 +120,14 @@ class WebControl:
         target = self.requested_task.value.decode()
         return target if target and target != self.current_task() else None
 
+    def pending_hand_model(self):
+        target = self.requested_hand_model.value.decode()
+        return target if target and target != self.current_hand_model() else None
+
+    def demo_axes_state(self, dof=None):
+        count = int(dof) if dof is not None else self.current_dof()
+        return self.demo_axes_active.is_set(), [float(self.demo_axes[i]) for i in range(count)]
+
     def commit_task(self, task_name):
         with self.command_lock:
             self.requested.clear()
@@ -99,6 +135,31 @@ class WebControl:
                 self.record_requested.clear()
             self.task.value = task_name.encode()
             self.requested_task.value = b""
+            if self.scene_revision is not None:
+                self.scene_revision.value += 1
+            if self.grasp is not None:
+                settings = json.loads(self.grasp.value)
+                settings["contact_revision"] += 1
+                self.grasp.value = json.dumps(settings).encode()
+            self._publish_native_intent()
+
+    def commit_hand_model(self, model_id, shared_path=None, dof=12):
+        with self.command_lock:
+            self.requested.clear()
+            if self.record_requested is not None:
+                self.record_requested.clear()
+            self.demo_axes_active.clear()
+            for i in range(16):
+                self.demo_axes[i] = 0.0
+            if self.demo_grip is not None:
+                self.demo_grip.value = -1.0
+            self.hand_model.value = str(model_id).encode()
+            self.requested_hand_model.value = b""
+            self._native_link_dof.value = int(dof)
+            if shared_path is not None:
+                self._native_link_path_buf.value = str(shared_path).encode()
+            self._native_link = None
+            self._native_link_opened = None
             if self.scene_revision is not None:
                 self.scene_revision.value += 1
             if self.grasp is not None:
@@ -138,15 +199,24 @@ class WebControl:
             return True
 
     def _publish_native_intent(self):
-        if self.native_link_path:
-            if self._native_link is None:
-                from motorhand.native_runtime import load_native
-                self._native_link = load_native().SharedLink(self.native_link_path)
+        path = self.native_link_path
+        if path:
+            dof = int(self._native_link_dof.value)
+            model_id = self.current_hand_model()
+            key = (path, dof)
+            if self._native_link is None or self._native_link_opened != key:
+                from motorhand.hand_profiles import get_hand_runtime
+                self._native_link = get_hand_runtime(model_id).create_shared_link(path)
+                self._native_link_opened = key
             revision = (self.grasp_request()["contact_revision"] if self.is_local_grasp()
                         else self.scene_revision.value if self.scene_revision is not None else 0)
             self._native_link.command(self.requested.is_set() and not self.zero.is_set() and not self.home.is_set(),
                                       revision,
                                       self.demo_grip.value if self.demo_grip is not None else -1.)
+            self._native_link.command_demo_axes(
+                self.demo_axes_active.is_set(),
+                [float(self.demo_axes[i]) for i in range(dof)],
+            )
 
     def command(self, message):
         with self.command_lock:
@@ -172,6 +242,17 @@ class WebControl:
                     if self.record_requested is not None:
                         self.record_requested.clear()
                     self.requested_task.value = target.encode()
+            elif action == "switch_hand_model":
+                target = str(message.get("hand_model") or message.get("model") or "").strip().lower()
+                if target not in ("12dof", "16dof"):
+                    raise ValueError("未知手部型号（仅支持 12dof / 16dof）")
+                if self.zero.is_set() or self.home.is_set():
+                    raise ValueError("标零或自动回零期间不能切换手部型号")
+                if target != self.current_hand_model():
+                    self.requested.clear()
+                    if self.record_requested is not None:
+                        self.record_requested.clear()
+                    self.requested_hand_model.value = target.encode()
             elif action == "configure_grasp" and self.is_local_grasp():
                 from ve33_local_grasp import grasp_needs_rebuild, grasp_settings
                 current = self.grasp_request()
@@ -185,7 +266,22 @@ class WebControl:
                 value = message.get("value")
                 if value is not None and (type(value) not in (int, float) or not 0. <= value <= 1.):
                     raise ValueError("演示抓握比例应在 0 到 1 之间")
+                self.demo_axes_active.clear()
                 self.demo_grip.value = -1. if value is None else value
+            elif action == "demo_axes":
+                values = message.get("values")
+                active = message.get("active", values is not None)
+                if not active:
+                    self.demo_axes_active.clear()
+                else:
+                    dof = self.current_dof()
+                    if not isinstance(values, list) or len(values) != dof:
+                        raise ValueError(f"演示关节数组长度应为 {dof}")
+                    for i, v in enumerate(values):
+                        if type(v) not in (int, float) or not math.isfinite(v):
+                            raise ValueError(f"轴 {i + 1} 演示角度无效")
+                        self.demo_axes[i] = float(v)
+                    self.demo_axes_active.set()
             elif action == "home_grasp" and self.is_local_grasp():
                 settings = self.grasp_request()
                 settings.update(layout="palm", drag=None, angle_deg=0., home=settings.get("home", 0) + 1)

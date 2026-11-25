@@ -23,7 +23,6 @@ namespace {
 namespace nb = nanobind;
 using mochi::Actor;
 using mochi::real;
-using Axes = std::array<double, 12>;
 using Force = std::array<double, 3>;
 
 std::int64_t steady_ns() {
@@ -37,10 +36,16 @@ void check(const mochi::Error& error) {
     }
 }
 
-class GraspPhysics {
+template <std::size_t Dof>
+class GraspPhysicsT {
 public:
-    GraspPhysics(mochi::Scene& scene, Actor& hand, std::vector<Actor*> links,
-                 std::vector<int> tree, std::array<int, 12> motors, int palm_index)
+    static constexpr std::size_t dof = Dof;
+    using Axes = std::array<double, Dof>;
+    using LinkType = ve33::SharedLinkT<Dof>;
+    using KinType = ve33::KinematicsT<Dof>;
+
+    GraspPhysicsT(mochi::Scene& scene, Actor& hand, std::vector<Actor*> links,
+                  std::vector<int> tree, std::array<int, Dof> motors, int palm_index)
         : scene_(scene), hand_(hand), links_(std::move(links)), tree_(std::move(tree)),
           motors_(motors), palm_index_(palm_index), pose_(hand.GetNumDofs()),
           velocity_(pose_.size()), target_(pose_.size()), frame_(3 + 5 * motors.size() + 1) {
@@ -70,17 +75,17 @@ public:
     }
 
     // 每个子步读取一张完整输入快照。场景约束不动时，一次调用可连续完成预算内的子步。
-    std::tuple<bool, double> step_contact(ve33::SharedLink& link, ve33::Kinematics& kin,
-                                         double dt, std::int64_t budget_end, unsigned max_steps,
-                                         bool publish_last, std::uint64_t revision) {
+    std::tuple<bool, double> step_contact(LinkType& link, KinType& kin,
+                                          double dt, std::int64_t budget_end, unsigned max_steps,
+                                          bool publish_last, std::uint64_t revision) {
         nb::gil_scoped_release release;
-        return advance_contact(link,kin,dt,budget_end,max_steps,publish_last,revision);
+        return advance_contact(link, kin, dt, budget_end, max_steps, publish_last, revision);
     }
 
     // 在创建 Mochi 场景的线程上运行。只在下一次场景命令/画面交接边界回到 Python。
-    double run_until(ve33::SharedLink& link, ve33::Kinematics& kin, double dt,
+    double run_until(LinkType& link, KinType& kin, double dt,
                      std::int64_t period, std::int64_t view_deadline, std::uint64_t revision) {
-        if (period<=0 || period>100'000'000 || view_deadline-steady_ns()>100'000'000)
+        if (period <= 0 || period > 100'000'000 || view_deadline - steady_ns() > 100'000'000)
             throw std::invalid_argument("无效的物理调度预算");
         nb::gil_scoped_release release;
         do {
@@ -94,10 +99,10 @@ public:
                 link.invalidate_force();
                 return 0.;
             }
-            const auto now=steady_ns();
-            next_tick_ns_=now+period;
-            advance_contact(link,kin,dt,next_tick_ns_,4,true,revision);
-        } while (std::max(steady_ns(),next_tick_ns_) < view_deadline);
+            const auto now = steady_ns();
+            next_tick_ns_ = now + period;
+            advance_contact(link, kin, dt, next_tick_ns_, 4, true, revision);
+        } while (std::max(steady_ns(), next_tick_ns_) < view_deadline);
         return last_target_[0];
     }
 
@@ -116,7 +121,7 @@ public:
         root_target_ = root;
     }
 
-    bool publish_contact(ve33::SharedLink& link, ve33::Kinematics& kin, double stamp,
+    bool publish_contact(LinkType& link, KinType& kin, double stamp,
                          const Axes& sampled_input, const Axes& encoder_sample, std::uint64_t revision) {
         nb::gil_scoped_release release;
         const auto solved = steady_ns();
@@ -158,25 +163,26 @@ public:
         return valid;
     }
 
-    void set_motion(std::vector<Actor*> rigid,std::vector<Actor*> fixed,std::vector<Actor*> surfaces,
-                    std::vector<Actor*> soft,int center_node,Force center,Force axis,double angle) {
-        motion_=std::make_unique<ve33::GraspMotion>(
-            scene_,std::move(rigid),std::move(fixed),std::move(surfaces),std::move(soft),
-            center_node,center,axis,angle);
+    void set_motion(std::vector<Actor*> rigid, std::vector<Actor*> fixed, std::vector<Actor*> surfaces,
+                    std::vector<Actor*> soft, int center_node, Force center, Force axis, double angle) {
+        motion_ = std::make_unique<ve33::GraspMotion>(
+            scene_, std::move(rigid), std::move(fixed), std::move(surfaces), std::move(soft),
+            center_node, center, axis, angle);
     }
-    void clear_motion() {motion_.reset();}
-    void motion_command(bool locked,double angle,const std::vector<double>& drag) {
+    void clear_motion() { motion_.reset(); }
+    void motion_command(bool locked, double angle, const std::vector<double>& drag) {
         if (!motion_) throw std::runtime_error("没有本地抓握物体");
-        motion_->command(locked,angle,drag);
+        motion_->command(locked, angle, drag);
     }
     Force motion_center() const {
         if (!motion_) throw std::runtime_error("没有本地抓握物体");
         return motion_->center();
     }
+
 private:
-    std::tuple<bool,double> advance_contact(ve33::SharedLink& link,ve33::Kinematics& kin,
-                                         double dt,std::int64_t budget_end,unsigned max_steps,
-                                         bool publish_last,std::uint64_t revision) {
+    std::tuple<bool, double> advance_contact(LinkType& link, KinType& kin,
+                                             double dt, std::int64_t budget_end, unsigned max_steps,
+                                             bool publish_last, std::uint64_t revision) {
         if (max_steps < 1 || max_steps > 4 || !std::isfinite(dt) || dt <= 0.)
             throw std::invalid_argument("无效的物理子步参数");
         mochi::Error error;
@@ -191,13 +197,13 @@ private:
                 if (sampled.size() != 1 + tree_.size() + motors_.size())
                     throw std::invalid_argument("编码器共享快照长度与关节树不匹配");
                 valid = sampled[0] > 0. && sampled[0] <= static_cast<double>(began) &&
-                        std::all_of(sampled.begin()+1, sampled.end(), [](double x) {
+                        std::all_of(sampled.begin() + 1, sampled.end(), [](double x) {
                             return std::isfinite(x) && std::abs(x) <= std::numeric_limits<real>::max();
                         });
                 if (valid) {
                     last_target_ = std::move(sampled);
                     for (std::size_t i = 0; i < tree_.size(); ++i)
-                        target_[tree_[i]] = static_cast<real>(last_target_[1+i]);
+                        target_[tree_[i]] = static_cast<real>(last_target_[1 + i]);
                 } else {
                     // 未收到完整快照时不施加可能撕裂的目标，也不给上一目标续期。
                     if (last_target_.empty()) last_target_.resize(sampled.size());
@@ -346,10 +352,10 @@ private:
     Actor& hand_;
     std::vector<Actor*> links_;
     std::vector<int> tree_;
-    std::array<int, 12> motors_;
+    std::array<int, Dof> motors_;
     int palm_index_;
     std::vector<real> pose_, velocity_, target_;
-    std::array<std::size_t, 12> motor_rows_{};
+    std::array<std::size_t, Dof> motor_rows_{};
     std::vector<double> last_target_, frame_;
     std::array<double, 3> last_timing_ms_{};
     std::int64_t next_tick_ns_{};
@@ -359,31 +365,38 @@ private:
     std::unique_ptr<ve33::GraspMotion> motion_;
 };
 
+template <std::size_t Dof>
+void bind_grasp_physics_for(nb::module_& module, const char* name) {
+    using GP = GraspPhysicsT<Dof>;
+    nb::class_<GP>(module, name)
+        .def(nb::init<mochi::Scene&, Actor&, std::vector<Actor*>, std::vector<int>, std::array<int, Dof>, int>(),
+             nb::keep_alive<1, 2>(), nb::keep_alive<1, 3>())
+        .def("step", &GP::step)
+        .def("step_contact", &GP::step_contact)
+        .def("run_until", &GP::run_until)
+        .def("set_root_target", &GP::set_root_target)
+        .def("publish_contact", &GP::publish_contact)
+        .def("set_motion", &GP::set_motion)
+        .def("clear_motion", &GP::clear_motion)
+        .def("motion_command", &GP::motion_command)
+        .def("motion_center", &GP::motion_center)
+        .def("last_target", &GP::last_target)
+        .def("last_contact_frame_ns", &GP::last_contact_frame_ns)
+        .def("last_timing_ms", &GP::last_timing_ms)
+        .def("effort", &GP::effort)
+        .def("contacts", &GP::contacts);
+}
+
 } // namespace
 
 void bind_native_loop(nanobind::module_&);
 NB_MODULE(_ve33_native, module) {
-    module.attr("runtime_api") = 5;
+    module.attr("runtime_api") = 6;
     bind_kinematics(module);
     bind_native_loop(module);
     module.attr("double_precision") = bool(MOCHI_USE_DOUBLE_PRECISION);
-    nb::class_<GraspPhysics>(module, "GraspPhysics")
-        .def(nb::init<mochi::Scene&, Actor&, std::vector<Actor*>, std::vector<int>, std::array<int, 12>, int>(),
-             nb::keep_alive<1, 2>(), nb::keep_alive<1, 3>())
-        .def("step", &GraspPhysics::step)
-        .def("step_contact", &GraspPhysics::step_contact)
-        .def("run_until", &GraspPhysics::run_until)
-        .def("set_root_target", &GraspPhysics::set_root_target)
-        .def("publish_contact", &GraspPhysics::publish_contact)
-        .def("set_motion",&GraspPhysics::set_motion)
-        .def("clear_motion",&GraspPhysics::clear_motion)
-        .def("motion_command",&GraspPhysics::motion_command)
-        .def("motion_center",&GraspPhysics::motion_center)
-        .def("last_target", &GraspPhysics::last_target)
-        .def("last_contact_frame_ns", &GraspPhysics::last_contact_frame_ns)
-        .def("last_timing_ms", &GraspPhysics::last_timing_ms)
-        .def("effort", &GraspPhysics::effort)
-        .def("contacts", &GraspPhysics::contacts);
+    bind_grasp_physics_for<12>(module, "GraspPhysics");
+    module.attr("GraspPhysics12") = module.attr("GraspPhysics");
+    bind_grasp_physics_for<16>(module, "GraspPhysics16");
     ve33::bind_feedback(module);
-
 }

@@ -1,0 +1,17 @@
+﻿电机输入,上一版对应关节,输出指节,相对未对齐中间模型角度符号,局部转轴,含义
+thumb_cmc_flex_motor_joint,J1,thumb_cmc_flex_link,-1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+thumb_cmc_abd_motor_joint,J2,thumb_cmc_abd_link,-1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+thumb_mcp_motor_joint,J3,thumb_mcp_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+thumb_ip_motor_joint,J4,thumb_ip_link,-1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+index_mcp_motor_joint,J6,index_mcp_link,-1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+index_pip_dip_motor_joint,J7 / J8（联动）,index_pip_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+middle_mcp_motor_joint,J10,middle_mcp_link,-1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+middle_pip_dip_motor_joint,J11 / J12（联动）,middle_pip_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+ring_mcp_motor_joint,J14,ring_mcp_link,-1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+ring_pip_dip_motor_joint,J15 / J16（联动）,ring_pip_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+pinky_mcp_motor_joint,J18,pinky_mcp_link,-1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+pinky_pip_dip_motor_joint,J19 / J20（联动）,pinky_pip_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+index_mcp_abd_motor_joint,J5,index_mount_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+middle_mcp_abd_motor_joint,J9,middle_mount_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+ring_mcp_abd_motor_joint,J13,ring_mount_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度
+pinky_mcp_abd_motor_joint,J17,pinky_mount_link,1,0 0 1,正输入使对应输出指节沿上一版正向运动；电机角度不是指节角度

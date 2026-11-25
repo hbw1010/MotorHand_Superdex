@@ -36,9 +36,10 @@ PALM_CUE_DURATION_NS = 120_000_000
 PALM_CUE_RELEASE_NS = 50_000_000
 
 
-def surface_stiffness():
-    lo, hi = CONFIG["driver_impedance"]["stiffness_nm_per_rad"]
-    return lo + CONFIG["hardness"] * (hi - lo)
+def surface_stiffness(config=None):
+    cfg = CONFIG if config is None else config
+    lo, hi = cfg["driver_impedance"]["stiffness_nm_per_rad"]
+    return lo + cfg["hardness"] * (hi - lo)
 
 
 class ContactProxy:
@@ -354,10 +355,11 @@ class FeedbackLoop:
             self.output_error = True
 
 
-def _validate_anchors(cfg):
+def _validate_anchors(cfg, *, config=None):
+    base_cfg = CONFIG if config is None else config
     try:
         anchors = np.asarray(cfg["anchors_nm"], dtype=float)
-        max_output = min(CONFIG["torque_limit_nm"]) * CONFIG["driver_impedance"]["torque_margin"]
+        max_output = min(base_cfg["torque_limit_nm"]) * base_cfg["driver_impedance"]["torque_margin"]
         valid = (anchors.ndim == 2 and anchors.shape[1] == 2 and len(anchors) >= 2
                  and np.isfinite(anchors).all() and np.array_equal(anchors[0], [0., 0.]))
         if valid:
@@ -374,15 +376,17 @@ def _validate_anchors(cfg):
     return anchors.tolist()
 
 
-def feedback_curves(profile, profile_config=None):
-    """共享曲线与可选分轴曲线，配置和原生接口都用电机编号 J1–J12。"""
+def feedback_curves(profile, profile_config=None, *, config=None, dof=None):
+    """共享曲线与可选分轴曲线，配置和原生接口都用电机编号 J1–J{dof}。"""
     if profile == "identity":
         return [], []
-    profiles = CONFIG.get("feedback_profiles", {})
+    base_cfg = CONFIG if config is None else config
+    axis_count = MOTOR_COUNT if dof is None else int(dof)
+    profiles = base_cfg.get("feedback_profiles", {})
     if profile not in profiles and profile != "nominal":
         raise ValueError(f"未知反馈配置：{profile}")
     cfg = profile_config if profile_config is not None else profiles.get(profile)
-    base = _validate_anchors(cfg)
+    base = _validate_anchors(cfg, config=base_cfg)
     groups = []
     assigned = set()
     overrides = cfg.get("axis_curves", [])
@@ -391,45 +395,54 @@ def feedback_curves(profile, profile_config=None):
     for group in overrides:
         ids = group.get("motor_ids") if isinstance(group, dict) else None
         if (not isinstance(ids, list) or not ids
-                or any(type(mid) is not int or not 1 <= mid <= MOTOR_COUNT for mid in ids)
+                or any(type(mid) is not int or not 1 <= mid <= axis_count for mid in ids)
                 or len(set(ids)) != len(ids) or assigned.intersection(ids)):
-            raise ValueError("分轴反馈曲线的电机编号应为 1–12 且不能重复分配")
-        groups.append((ids, _validate_anchors(group)))
+            raise ValueError(f"分轴反馈曲线的电机编号应为 1–{axis_count} 且不能重复分配")
+        groups.append((ids, _validate_anchors(group, config=base_cfg)))
         assigned.update(ids)
     return base, groups
 
 
-def _friction_params(cfg=None):
-    raw = CONFIG.get("friction_comp") if cfg is None else cfg
-    comp = FrictionCompensator(raw)
+def _friction_params(cfg=None, *, config=None, dof=None):
+    base_cfg = CONFIG if config is None else config
+    axis_count = MOTOR_COUNT if dof is None else int(dof)
+    raw = base_cfg.get("friction_comp") if cfg is None else cfg
+    comp = FrictionCompensator(raw, dof=axis_count)
     return (comp.enabled, comp.coulomb.tolist(), comp.viscous.tolist(),
             comp.v_scale, comp.v_dead, comp.gain, comp.limit.tolist())
 
 
-def build_contact_kernel(native, gains, curves, friction=None):
+def build_contact_kernel(native, gains, curves, friction=None, *, config=None, kernel_cls=None, dof=None):
+    base_cfg = CONFIG if config is None else config
     limit, stiffness, position_limit = gains
+    axis_count = len(limit) if dof is None else int(dof)
     base, groups = curves
-    kernel = native.ContactFeedback(limit, stiffness, position_limit, POSITION_DEADBAND_RAD, CONTACT_THRESHOLD_NM,
-                                    CONTACT_BLEND_END_NM, POSITION_FULL_LOAD_NM, MOTOR_DAMPING_NM_S_PER_RAD,
-                                    CONFIG["driver_impedance"]["release_lookahead_s"], base)
+    cls = kernel_cls if kernel_cls is not None else (
+        native.ContactFeedback16 if axis_count == 16 else native.ContactFeedback
+    )
+    kernel = cls(limit, stiffness, position_limit, POSITION_DEADBAND_RAD, CONTACT_THRESHOLD_NM,
+                 CONTACT_BLEND_END_NM, POSITION_FULL_LOAD_NM, MOTOR_DAMPING_NM_S_PER_RAD,
+                 base_cfg["driver_impedance"]["release_lookahead_s"], base)
     for ids, curve in groups:
         for mid in ids:
             kernel.set_axis_curve(mid, curve)
-    kernel.set_friction(*_friction_params(friction))
+    kernel.set_friction(*_friction_params(friction, config=base_cfg, dof=axis_count))
     return kernel
 
 
-def contact_feedback_gains(axes):
-    cfg = CONFIG["driver_impedance"]
-    limits = np.asarray(CONFIG["torque_limit_nm"]) * cfg["torque_margin"]
-    base_stiffness = np.minimum(cfg["k_max_nm_per_rad"],
-                                surface_stiffness() * cfg["gain"] * np.asarray(cfg["joint_gain"]))
+def contact_feedback_gains(axes, *, config=None):
+    base_cfg = CONFIG if config is None else config
+    cfg = base_cfg["driver_impedance"]
+    axis_count = len(axes)
+    limits = np.asarray(base_cfg["torque_limit_nm"][:axis_count], dtype=float) * cfg["torque_margin"]
+    base_stiffness = np.minimum(cfg["k_max_nm_per_rad"][:axis_count],
+                                surface_stiffness(base_cfg) * cfg["gain"] * np.asarray(cfg["joint_gain"][:axis_count], dtype=float))
     # 只缩放同向受阻角差对应的前馈位置项，独立上限由 position_limit 控制。
     gain = cfg.get("position_compensation_gain", 1.)
     if type(gain) not in (int, float) or not math.isfinite(gain) or gain < 0.:
         raise ValueError("位置补偿倍率必须是有限的非负数")
     stiffness = base_stiffness * gain
-    scales = np.asarray([axes[i + 1][1].scale for i in range(MOTOR_COUNT)])
+    scales = np.asarray([axes[i + 1][1].scale for i in range(axis_count)])
     return limits, stiffness, cfg["position_compensation_max_nm"] / np.maximum(1., scales)
 
 
