@@ -52,7 +52,7 @@ flowchart LR
 
 ## 本地复现
 
-无串口演示和真机预览均从仓库根目录启动。构建方式见 [G4 README](../hardware/encos_g4_gateway_sdk/README.md)。
+无串口演示和真机预览均从仓库根目录启动。构建方式见 [12-DOF G4 驱动 README](../hardware/encos_g4_gateway_12dof/README.md) 与 [16-DOF G4 驱动 README](../hardware/encos_g4_gateway_16dof/README.md)。
 
 ```bash
 .venv/bin/python tools/ve33_g4_view.py --local-grasp --demo --quest-port 8766

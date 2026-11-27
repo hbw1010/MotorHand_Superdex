@@ -12,6 +12,7 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <limits>
 #include <thread>
 #include <stdexcept>
@@ -226,6 +227,12 @@ private:
             advance_scene(dt);
             const auto solved = steady_ns();
             const auto step_ns = std::max<std::int64_t>(0, solved - began);
+            if (step_ns >= 35'000'000) {
+                std::fprintf(stderr, "[GRASP_SLOW] dof=%zu step=%u step_ms=%.2f target_age_ms=%.2f\n",
+                             Dof, step, step_ns * 1e-6,
+                             valid ? (solved - static_cast<std::int64_t>(last_target_[0])) * 1e-6 : -1.);
+                std::fflush(stderr);
+            }
             const bool finish_early = publish_last && (
                 (budget_end > 0 && solved + step_ns > budget_end) ||
                 (valid && (solved - static_cast<std::int64_t>(last_target_[0])) >= 35'000'000));

@@ -19,7 +19,7 @@ SHARPA_ROOT = ROOT / "sharpa_teleop"
 WEB_CONFIG_PATH = SHARPA_ROOT / "config/web_config.json"
 PIXI_PYTHON = SHARPA_ROOT / ".pixi/envs/default/bin/python"
 FK_WORKER_SCRIPT = SHARPA_ROOT / "tools/scene_fk_worker.py"
-DEFAULT_MAPPING = ROOT / "hardware/encos_g4_gateway_sdk/config/right_sim_mapping.json"
+DEFAULT_MAPPING = ROOT / "hardware/encos_g4_gateway_12dof/config/right_sim_mapping_12dof.json"
 RECORDINGS_DIR = SHARPA_ROOT / "recordings"
 
 from motorhand.hand_profiles import AVAILABLE_HAND_MODELS, get_hand_profile, get_hand_runtime

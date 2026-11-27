@@ -9,9 +9,9 @@ import numpy as np
 from .impedance import DriverImpedancePlanner, FrictionCompensator, ImpedanceCommand, VelocityEstimator
 from .mapping import MOTOR_FINGER
 
-CONFIG_DIR = Path(__file__).resolve().parents[2] / "hardware/encos_g4_gateway_sdk/config"
-MAPPING = CONFIG_DIR / "right_sim_mapping.json"
-CONFIG = json.loads((CONFIG_DIR / "right_sim_feedback.json").read_text())
+CONFIG_DIR = Path(__file__).resolve().parents[2] / "hardware/encos_g4_gateway_12dof/config"
+MAPPING = CONFIG_DIR / "right_sim_mapping_12dof.json"
+CONFIG = json.loads((CONFIG_DIR / "right_sim_feedback_12dof.json").read_text())
 MOTOR_COUNT = len(MOTOR_FINGER)
 SURFACE_END = 3 + MOTOR_COUNT
 DIRECTION_END = SURFACE_END + MOTOR_COUNT

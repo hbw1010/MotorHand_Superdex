@@ -8,6 +8,7 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <chrono>
+#include <cstdio>
 #include <mutex>
 #include <optional>
 #include <thread>
@@ -36,7 +37,7 @@ struct SampleT {
 
 template <size_t Dof>
 class NativeLoopT {
-    static constexpr int max_bus = (Dof <= 12) ? 3 : 4;
+    static constexpr uint32_t max_bus = 3;
     static constexpr uint32_t full_mask = (uint32_t(1) << Dof) - 1u;
     using KinType = KinematicsT<Dof>;
     using ControlType = FeedbackControlT<Dof>;
@@ -52,8 +53,9 @@ class NativeLoopT {
     const AxesType ratio_, lo_, hi_, amplitude_;
     const int64_t period_;
     const uint32_t disabled_mask_;
+    using TransportType = GatewayTransportT<Dof>;
     const bool preserve_zero_on_reconnect_;
-    std::optional<GatewayTransport> transport_;
+    std::optional<TransportType> transport_;
     bool demo_;
     AxesType zero_{}, last_q_{};
     bool calibrated_ = false, have_pose_ = false, requires_new_zero_ = false;
@@ -69,8 +71,8 @@ class NativeLoopT {
     std::thread worker_;
 
     void release() {
-        if (auto device = transport_->handle())
-            for (int i = 0; i < int(Dof); ++i) g4_release(device, 0, i + 1);
+        if (transport_->handle())
+            for (int i = 0; i < int(Dof); ++i) transport_->release(0, i + 1);
         control_.released();
     }
     void disarm_feedback(const char* reason, int64_t now) {
@@ -79,9 +81,9 @@ class NativeLoopT {
         if (held) release(); else control_.released();
     }
     void clear_target() { target_[0] = 0.; link_.publish_target(target_); have_pose_ = false; }
-    GatewayTransport::Event poll_transport(int64_t now) {
+    typename TransportType::Event poll_transport(int64_t now) {
         const auto event = transport_->poll(now);
-        if (event != GatewayTransport::Event::none) {
+        if (event != TransportType::Event::none) {
             if (!preserve_zero_on_reconnect_ || !calibrated_) {
                 // 默认模式下串口重新枚举不得沿用旧零位；开启保留模式时仅安全卸力，保留已标定零位。
                 requires_new_zero_ = true;
@@ -96,16 +98,16 @@ class NativeLoopT {
                           : "串口连接变化 · 等待重新标零");
             control_.released();  // 旧句柄已由 transport 销毁，新句柄只读位置。
             clear_target();
-            if (auto device = transport_->handle()) g4_set_disabled_mask(device, disabled_mask_);
+            transport_->set_disabled_mask(disabled_mask_);
         }
         return event;
     }
     struct Raw { std::array<G4Joint, 16> joints{}; std::array<int64_t, 16> currents{}; int size{}; };
     Raw read_raw() {
         Raw data;
-        if (auto device = transport_->handle()) {
-            data.size = g4_snapshots_with_current_time(device, data.joints.data(), data.currents.data(),
-                                                       static_cast<int>(data.joints.size()));
+        if (transport_->handle()) {
+            data.size = transport_->snapshots_with_current_time(
+                data.joints.data(), data.currents.data(), static_cast<int>(data.joints.size()));
         } else if (demo_) {
             const int64_t now = ns_now();
             const double phase = (now - start_time_) * 1e-9 * 2. * std::numbers::pi / 7.;
@@ -115,7 +117,7 @@ class NativeLoopT {
             for (unsigned i = 0; i < Dof; ++i) {
                 auto& j = data.joints[i];
                 j.id = i + 1;
-                j.bus = (Dof <= 12) ? (3 - i / 4) : (1 + i / 4);
+                j.bus = (i < 12) ? (3 - i / 4) : (1 + (i - 12) % 3);
                 j.valid = 1;
                 j.received_ns = now;
                 double target_rad = 0.;
@@ -228,8 +230,8 @@ class NativeLoopT {
             }
             const auto allowed = link_.if_permitted(intent_, [&] {
                 const auto& state = control_.state();
-                auto accepted = g4_renew_mit_batch(transport_->handle(), batch.data(), int(Dof), state.deadline,
-                                                   state.valid_sent ? state.submitted_until : 0);
+                auto accepted = transport_->renew_mit_batch(batch.data(), int(Dof), state.deadline,
+                                                            state.valid_sent ? state.submitted_until : 0);
                 if (accepted == 1) control_.accepted(); else control_.failed(accepted == 0);
             });
             if (allowed == CommitPermission::changed) disarm_feedback("控制请求更新", ns_now());
@@ -283,11 +285,21 @@ class NativeLoopT {
         try {
             auto next = Clock::now();
             while (running_.load()) {
+                const auto loop_wake = Clock::now();
+                const auto wake_late_ms = std::chrono::duration<double, std::milli>(loop_wake - next).count();
                 tick(); next += Ns(period_);
                 const auto now = Clock::now();
+                const auto tick_ms = std::chrono::duration<double, std::milli>(now - loop_wake).count();
                 if (now > next) {
                     const auto missed = (now - next) / Ns(period_) + 1;
                     skipped_ += missed; next += missed * Ns(period_);
+                    if (missed >= 3) {
+                        std::fprintf(stderr,
+                                     "[LOOP_STALL] dof=%zu missed=%lld total_skipped=%lld wake_late_ms=%.2f tick_ms=%.2f active=%d\n",
+                                     Dof, static_cast<long long>(missed), static_cast<long long>(skipped_),
+                                     wake_late_ms, tick_ms, int(control_.state().active));
+                        std::fflush(stderr);
+                    }
                 }
                 service_expiring_batch(next);
                 std::this_thread::sleep_until(next);
@@ -313,8 +325,8 @@ public:
             if (!std::isfinite(ratio[i]) || ratio[i] == 0 || !std::isfinite(lo[i]) ||
                 !std::isfinite(hi[i]) || lo[i] >= hi[i] || !std::isfinite(amplitude[i]))
                 throw std::invalid_argument("无效编码器映射");
-        transport_.emplace(port, int(Dof));
-        if (auto device = transport_->handle()) g4_set_disabled_mask(device, disabled_mask_);
+        transport_.emplace(port);
+        transport_->set_disabled_mask(disabled_mask_);
     }
     ~NativeLoopT() { close(); }
     void close() {
@@ -355,7 +367,7 @@ public:
         std::lock_guard lock(lifecycle_lock_);
         if (worker_.joinable() || !transport_) throw std::runtime_error("标零前必须停控制线程");
         const auto now = ns_now();
-        if (poll_transport(now) != GatewayTransport::Event::none || !transport_->handle())
+        if (poll_transport(now) != TransportType::Event::none || !transport_->handle())
             throw std::invalid_argument("串口离线或已重新连接，请重新标零");
         const auto raw = read_raw(); nb::list result;
         uint32_t valid_mask = 0;
@@ -374,9 +386,9 @@ public:
         if (worker_.joinable() || !transport_) throw std::runtime_error("自动回零前必须停控制线程");
         if (ttl_ns <= 0 || ttl_ns > 200'000'000) throw std::invalid_argument("无效回零指令期限");
         const auto now = ns_now();
-        if (poll_transport(now) != GatewayTransport::Event::none || !transport_->handle())
+        if (poll_transport(now) != TransportType::Event::none || !transport_->handle())
             return -1;
-        return g4_homing_mit_batch(transport_->handle(), batch.data(), int(Dof), active_mask, now + ttl_ns);
+        return transport_->homing_mit_batch(batch.data(), int(Dof), active_mask, now + ttl_ns);
     }
     void homing_release() {
         std::lock_guard lock(lifecycle_lock_);

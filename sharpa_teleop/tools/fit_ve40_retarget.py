@@ -173,7 +173,7 @@ for line in sys.stdin:
 
 class VE40Evaluator:
     def __init__(self):
-        self.mapping = GloveMapping.load(ROOT / "hardware/encos_g4_gateway_sdk/config/right_sim_mapping.json")
+        self.mapping = GloveMapping.load(ROOT / "hardware/encos_g4_gateway_12dof/config/right_sim_mapping_12dof.json")
         self.kin = NativeGloveKinematics(VE40_DIR, self.mapping)
         self.proc = subprocess.Popen(
             [str(PIXI_PY), "-c", MJ_WORKER_CODE, str(ROOT)],

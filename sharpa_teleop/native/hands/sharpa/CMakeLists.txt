@@ -26,7 +26,8 @@ add_library(sharpa_control_core STATIC
   "${CONTROL_ROOT}/encos_driver.cpp" "${CONTROL_ROOT}/simulation/fake_glove.cpp"
   "${CONTROL_ROOT}/simulation/sharpa_device.cpp" model.cpp device.cpp identity.cpp transport.cpp feedback.cpp)
 target_include_directories(sharpa_control_core PUBLIC "${CONTROL_ROOT}" "${MUJOCO_ROOT}/include"
-  "${SUPERDEX_ROOT}/hardware/encos_g4_gateway_sdk/vendor/include")
+  "${SUPERDEX_ROOT}/hardware/encos_g4_gateway_12dof/vendor/include"
+  "${SUPERDEX_ROOT}/hardware/encos_g4_gateway_16dof/vendor/include")
 target_link_libraries(sharpa_control_core PUBLIC Eigen3::Eigen NLopt::nlopt pinocchio::pinocchio_default
   pinocchio::pinocchio_parsers tinyxml2::tinyxml2 yaml-cpp::yaml-cpp nlohmann_json::nlohmann_json
   Threads::Threads "${MUJOCO_LIBRARY}")

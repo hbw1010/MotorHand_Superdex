@@ -122,7 +122,7 @@ void test_control_session_16dof() {
     ControlOptionsT<16> opts;
     opts.left = false;
     opts.asset_root = assets / "hand_motor_16dof";
-    opts.glove_mapping = root.parent_path() / "hardware/encos_g4_gateway_sdk/config/right_sim_mapping_16dof.json";
+    opts.glove_mapping = root.parent_path() / "hardware/encos_g4_gateway_16dof/config/right_sim_mapping_16dof.json";
     opts.linear_feedback = root / "config/feedback/sharpa-right-16dof.json";
     opts.driver_impedance_config = root / "config/feedback/wuji-driver-impedance-right-16dof.json";
     opts.driver_impedance_feedback = true;

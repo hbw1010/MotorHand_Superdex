@@ -15,7 +15,8 @@ from .mapping import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-G4_CONFIG_DIR = ROOT / "hardware/encos_g4_gateway_sdk/config"
+G4_12DOF_DIR = ROOT / "hardware/encos_g4_gateway_12dof"
+G4_16DOF_DIR = ROOT / "hardware/encos_g4_gateway_16dof"
 SHARPA_DIR = ROOT / "sharpa_teleop"
 
 
@@ -27,6 +28,9 @@ class HandModelSpec:
     tree_dof: int
     model_dir: Path
     bot_path: Path
+    driver_dir: Path
+    shim_library: Path
+    gateway_hz: int
     mapping_path: Path
     feedback_path: Path
     default_zero_path: Path
@@ -53,8 +57,11 @@ HAND_12DOF = HandModelSpec(
     tree_dof=68,
     model_dir=ROOT / "assets/hand_motor_ve40/hand_motor_ve40_R",
     bot_path=ROOT / "assets/hand_motor_ve40/hand_motor_ve40_R/hand_motor_ve40_right_closed_chain.superdex_bot",
-    mapping_path=G4_CONFIG_DIR / "right_sim_mapping.json",
-    feedback_path=G4_CONFIG_DIR / "right_sim_feedback.json",
+    driver_dir=G4_12DOF_DIR,
+    shim_library=G4_12DOF_DIR / "build/libg4_shim_12dof.so",
+    gateway_hz=200,
+    mapping_path=G4_12DOF_DIR / "config/right_sim_mapping_12dof.json",
+    feedback_path=G4_12DOF_DIR / "config/right_sim_feedback_12dof.json",
     default_zero_path=Path.home() / ".config/superdex/ve33-g4-right-zero.json",
     motor_joints=MODEL_MOTOR_JOINTS,
     motor_fingers=MOTOR_FINGER,
@@ -71,8 +78,11 @@ HAND_16DOF = HandModelSpec(
     tree_dof=80,
     model_dir=ROOT / "assets/hand_motor_16dof_R",
     bot_path=ROOT / "assets/hand_motor_16dof_R/hand_motor_16dof_right_closed_chain.superdex_bot",
-    mapping_path=G4_CONFIG_DIR / "right_sim_mapping_16dof.json",
-    feedback_path=G4_CONFIG_DIR / "right_sim_feedback_16dof.json",
+    driver_dir=G4_16DOF_DIR,
+    shim_library=G4_16DOF_DIR / "build/libg4_shim_16dof.so",
+    gateway_hz=150,
+    mapping_path=G4_16DOF_DIR / "config/right_sim_mapping_16dof.json",
+    feedback_path=G4_16DOF_DIR / "config/right_sim_feedback_16dof.json",
     default_zero_path=Path.home() / ".config/superdex/motorhand-16dof-right-zero.json",
     motor_joints=MODEL_MOTOR_JOINTS_16,
     motor_fingers=MOTOR_FINGER_16,

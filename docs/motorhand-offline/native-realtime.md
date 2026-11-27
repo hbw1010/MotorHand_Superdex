@@ -28,7 +28,7 @@
 
 ## 复现
 
-在仓库根目录执行。[构建与启动说明](../../hardware/encos_g4_gateway_sdk/README.md)
+在仓库根目录执行。[12-DOF 构建与启动说明](../../hardware/encos_g4_gateway_12dof/README.md)｜[16-DOF 构建与启动说明](../../hardware/encos_g4_gateway_16dof/README.md)
 
 ```bash
 .venv/bin/python tools/experiments/motorhand_native_link_benchmark.py

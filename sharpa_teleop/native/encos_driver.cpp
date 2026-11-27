@@ -24,8 +24,9 @@
 #include <unistd.h>
 #include <nlohmann/json.hpp>
 
-// 驱动 2: STM32G4 LQS-GW02；SDK最小扩展只增加原始主机位置收包时间快照接口。
-#include "HandClientG4.hpp"
+// 驱动 2: STM32G4 LQS-GW02 并列支持 12-DOF (200 Hz) 与 16-DOF (v0.5.0, ≤150 Hz) 独立驱动。
+#include "HandClientG4_12dof.hpp"
+#include "HandClientG4_16dof.hpp"
 
 namespace motorhand::native {
 namespace {
@@ -203,10 +204,11 @@ struct EncosDriverT<G>::Impl {
     std::uint64_t generation{};
     bool output_latched{}, submitting{}, owned{}, stopping{};
     std::array<Channel, 3> channels;
-    // 驱动 2: one gateway serial port; the SDK's IO thread talks to all G motors at 200 Hz.
+    // 驱动 2: 并列 12-DOF (200 Hz) 与 16-DOF (150 Hz) 独立 G4 网关驱动，全部挂载于 CAN 1–3。
+    using GatewayClient = std::conditional_t<G == 16, lqs::HandClientG4_16dof, lqs::HandClientG4_12dof>;
     int driver_kind = 0;                       // 1: 3x CANable2 (SLCAN), 2: G4 gateway
     std::string gateway_port;
-    std::unique_ptr<lqs::HandClientG4> gateway;
+    std::unique_ptr<GatewayClient> gateway;
     std::thread gateway_thread;
 #ifdef MOTORHAND_ENCOS_OFFLINE_TEST
     std::vector<std::string> offline_ports;
@@ -434,7 +436,7 @@ struct EncosDriverT<G>::Impl {
     }
     std::uint8_t gateway_bus(int id) const {
         return gateway ? gateway->BusForId(static_cast<uint16_t>(id))
-                       : static_cast<std::uint8_t>(id >= 13 ? 4 : id >= 9 ? 1 : id >= 5 ? 2 : 3);
+                       : static_cast<std::uint8_t>(id >= 15 ? 1 : id >= 13 ? 2 : id >= 9 ? 1 : id >= 5 ? 2 : 3);
     }
     void run_gateway() {
         try {
@@ -507,8 +509,8 @@ struct EncosDriverT<G>::Impl {
             throw std::runtime_error("Expected exactly one G4 gateway serial port, found " + std::to_string(ports.size()) +
                                      " (set MOTORHAND_GLOVE_PORT)");
         gateway_port = ports[0];
-        gateway = std::make_unique<lqs::HandClientG4>();
-        if (!gateway->Connect(gateway_port, 921600, 200, kDof))
+        gateway = std::make_unique<GatewayClient>();
+        if (!gateway->Connect(gateway_port, 921600, GatewayClient::kDefaultHz, false, true))
             throw std::runtime_error("Cannot open Encos gateway serial port " + gateway_port);
         auto end = Clock::now() + std::chrono::milliseconds(700);
         std::array<bool, G> seen{};
@@ -605,8 +607,12 @@ void EncosDriverT<G>::connect() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
         }
-        std::clog << (d.driver_kind == 2 ? "手套驱动 2（G4 网关 " + d.gateway_port + "，SDK 200 Hz，" + std::to_string(Impl::kDof) + " 轴）"
-                                         : std::string("手套驱动 1（3×CANable2 SLCAN）")) << std::endl;
+        std::clog << (d.driver_kind == 2
+                          ? "手套驱动 2（G4 网关 " + d.gateway_port + "，SDK " +
+                                std::to_string(Impl::GatewayClient::kDefaultHz) + " Hz，" +
+                                std::to_string(Impl::kDof) + " 轴）"
+                          : std::string("手套驱动 1（3×CANable2 SLCAN）"))
+                  << std::endl;
     } catch (...) { close(); throw; }
 }
 

@@ -1,4 +1,6 @@
-﻿#pragma once
+#pragma once
+#ifndef LQS_POSIX_SERIAL_HPP
+#define LQS_POSIX_SERIAL_HPP
 #include <algorithm>
 #include <cerrno>
 #include <chrono>
@@ -11,6 +13,14 @@
 #include <unistd.h>
 
 namespace lqs {
+struct JointKey {
+    uint8_t bus;
+    uint16_t id;
+    bool operator<(const JointKey& o) const {
+        return (bus != o.bus) ? (bus < o.bus) : (id < o.id);
+    }
+};
+
 class PosixSerial {
 public:
     PosixSerial() = default;
@@ -63,7 +73,6 @@ public:
         if (port.revents & (POLLHUP | POLLERR | POLLNVAL)) hangup = true;
         return (port.revents & POLLIN) != 0;
     }
-    // 非阻塞串口上的有界完整写入：处理 EINTR/EAGAIN 与部分写，避免把协议帧腰斩。
     int WriteAll(const void* data, size_t size, int64_t initial_wait_ns, int64_t finish_wait_ns,
                  bool& terminal_error) {
         terminal_error = false;
@@ -111,4 +120,5 @@ public:
 private:
     int fd_ = -1;
 };
-}
+}  // namespace lqs
+#endif  // LQS_POSIX_SERIAL_HPP

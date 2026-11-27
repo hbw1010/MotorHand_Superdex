@@ -194,8 +194,9 @@ int run_for_glove(const sh::EntryOptions& a) {
 
     const std::filesystem::path mapping = !a.mapping.empty()
         ? a.mapping
-        : (a.project_root.parent_path() / "hardware/encos_g4_gateway_sdk/config" /
-           (is_16dof ? "right_sim_mapping_16dof.json" : "right_sim_mapping.json"));
+        : (a.project_root.parent_path() / "hardware" /
+           (is_16dof ? "encos_g4_gateway_16dof/config/right_sim_mapping_16dof.json"
+                     : "encos_g4_gateway_12dof/config/right_sim_mapping_12dof.json"));
     const std::filesystem::path feedback_path = a.project_root / "config/feedback" /
         (is_16dof ? (a.left ? "sharpa-left-16dof.json" : "sharpa-right-16dof.json")
                   : (a.left ? "sharpa-left.json" : "sharpa-right.json"));

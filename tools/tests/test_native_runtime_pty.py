@@ -275,12 +275,13 @@ class NativeRuntimePtyTest(unittest.TestCase):
 class SdkBatchDeadlineTest(unittest.TestCase):
     def test_sdk_rejects_expired_batch_and_late_replacement_on_wire(self):
         # 原生扩展不导出 SDK 符号；从同一份源码编译，避免测到旧 ctypes 动态库。
-        gateway_dir = Path(__file__).resolve().parents[2] / 'hardware/encos_g4_gateway_sdk'
+        gateway_dir = Path(__file__).resolve().parents[2] / 'hardware/encos_g4_gateway_12dof'
         folder = tempfile.TemporaryDirectory()
         self.addCleanup(folder.cleanup)
         library = Path(folder.name) / 'g4.so'
         subprocess.run(['c++', '-O2', '-std=c++17', '-shared', '-fPIC', '-pthread',
-                        '-I'+str(gateway_dir/'vendor/include'), str(gateway_dir/'shim/g4_shim.cpp'),
+                        '-I'+str(gateway_dir/'shim'), '-I'+str(gateway_dir/'vendor/include'),
+                        str(gateway_dir/'shim/g4_shim_12dof.cpp'),
                         '-o', str(library)], check=True, timeout=60)
         sdk = ctypes.CDLL(str(library))
         sdk.g4_open.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_uint]

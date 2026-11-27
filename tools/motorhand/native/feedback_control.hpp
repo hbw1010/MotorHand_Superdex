@@ -2,6 +2,7 @@
 
 #include "contact_feedback.hpp"
 
+#include <cstdio>
 #include <cstdint>
 #include <numbers>
 #include <string>
@@ -142,6 +143,12 @@ public:
         }
         if (state_.active && state_.submitted_until > 0 && now >= state_.submitted_until && state_.valid_sent) {
             // 看门狗可能已卸力；新物理帧不能自动重启原来的负载。
+            std::fprintf(stderr,
+                         "[FB_TRIP] reason=mit_expired over_ms=%.2f motor_age_ms=%.2f f0_age_ms=%.2f f1_age_ms=%.2f last_tick_ms=%.2f\n",
+                         (now - state_.submitted_until) * 1e-6, (now - stamp) * 1e-6,
+                         (now - static_cast<int64_t>(frame[0])) * 1e-6, (now - simulated) * 1e-6,
+                         last_tick_ ? (now - last_tick_) * 1e-6 : -1.);
+            std::fflush(stderr);
             interrupt("上一批 MIT 指令已到期");
             return state_;
         }

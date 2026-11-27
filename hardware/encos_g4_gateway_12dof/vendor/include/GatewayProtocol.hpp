@@ -1,4 +1,6 @@
-﻿#pragma once
+#pragma once
+#ifndef LQS_GATEWAY_PROTOCOL_COMMON_HPP
+#define LQS_GATEWAY_PROTOCOL_COMMON_HPP
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -43,7 +45,7 @@ struct HandSnapshot {
     uint32_t host_over_10ms, board_over_10ms, tx_failures;
 };
 
-// 项目扩展：不更改HandSnapshot的C ABI布局，单独携带SDK解析位置包的主机steady时间。
+// 项目扩展：不更改 HandSnapshot 的 C ABI 布局，单独携带 SDK 解析位置包的主机 steady 时间。
 struct TimedHandSnapshot {
     HandSnapshot state{};
     uint64_t position_received_us{}, current_received_us{};
@@ -110,8 +112,9 @@ public:
                 GatewayWireFrame frame;
                 std::memcpy(&frame, bytes, sizeof(frame));
                 begin_ += sizeof(frame);
+                // GW02 硬件共 3 路 CAN 总线（bus 1..3）
                 if (frame.len > 8 || (frame.kind == 0x90 &&
-                    (frame.bus < 1 || frame.bus > 4 || frame.can_id > 0x7FF))) {
+                    (frame.bus < 1 || frame.bus > 3 || frame.can_id > 0x7FF))) {
                     ++invalid_frames;
                     continue;
                 }
@@ -312,3 +315,4 @@ inline GatewayWireFrame Release(uint8_t bus, uint16_t id) {
     return frame;
 }
 }
+#endif  // LQS_GATEWAY_PROTOCOL_COMMON_HPP

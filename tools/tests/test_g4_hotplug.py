@@ -19,12 +19,15 @@ from ve33_g4_view import open_reader
 class G4HotplugTest(unittest.TestCase):
     def test_transport_reopens_reenumerated_port_without_old_commands(self):
         root = Path(__file__).resolve().parents[2]
-        gateway = root / 'hardware/encos_g4_gateway_sdk'
+        gateway12 = root / 'hardware/encos_g4_gateway_12dof'
+        gateway16 = root / 'hardware/encos_g4_gateway_16dof'
         with TemporaryDirectory() as temp:
             binary = Path(temp) / 'hotplug'
-            subprocess.run(['c++', '-std=c++20', '-pthread', '-O2', '-I' + str(gateway / 'shim'),
-                            '-I' + str(gateway / 'vendor/include'), '-I' + str(root / 'tools/motorhand/native'),
-                            str(root / 'tools/tests/cpp/g4_hotplug.cpp'), str(gateway / 'shim/g4_shim.cpp'),
+            subprocess.run(['c++', '-std=c++20', '-pthread', '-O2',
+                            '-I' + str(gateway12 / 'shim'), '-I' + str(gateway12 / 'vendor/include'),
+                            '-I' + str(gateway16 / 'shim'), '-I' + str(gateway16 / 'vendor/include'),
+                            '-I' + str(root / 'tools/motorhand/native'),
+                            str(root / 'tools/tests/cpp/g4_hotplug.cpp'), str(gateway12 / 'shim/g4_shim_12dof.cpp'),
                             '-lutil', '-o', str(binary)], check=True, timeout=60)
             subprocess.run([str(binary), str(Path(temp) / 'gateway')], check=True, timeout=10)
 

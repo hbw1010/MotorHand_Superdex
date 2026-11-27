@@ -36,6 +36,7 @@ __pycache__/
 *.py[cod]
 /assets/*.zip
 /assets/**/*.zip
+/hardware/*.zip
 sharpa_teleop/.pixi/
 sharpa_teleop/.cache/
 sharpa_teleop/recordings/*.jsonl

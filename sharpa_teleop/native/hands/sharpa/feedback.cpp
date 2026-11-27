@@ -136,7 +136,7 @@ FeedbackT<G>::FeedbackT(const std::filesystem::path& path,
         if (raw < 0 || raw >= static_cast<int>(G) || used[raw] || !std::isfinite(factor) ||
             factor <= 0 || !c.has_torque_limit ||
             !std::isfinite(c.raw_torque_limit_nm) || raw_cap[raw] <= half_lsb ||
-            raw_cap[raw] > 10 || raw_cap[raw] > c.raw_torque_limit_nm + 1e-12 ||
+            raw_cap[raw] > 20.0 || raw_cap[raw] > c.raw_torque_limit_nm + 1e-12 ||
             raw_slew[raw] <= 0)
             throw std::invalid_argument("Sharpa反馈Encos绑定/限额无效");
         used[raw] = true;

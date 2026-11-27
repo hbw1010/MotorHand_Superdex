@@ -34,7 +34,7 @@ from ve33_web_control import WebControl, measure_frame_gaps
 
 MODEL_DIR = ROOT / "assets/hand_motor_ve40/hand_motor_ve40_R"
 MODEL_BOT = MODEL_DIR / "hand_motor_ve40_right_closed_chain.superdex_bot"
-LIBRARY = ROOT / "hardware/encos_g4_gateway_sdk/build/libg4_shim.so"
+LIBRARY = ROOT / "hardware/encos_g4_gateway_12dof/build/libg4_shim_12dof.so"
 PHYSICS_STEP_S = 1. / 240.
 SCENE_VIEW_PERIOD_S = 1. / 60.
 

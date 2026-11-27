@@ -52,7 +52,7 @@ def main():
                 time.sleep(.1)
             metadata = {'profile': args.profile, 'command': command, 'backend': status.get('grasp_backend'),
                         'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-                        'feedback_config': json.loads((ROOT / 'hardware/encos_g4_gateway_sdk/config/right_sim_feedback.json').read_text()),
+                        'feedback_config': json.loads((ROOT / 'hardware/encos_g4_gateway_12dof/config/right_sim_feedback_12dof.json').read_text()),
                         'physics_step_s': 1 / 240, 'max_substeps': 4, 'control_hz': 100,
                         'precision': 'float32', 'size_mm': 89, 'locked': True, 'layout': 'palm',
                         'timeline': '每 0.2 秒变更 grip 0.05，合拢到 0.8，保持 2 秒，再对称松开',

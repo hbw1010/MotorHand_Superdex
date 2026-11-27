@@ -71,7 +71,7 @@ void verify_handover(const std::filesystem::path& root,
     auto* manual = glove.get();
     ControlOptions options;
     options.asset_root = root/"sharpa_teleop/assets/hand_motor_ve40";
-    options.glove_mapping = root/"hardware/encos_g4_gateway_sdk/config/right_sim_mapping.json";
+    options.glove_mapping = root/"hardware/encos_g4_gateway_12dof/config/right_sim_mapping_12dof.json";
     options.glove_output = false;
     options.force_feedback = false;
     options.transition_ns = 1;
@@ -123,7 +123,7 @@ int main(int argc,char** argv){try{
     Ve33Model glove(root/"sharpa_teleop/assets/hand_motor_ve40",false);
     sharpa::Model hand(root/"sharpa_teleop/assets/sharpa-hand",false);
     // 只读本地标定元数据；不connect任何真实设备。
-    EncosDriver metadata((root/"hardware/encos_g4_gateway_sdk/config/right_sim_mapping.json").string());
+    EncosDriver metadata((root/"hardware/encos_g4_gateway_12dof/config/right_sim_mapping_12dof.json").string());
     const auto cal=metadata.calibration();std::array<std::array<double,2>,12> bounds{};
     for(int i=0;i<12;++i)bounds[i]={cal[i].model_min_rad,cal[i].model_max_rad};
     const auto zero=glove.zero();
